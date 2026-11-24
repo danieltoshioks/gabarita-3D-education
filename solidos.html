@@ -1,0 +1,46 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sólidos geométricos · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// sólidos geométricos sobre uma mesa: cada um com fórmulas de área e volume
+const P={cubo:[-1.25,0,-.45],prisma:[0,0,-.45],piramide:[1.25,0,-.45],cilindro:[-1.25,0,.75],cone:[0,0,.75],esfera:[1.25,0,.75]};
+Modelo3D({
+ titulo:"Sólidos geométricos", area:"Matemática", voltar:"index.html#matematica", rotLista:"Sólidos", rotParte:"Sólido",
+ geral:{t:"Geometria espacial",f:"Poliedros têm faces planas (cubo, prisma, pirâmide); corpos redondos têm superfícies curvas (cilindro, cone, esfera). Toque num sólido para ver as fórmulas.",
+  dl:[["Relação de Euler","V − A + F = 2 (poliedros convexos)"],["Prismas e cilindros","V = área da base × altura"],["Pirâmides e cones","V = ⅓ × área da base × altura"]],
+  pas:"Volume e capacidade em situações reais (caixas d'água, embalagens), planificação e semelhança entre sólidos."},
+ partes:[
+  {id:"cubo",n:"Cubo",c:[.86,.56,.40],f:"Prisma com 6 faces quadradas iguais. Tem 8 vértices e 12 arestas: 8 − 12 + 6 = 2.",dl:[["Volume","V = a³"],["Área total","A = 6a²"],["Diagonal","d = a√3"]],pas:"1 dm³ = 1 litro: a ligação entre volume e capacidade."},
+  {id:"prisma",n:"Prisma triangular",c:[.48,.66,.80],f:"Duas bases triangulares iguais e paralelas ligadas por 3 faces retangulares. 6 vértices, 9 arestas, 5 faces.",dl:[["Volume","V = Ab × h"],["Área total","A = 2·Ab + Al"]],pas:"Volume de telhados, rampas e calhas."},
+  {id:"piramide",n:"Pirâmide quadrangular",c:[.90,.76,.44],f:"Base quadrada e 4 faces triangulares que se encontram no vértice. 5 vértices, 8 arestas, 5 faces.",dl:[["Volume","V = ⅓ · Ab · h"],["Apótema","g² = h² + (a/2)²"]],pas:"O volume é um terço do prisma de mesma base e mesma altura."},
+  {id:"cilindro",n:"Cilindro",c:[.56,.74,.54],f:"Corpo redondo com duas bases circulares paralelas. A planificação da lateral é um retângulo de lados 2πr e h.",dl:[["Volume","V = πr²h"],["Área lateral","Al = 2πrh"],["Área total","A = 2πr(r + h)"]],pas:"Latas, caixas d'água e tubos: cálculo de capacidade."},
+  {id:"cone",n:"Cone",c:[.82,.48,.52],f:"Base circular e um vértice. A geratriz g liga o vértice a um ponto da circunferência da base.",dl:[["Volume","V = ⅓ · πr²h"],["Geratriz","g² = h² + r²"],["Área lateral","Al = πrg"]],pas:"Um cone tem 1/3 do volume do cilindro de mesma base e altura."},
+  {id:"esfera",n:"Esfera",c:[.70,.64,.86],f:"Todos os pontos da superfície estão à mesma distância r do centro.",dl:[["Volume","V = ⁴⁄₃ · πr³"],["Área","A = 4πr²"]],pas:"Dobrar o raio multiplica o volume por 8."},
+  {id:"mesa",n:"Mesa",c:[.32,.30,.34],f:"",oculto:true},
+ ],
+ relevoPadrao:.025, detalhe:{mesa:5}, relevo:{mesa:.12}, brilho:{cubo:.35,prisma:.35,piramide:.35,cilindro:.4,cone:.4,esfera:.5},
+ aoRaio:0, fundo:["#1A2240","#0A0F22"], dist:5.3, pitch:.6, yaw:-.35, giro:.0012, botoes:{corte:false},
+ constroi(A){
+  const {add,faces,cilindro,cone,esfera,caixa,T,M}=A;
+  add(caixa(4.2,.08,2.6),T(0,-.04,.15),"mesa");
+  const a=.7,h=a/2,c=P.cubo;
+  add(caixa(a,a,a),T(c[0],h,c[2]),"cubo");
+  // prisma triangular (base equilátera), deitado ao longo de z
+  const p=P.prisma,s=.8,ht=s*Math.sqrt(3)/2,L=.7,x0=p[0],z0=p[2];
+  const v=[[x0-s/2,0,z0-L/2],[x0+s/2,0,z0-L/2],[x0,ht,z0-L/2],[x0-s/2,0,z0+L/2],[x0+s/2,0,z0+L/2],[x0,ht,z0+L/2]];
+  add(faces([[v[0],v[2],v[1]],[v[3],v[4],v[5]],[v[0],v[1],v[4],v[3]],[v[1],v[2],v[5],v[4]],[v[2],v[0],v[3],v[5]]]),T(0,0,0),"prisma");
+  // pirâmide de base quadrada
+  const q=P.piramide,b=.75,H=.85,ap=[q[0],H,q[2]],B=[[q[0]-b/2,0,q[2]-b/2],[q[0]+b/2,0,q[2]-b/2],[q[0]+b/2,0,q[2]+b/2],[q[0]-b/2,0,q[2]+b/2]];
+  add(faces([[B[0],B[1],B[2],B[3]],[B[0],ap,B[1]],[B[1],ap,B[2]],[B[2],ap,B[3]],[B[3],ap,B[0]]]),T(0,0,0),"piramide");
+  add(cilindro(.34,.8,64),T(P.cilindro[0],.4,P.cilindro[2]),"cilindro");
+  add(cone(.38,.85,64),T(P.cone[0],.425,P.cone[2]),"cone");
+  add(esfera(.4,0,0,64),T(P.esfera[0],.4,P.esfera[2]),"esfera");
+ },
+ foco:{cubo:[[P.cubo[0],.35,P.cubo[2]],2.2,[-.3,.5,1]],prisma:[[0,.3,P.prisma[2]],2.2,[.2,.5,1]],piramide:[[P.piramide[0],.4,P.piramide[2]],2.3,[.4,.4,1]],cilindro:[[P.cilindro[0],.4,P.cilindro[2]],2.2,[-.3,.5,1]],cone:[[0,.4,P.cone[2]],2.2,[0,.4,1]],esfera:[[P.esfera[0],.4,P.esfera[2]],2.1,[.4,.4,1]],mesa:[[0,0,0],4.6,[0,.6,1]]},
+ etiquetas:Object.keys(P).map(k=>({id:k,p:[P[k][0],k==="piramide"?1.0:k==="cone"?.98:k==="prisma"?.85:.92,P[k][2]],t:{cubo:"Cubo",prisma:"Prisma",piramide:"Pirâmide",cilindro:"Cilindro",cone:"Cone",esfera:"Esfera"}[k]})),
+});
+
+</script></body></html>

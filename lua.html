@@ -1,0 +1,69 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fases da Lua e eclipses · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// fases da Lua e eclipses: Sol à esquerda (luz vinda de -x), Terra no centro, Lua em órbita (fora de escala)
+const ETAPAS=["nova","crescente","cheia","minguante","eclsolar","eclunar"];
+const NE=["Lua nova","Quarto crescente","Lua cheia","Quarto minguante","Eclipse solar","Eclipse lunar"];
+const ANG={nova:0,crescente:90,cheia:180,minguante:270,eclsolar:0,eclunar:180}; // ângulo da Lua a partir da direção do Sol, sentido anti-horário visto do norte
+const RO=1.7,INC=5.1*Math.PI/180;
+let ET=0,DIA=0,SYNC=false;
+const posLua=()=>{const a=Math.PI+DIA/29.5*2*Math.PI,ecl=ET>=4;const y=ecl?0:RO*Math.sin(INC)*Math.sin(a-Math.PI*.35);return [RO*Math.cos(a),y,-RO*Math.sin(a)];};
+Modelo3D({
+ titulo:"Fases da Lua e eclipses", area:"Geografia", voltar:"index.html#geografia", rotLista:"Fases e eclipses", rotParte:"Lua",
+ geral:{t:"A Lua não muda: muda o quanto vemos da parte iluminada",f:"O Sol ilumina sempre metade da Lua. Conforme ela gira em volta da Terra (cerca de 29,5 dias), vemos daqui uma parte maior ou menor dessa metade iluminada: são as fases. O desenho no canto mostra como a Lua aparece no céu do Brasil. Mude o dia no controle.",
+  dl:[["Ciclo das fases","~29,5 dias (mês sinódico)"],["Órbita","inclinada ~5° em relação à da Terra"],["Mesma face","a Lua gira e translada no mesmo tempo"]],
+  pas:"Explicar as fases pela posição Sol-Terra-Lua, por que não há eclipse todo mês (órbita inclinada) e relacionar com marés."},
+ partes:[
+  {id:"nova",n:"Lua nova",c:[.30,.32,.38],f:"A Lua está entre a Terra e o Sol. A face iluminada aponta para o Sol, e a voltada para nós fica escura. Ela nasce e se põe junto com o Sol.",pas:"Eclipse solar só pode acontecer na lua nova."},
+  {id:"crescente",n:"Quarto crescente",c:[.78,.78,.72],f:"A Lua andou um quarto da órbita. Vemos metade do disco iluminado. No Hemisfério Sul, o lado iluminado fica à esquerda (forma de C).",pas:"No Sul, a crescente parece um C; no Norte, um D."},
+  {id:"cheia",n:"Lua cheia",c:[.96,.94,.86],f:"A Terra está entre o Sol e a Lua (mas não alinhada exatamente). Vemos toda a face iluminada. Nasce quando o Sol se põe.",pas:"Eclipse lunar só pode acontecer na lua cheia."},
+  {id:"minguante",n:"Quarto minguante",c:[.70,.70,.66],f:"Três quartos da órbita. Vemos de novo metade iluminada, agora do outro lado. No Sul, forma de D. Aparece de madrugada.",pas:"Entre cheia e nova, a parte iluminada diminui."},
+  {id:"eclsolar",n:"Eclipse solar",c:[1,.72,.30],f:"Lua nova exatamente no plano da órbita da Terra: a sombra da Lua atinge uma pequena região da Terra, e lá o Sol fica encoberto de dia.",pas:"Só é visto numa faixa estreita da Terra; nunca olhe o Sol sem filtro adequado."},
+  {id:"eclunar",n:"Eclipse lunar",c:[.78,.32,.22],f:"Lua cheia exatamente alinhada: ela entra na sombra da Terra e fica avermelhada, pela luz que a atmosfera da Terra desvia.",pas:"Visível de toda a metade da Terra em que é noite. É a 'lua de sangue'."},
+  {id:"sol",n:"Sol",c:[1,.82,.45],f:"Fonte de luz. Fora de escala: na realidade ele é cerca de 400 vezes mais distante que a Lua.",oculto:true},
+  {id:"terra",n:"Terra",c:[.28,.46,.72],f:"Metade iluminada (dia) e metade no escuro (noite).",oculto:true},
+  {id:"lua",n:"Lua",c:[.78,.77,.72],f:"Satélite natural, sem luz própria. Reflete a luz do Sol.",pas:"Astro iluminado × astro luminoso."},
+  {id:"orbita",n:"Órbita da Lua",c:[.6,.66,.84],f:"Inclinada cerca de 5° em relação ao plano da órbita da Terra. Por isso, na maioria das luas novas e cheias, a sombra passa acima ou abaixo e não há eclipse.",pas:"Por que não há eclipse todo mês."},
+  {id:"sombra",n:"Cone de sombra",c:[.1,.1,.14],f:"Região onde a luz do Sol é bloqueada. A umbra é a sombra total.",oculto:true},
+ ],
+ semApagar:["sol","terra","lua","orbita","sombra"], detalhe:{terra:7,lua:20,sol:4}, relevo:{terra:.05,lua:.18,sol:.2}, brilho:{terra:.35},
+ aoRaio:0, fundo:["#0B1430","#03060E"], dist:6.2, pitch:.7, yaw:.0, alvo:[-.6,0,0], giro:0, botoes:{corte:false,gira:false}, luzPonto:[-60,0,0], distMax:10,
+ slider:{rot:"Dia",min:0,max:29,passo:1,valor:0,fmt:v=>"dia "+v+" · "+nomeDia(v),muda(v,A){if(SYNC)return;DIA=v;if(ET>=4)ET=-1;A.refaz("lua",()=>lua(A));desenha();}},
+ aoFocar(o,A){if(!o)return;const k=ETAPAS.indexOf(o.id);if(k<0)return;ET=k;DIA=Math.round(ANG[o.id]/360*29.5)%30;A.refaz("lua",()=>lua(A));SYNC=true;const inp=document.querySelector(".mv-slider input");if(inp){inp.value=DIA;document.querySelector(".mv-sv").textContent="dia "+DIA+" · "+nomeDia(DIA);}SYNC=false;desenha();},
+ constroi(A){
+  const {add,esfera,T}=A;
+  add(esfera(.5,0,0,48),T(-3.4,0,0),"sol",{emi:1});
+  add(esfera(.4,0,0,64),T(0,0,0),"terra");
+  add(A.param(160,4,(u,v)=>{const a=u*2*Math.PI,w=(v-.5)*2*Math.PI;const p=[RO*Math.cos(a),RO*Math.sin(INC)*Math.sin(a+Math.PI-Math.PI*.35),-RO*Math.sin(a)];return [p[0]+.005*Math.cos(w),p[1]+.005*Math.sin(w),p[2]];}),T(0,0,0),"orbita",{emi:.5,a:.5});
+  lua(A);
+ },
+ get foco(){const p=posLua(),f={};["nova","crescente","cheia","minguante"].forEach(k=>f[k]=[[-.6,0,0],6.2,[0,1,1]]);f.eclsolar=[[-.9,0,0],3.4,[.25,.45,1]];f.eclunar=[[.7,0,0],3.4,[.25,.45,1]];f.lua=[p,1.2,[-p[0]+.6,.4,-p[2]+.6]];f.orbita=[[0,0,0],6,[0,1.2,1]];return f;},
+});
+function nomeDia(d){const f=d/29.5;return f<.03||f>.97?"nova":f<.22?"crescente (lua nova visível)":f<.28?"quarto crescente":f<.47?"crescente gibosa":f<.53?"cheia":f<.72?"minguante gibosa":f<.78?"quarto minguante":"minguante";}
+function lua(A){
+ const {add,esfera,cone,T,M,Rz,PI}=A,p=posLua(),g={grupo:"lua"};
+ add(esfera(.14,0,0,48),T(...p),"lua",Object.assign({},g,ET===5?{c:[.62,.26,.18]}:{}));
+ if(ET===5){ // sombra da Terra (umbra) atrás dela, no sentido oposto ao Sol
+  add(cone(.4,3,48),M(T(1.5,0,0),Rz(-PI/2)),"sombra",{grupo:"lua",a:.45,c:[.24,.26,.36],emi:.12});}
+ if(ET===4){ // sombra da Lua chegando à Terra
+  add(cone(.14,Math.abs(p[0])-.35,32),M(T((p[0]-.35)/2,0,0),Rz(-PI/2)),"sombra",{grupo:"lua",a:.5,c:[.24,.26,.36],emi:.12});
+  add(esfera(.07,0,0,16),T(-.37,0,0),"sombra",{grupo:"lua",c:[.02,.02,.03]});}
+}
+// desenho da fase como vista da Terra (Hemisfério Sul)
+var svg;
+function desenha(){
+ if(!svg){const cena=document.querySelector(".mv-cena");if(!cena)return;const d=document.createElement("div");d.style.cssText="position:absolute;z-index:4;right:18px;bottom:96px;width:132px;padding:10px 10px 8px;border-radius:16px;background:rgba(9,14,32,.82);border:1px solid rgba(255,255,255,.1);text-align:center;font:600 11.5px/1.3 Inter,system-ui,sans-serif;color:#B4BCD9;pointer-events:none";d.innerHTML='<svg viewBox="-60 -60 120 120" width="100" height="100" aria-hidden="true"></svg><div>Vista do Brasil</div>';cena.appendChild(d);svg=d.querySelector("svg");if(cena.clientWidth<600){d.style.width="84px";d.style.bottom="auto";d.style.top="64px";d.style.right="10px";d.style.padding="6px";svg.setAttribute("width","64");svg.setAttribute("height","64");}}
+ const f=(DIA/29.5)%1,k=Math.cos(f*2*Math.PI); // k = 1 nova, -1 cheia
+ // parte iluminada: no Sul, a crescente aparece à esquerda
+ const R=48,lado=f<.5?-1:1,rx=Math.abs(k)*R;
+ const ec=ET===5;const cor=ec?"#A4412E":"#E9E6DA";
+ const nova=f<.02||f>.98,meia=`M0 ${-R} A${R} ${R} 0 0 ${lado<0?0:1} 0 ${R}Z`;
+ svg.innerHTML=`<circle r="${R}" fill="#1A1E2C"/>`+(ec?`<circle r="${R}" fill="${cor}"/>`:(nova?"":`<path d="${meia}" fill="${cor}"/><ellipse rx="${rx}" ry="${R}" fill="${k>0?"#1A1E2C":cor}"/>`))+(ET===4?`<circle r="${R}" fill="#000"/><circle r="${R+4}" fill="none" stroke="#FFD27A" stroke-width="3" opacity=".8"/>`:"");
+}
+setTimeout(desenha,50);
+
+</script></body></html>

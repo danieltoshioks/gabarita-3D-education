@@ -1,0 +1,52 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DNA · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// dupla hélice B: 10 pares por volta, 36° por par, fitas antiparalelas
+const SEQ="ATGCGTACCATGGCTAGCTTACGG",N=SEQ.length,PASSO=.105,RH=.34,Y0=-(N-1)*PASSO/2;
+const PAR={A:"T",T:"A",C:"G",G:"C"};
+Modelo3D({
+ titulo:"DNA", area:"Biologia", voltar:"index.html#biologia", rotLista:"Componentes", rotParte:"Componente",
+ geral:{t:"DNA: a dupla hélice",f:"Duas fitas de nucleotídeos enroladas uma na outra. Cada nucleotídeo tem um fosfato, um açúcar (a desoxirribose) e uma base nitrogenada. As bases de uma fita se ligam às da outra por ligações de hidrogênio, sempre A com T e C com G.",
+  dl:[["Sentido da hélice","dextrógira (gira para a direita)"],["Pares por volta","cerca de 10"],["Diâmetro","2 nm"],["Fitas","antiparalelas (5'→3' e 3'→5')"]],
+  pas:"Complementaridade das bases (regra de Chargaff), replicação semiconservativa e diferenças entre DNA e RNA."},
+ partes:[
+  {id:"fosfato",n:"Grupo fosfato",c:[.86,.62,.30],f:"Liga o açúcar de um nucleotídeo ao do seguinte, formando o 'corrimão' da escada. Tem carga negativa, por isso o DNA é ácido.",pas:"Ligação fosfodiéster entre os nucleotídeos da mesma fita."},
+  {id:"acucar",n:"Desoxirribose",c:[.82,.80,.72],f:"Açúcar de 5 carbonos. É o 'desoxi' de DNA: tem um oxigênio a menos que a ribose do RNA.",pas:"DNA tem desoxirribose; RNA tem ribose."},
+  {id:"A",n:"Adenina (A)",c:[.80,.40,.36],f:"Base púrica (dois anéis). Pareia com a timina por 2 ligações de hidrogênio.",pas:"Se um DNA tem 30% de A, tem 30% de T e 20% de C e de G."},
+  {id:"T",n:"Timina (T)",c:[.42,.58,.80],f:"Base pirimídica (um anel). Pareia com a adenina. No RNA ela é trocada pela uracila (U).",pas:"T só existe no DNA; U só no RNA."},
+  {id:"C",n:"Citosina (C)",c:[.50,.72,.46],f:"Base pirimídica. Pareia com a guanina por 3 ligações de hidrogênio.",pas:"Regiões ricas em C-G são mais estáveis, porque têm mais ligações de hidrogênio."},
+  {id:"G",n:"Guanina (G)",c:[.88,.74,.40],f:"Base púrica. Pareia com a citosina por 3 ligações de hidrogênio.",pas:"Púrica (A, G) sempre com pirimídica (T, C): por isso a largura da hélice é constante."},
+  {id:"ponte",n:"Ligações de hidrogênio",c:[.92,.94,1],f:"Ligações fracas entre as bases das duas fitas. Por serem fracas, podem ser rompidas pela enzima helicase, que separa as fitas na replicação e na transcrição.",pas:"A=T tem 2 ligações; C≡G tem 3."},
+ ],
+ detalhe:{fosfato:30,acucar:20,A:24,T:24,C:24,G:24}, relevo:{fosfato:.05,acucar:.05}, brilho:{fosfato:.3,acucar:.15,A:.2,T:.2,C:.2,G:.2},
+ aoRaio:0, fundo:["#13203F","#070C1E"], dist:4.0, pitch:.12, giro:.004, botoes:{corte:false},
+ constroi(A){
+  const {add,esfera,cilindro,elipsoide,tubo,T,Ry,Rz,M,PI}=A;
+  const fos=esfera(.05,0,0,18),acu=elipsoide(.055,.03,.045,16),eixo=a=>[RH*Math.cos(a),0,-RH*Math.sin(a)];
+  // fitas: tubos finos ligando açúcares e fosfatos
+  for(const s of [0,1]){const off=s?PI*.78:0;
+   add(tubo(u=>{const i=u*(N-1),a=i*36*PI/180+off;return [ (RH+.02)*Math.cos(a),Y0+i*PASSO,-(RH+.02)*Math.sin(a)];},.016,240,8),T(0,0,0),"fosfato",{c:[.70,.52,.30]});}
+  for(let i=0;i<N;i++){const y=Y0+i*PASSO,a1=i*36*PI/180,a2=a1+PI*.78;
+   const b1=SEQ[i],b2=PAR[b1];
+   const p1=eixo(a1),p2=eixo(a2);
+   [[a1,b1],[a2,b2]].forEach(([a,b])=>{const p=eixo(a);
+    add(fos,T((RH+.06)*Math.cos(a+.25),y+.03,-(RH+.06)*Math.sin(a+.25)),"fosfato");
+    add(acu,M(T(p[0],y,p[2]),Ry(a)),"acucar");});
+   // bases: cada uma vai do seu açúcar até o meio do par (púrica é mais comprida)
+   const s1=[p1[0]*.84,p1[2]*.84],s2=[p2[0]*.84,p2[2]*.84],L=Math.hypot(s2[0]-s1[0],s2[1]-s1[1]),ux=(s2[0]-s1[0])/L,uz=(s2[1]-s1[1])/L,ang=Math.atan2(uz,ux);
+   const f=(b1==="A"||b1==="G")?.56:.44,gap=.035,l1=L*f-gap/2,l2=L*(1-f)-gap/2;
+   add(A.caixa(l1,.022,.065),M(T(s1[0]+ux*l1/2,y,s1[1]+uz*l1/2),Ry(-ang)),b1);
+   add(A.caixa(l2,.022,.065),M(T(s2[0]-ux*l2/2,y,s2[1]-uz*l2/2),Ry(-ang)),b2);
+   // ligações de hidrogênio: 2 (A=T) ou 3 (C≡G) traços no vão
+   const n=(b1==="A"||b1==="T")?2:3,cx=s1[0]+ux*L*f,cz=s1[1]+uz*L*f,tr=cilindro(.0055,gap,8);
+   for(let k=0;k<n;k++){const d=(k-(n-1)/2)*.02;add(tr,M(T(cx-uz*d,y,cz+ux*d),Ry(-ang),Rz(PI/2)),"ponte",{emi:.6});}
+  }
+ },
+ get foco(){const yb=b=>Y0+SEQ.indexOf(b)*PASSO,v=[0,1.1,1];return {fosfato:[[RH*.7,0,RH*.7],1.0,[1,.3,1]],acucar:[[RH*.7,0,RH*.7],.9,[1,.3,1]],A:[[0,yb("A"),0],1.0,v],T:[[0,yb("T"),0],1.0,v],C:[[0,yb("C"),0],1.0,v],G:[[0,yb("G"),0],1.0,v],ponte:[[0,yb("C"),0],1.05,v]};},
+});
+
+</script></body></html>

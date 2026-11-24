@@ -1,0 +1,65 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vírus, bactéria e célula · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// vírus, bactéria e célula eucarionte lado a lado (fora de escala)
+const VX=-1.75,BX=0,CX=1.9;
+Modelo3D({
+ titulo:"Vírus, bactéria e célula", area:"Biologia", voltar:"index.html#biologia", rotLista:"Estruturas", rotParte:"Estrutura",
+ geral:{t:"Três níveis de organização",f:"O vírus não é célula: é material genético dentro de uma capa de proteína e só se reproduz dentro de uma célula. A bactéria é uma célula procarionte, sem núcleo. A célula eucarionte (de animais, plantas, fungos e protozoários) tem núcleo e organelas com membrana. Os tamanhos estão fora de escala.",
+  dl:[["Vírus","~20 a 300 nanômetros"],["Bactéria","~1 a 10 micrômetros"],["Célula eucarionte","~10 a 100 micrômetros"]],
+  pas:"Vírus como parasita intracelular obrigatório, diferenças entre procariontes e eucariontes e por que antibióticos não funcionam contra vírus."},
+ partes:[
+  {id:"capsideo",n:"Capsídeo (vírus)",c:[.62,.70,.86],f:"Capa de proteínas que protege o material genético do vírus. Muitos têm forma de icosaedro, um poliedro com 20 faces.",pas:"Vírus são acelulares: não têm metabolismo próprio."},
+  {id:"espiculas",n:"Espículas",c:[.92,.56,.44],f:"Proteínas na superfície que reconhecem e se encaixam em receptores da célula hospedeira. Por isso cada vírus infecta tipos específicos de células.",pas:"Vacinas ensinam o sistema imune a reconhecer essas proteínas."},
+  {id:"genoma",n:"Material genético do vírus",c:[.98,.80,.40],f:"DNA ou RNA, nunca os dois no mesmo vírus. Dentro da célula, ele usa os ribossomos e a energia do hospedeiro para fazer cópias do vírus.",pas:"Retrovírus (como o HIV) têm RNA e usam a transcriptase reversa para fazer DNA."},
+  {id:"parede",n:"Parede e cápsula (bactéria)",c:[.56,.74,.52],f:"A parede bacteriana tem peptidoglicano e dá forma à célula. Muitas bactérias têm ainda uma cápsula mucosa por fora, que ajuda a escapar das defesas do corpo.",pas:"A penicilina age impedindo a formação da parede bacteriana."},
+  {id:"nucleoide",n:"Nucleoide",c:[.96,.72,.36],f:"Região do citoplasma onde fica o DNA da bactéria: uma única molécula circular, solta, sem carioteca.",pas:"Procarionte = sem núcleo organizado."},
+  {id:"plasmideo",n:"Plasmídeos",c:[.98,.46,.36],f:"Pequenos anéis extras de DNA. Podem carregar genes de resistência a antibióticos e passar de uma bactéria para outra.",pas:"Base da engenharia genética: plasmídeos são usados para inserir genes em bactérias (ex.: produção de insulina)."},
+  {id:"ribossomos",n:"Ribossomos",c:[.86,.82,.74],f:"Fazem proteínas. Estão nas bactérias e nas células eucariontes; os bacterianos são um pouco menores.",pas:"Única organela presente em procariontes."},
+  {id:"flagelo",n:"Flagelo e pili",c:[.80,.84,.92],f:"O flagelo gira como uma hélice e movimenta a bactéria. Os pili são filamentos curtos que ajudam a aderir a superfícies e a trocar DNA (conjugação).",pas:"Conjugação: troca de material genético entre bactérias."},
+  {id:"eucarionte",n:"Célula eucarionte",c:[.84,.66,.62],f:"Célula com núcleo envolvido pela carioteca e com organelas membranosas, como mitocôndrias, retículo e complexo golgiense. É bem maior que a bactéria.",pas:"Eucariontes: animais, plantas, fungos, protozoários e algas."},
+  {id:"nucleo",n:"Núcleo (eucarionte)",c:[.55,.48,.66],f:"Guarda o DNA, separado do citoplasma pela carioteca. É a principal diferença em relação aos procariontes.",pas:"Teoria endossimbiótica: mitocôndrias e cloroplastos vieram de bactérias englobadas."},
+ ],
+ semApagar:[], detalhe:{capsideo:8,parede:6,eucarionte:6}, relevo:{parede:.08,eucarionte:.04}, brilho:{capsideo:.35,espiculas:.3,parede:.12,eucarionte:.1,nucleo:.08},
+ textura:{parede:5,eucarionte:5,nucleo:5,capsideo:5},
+ aoRaio:0, fundo:["#14223A","#070E1C"], dist:5.2, pitch:.25, yaw:.15, giro:.0012, botoes:{corte:false},
+ constroi(A){
+  const {add,esfera,capsula,tubo,toro,faces,T,M,Rz,Rx,PI,norm}=A,R=A.rnd(21);
+  // vírus: icosaedro
+  const f=(1+Math.sqrt(5))/2,V=[[-1,f,0],[1,f,0],[-1,-f,0],[1,-f,0],[0,-1,f],[0,1,f],[0,-1,-f],[0,1,-f],[f,0,-1],[f,0,1],[-f,0,-1],[-f,0,1]].map(v=>norm(v).map(x=>x*.42));
+  const F=[];for(let i=0;i<12;i++)for(let j=i+1;j<12;j++)for(let k=j+1;k<12;k++){const d=(a,b)=>Math.hypot(...A.sub(V[a],V[b]));const e=d(0,1)*1.05;if(d(i,j)<e&&d(j,k)<e&&d(i,k)<e){let t=[V[i],V[j],V[k]];const n=A.cross(A.sub(t[1],t[0]),A.sub(t[2],t[0]));if(A.dot(n,t[0])<0)t=[t[0],t[2],t[1]];F.push(t.map(p=>[p[0]+VX,p[1],p[2]]));}}
+  add(faces(F),T(0,0,0),"capsideo",{a:.5});
+  // capsômeros: as unidades de proteína que formam a capa, em relevo sobre cada face
+  const cap=esfera(.046,.08,2,12);
+  F.forEach(t=>{const pts=[];const N=4;for(let i=0;i<=N;i++)for(let j=0;j<=N-i;j++){const a=i/N,b=j/N,c=1-a-b;pts.push([t[0][0]*a+t[1][0]*b+t[2][0]*c,t[0][1]*a+t[1][1]*b+t[2][1]*c,t[0][2]*a+t[1][2]*b+t[2][2]*c]);}
+   pts.forEach(q=>{const k=[q[0]-VX,q[1],q[2]];const l=Math.hypot(...k);const r=.405/l;add(cap,T(VX+k[0]*r,k[1]*r,k[2]*r),"capsideo",{c:[.66,.74,.9]});});});
+  V.forEach(v=>{const u=norm(v),a=[VX+u[0]*.4,u[1]*.4,u[2]*.4],b=[VX+u[0]*.62,u[1]*.62,u[2]*.62];A.linha(a,b,.018,"espiculas");add(esfera(.05,0,0,14),T(...b),"espiculas");});
+  add(tubo(u=>{const a=u*30;return [VX+.2*Math.sin(a*.7)*Math.cos(a),.2*Math.sin(a*1.3),.2*Math.cos(a*.9)];},.012,300,6),T(0,0,0),"genoma",{emi:.3});
+  // bactéria em bastão
+  add(capsula(.42,.95,48),M(T(BX,0,0),Rz(PI/2)),"parede",{a:.18,c:[.70,.84,.62]});
+  add(capsula(.34,.95,48),M(T(BX,0,0),Rz(PI/2)),"parede",{a:.42});
+  add(tubo(u=>{const a=u*40;return [BX+.28*Math.sin(a*.33)+.05*Math.sin(a*1.7),.14*Math.sin(a*.9),.14*Math.cos(a*1.1)];},.011,400,6),T(0,0,0),"nucleoide",{emi:.25});
+  [[BX-.55,.12,.1],[BX+.5,-.1,-.08],[BX+.2,.18,-.12]].forEach(p=>add(toro(.05,.01,0,2*PI,20),M(T(...p),Rx(R()*PI)),"plasmideo",{emi:.3}));
+  const rb=esfera(.016,0,0,8);for(let i=0;i<90;i++){const x=(R()-.5)*1.5,a=R()*2*PI,r=.12+R()*.16;add(rb,T(BX+x,r*Math.cos(a),r*Math.sin(a)),"ribossomos");}
+  add(tubo(u=>{const k=Math.min(1,u*5);return [BX+.8+u*1.3,.1*k*Math.sin(u*20),.1*k*Math.cos(u*20)];},u=>.016-.004*u,220,8),T(0,0,0),"flagelo");add(toro(.03,.012,0,2*PI,14),M(T(BX+.8,0,0),Rz(PI/2)),"flagelo");
+  for(let i=0;i<60;i++){const x=(R()-.5)*1.5,a=R()*2*PI,d=[0,Math.cos(a),Math.sin(a)];A.linha([BX+x,d[1]*.33,d[2]*.33],[BX+x,d[1]*.5,d[2]*.5],.006,"flagelo");}
+  // célula eucarionte simplificada
+  add(esfera(.85,.03,4,64),T(CX,0,0),"eucarionte",{a:.22});
+  add(esfera(.3,.02,5,48),T(CX-.08,.05,0),"nucleo",{a:.85});
+  add(esfera(.1,.05,3,24),T(CX-.04,.1,.05),"nucleo",{c:[.38,.25,.40]});
+  [[CX+.42,-.3,.2],[CX+.3,.4,-.3],[CX-.45,-.4,-.2]].forEach(p=>add(capsula(.06,.16,24),M(T(...p),Rz(R()*PI),Rx(R()*PI)),"eucarionte",{c:[.84,.54,.38]}));
+  for(let k=0;k<3;k++)add(A.lamina(.38+k*.05,.04,-.4,1.3,.014),M(T(CX-.08,.05,0),Rx(.3-k*.2),A.Ry(2.6)),"eucarionte",{c:[.48,.58,.74]});
+  const cis=A.param(28,18,(u,v)=>{const th=u*2*PI,ph=v*PI,s=Math.sin(ph);return [.15*s*Math.cos(th),.01*Math.cos(ph)+.03*s*s,.08*s*Math.sin(th)];});
+  for(let k=0;k<5;k++)add(cis,M(T(CX+.45,.15-k*.028,.25),Rz(-.7)),"eucarionte",{c:[.86,.70,.44]});
+  const poro=toro(.018,.006,0,2*PI,12);for(let i=0;i<60;i++){const a=R()*2*PI,b=Math.acos(2*R()-1),rr=.302;add(poro,M(T(CX-.08+rr*Math.sin(b)*Math.cos(a),.05+rr*Math.cos(b),rr*Math.sin(b)*Math.sin(a)),A.Ry(-a),Rz(-b)),"nucleo",{c:[.68,.6,.8]});}
+  for(let i=0;i<60;i++){const r=.35+R()*.42,a=R()*2*PI,b=Math.acos(2*R()-1);add(rb,T(CX+r*Math.sin(b)*Math.cos(a),r*Math.cos(b),r*Math.sin(b)*Math.sin(a)),"ribossomos");}
+ },
+ foco:{capsideo:[[VX,0,0],1.7,[.2,.3,1]],espiculas:[[VX,0,0],1.6,[.4,.4,1]],genoma:[[VX,0,0],1.2,[.2,.3,1]],parede:[[BX,0,0],2,[.2,.3,1]],nucleoide:[[BX,0,0],1.4,[.2,.4,1]],plasmideo:[[BX-.55,.12,.1],.8,[.2,.3,1]],ribossomos:[[BX,0,0],1.3,[.2,.3,1]],flagelo:[[BX+1,0,0],1.8,[.3,.3,1]],eucarionte:[[CX,0,0],2.4,[.2,.3,1]],nucleo:[[CX,0,0],1.4,[.2,.3,1]]},
+ etiquetas:[{p:[VX,.85,0],t:"Vírus"},{p:[BX,.65,0],t:"Bactéria"},{p:[CX,1.0,0],t:"Célula eucarionte"}],
+});
+
+</script></body></html>

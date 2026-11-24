@@ -1,0 +1,48 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ligações químicas · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// ligações químicas: iônica (retículo do NaCl), covalente (H₂O) e metálica (cátions + mar de elétrons)
+const LG=["ionica","covalente","metalica"],NL=["Iônica","Covalente","Metálica"];
+const E=MV_ETAPAS(LG,NL,A=>monta(A,0),"lg","Ligação");
+Modelo3D({
+ titulo:"Ligações químicas", area:"Química", voltar:"index.html#quimica", rotLista:"Ligações e partes", rotParte:"Ligação",
+ geral:{t:"Como os átomos se unem",f:"Os átomos se ligam para ficar mais estáveis, em geral com 8 elétrons na última camada (regra do octeto). O tipo de ligação depende de quem ganha, perde ou compartilha elétrons. Escolha a ligação no controle.",
+  dl:[["Iônica","metal + não metal: transferência de elétrons"],["Covalente","não metal + não metal (ou H): compartilhamento"],["Metálica","metal + metal: elétrons livres"]],
+  pas:"Prever o tipo de ligação pela posição na tabela, relacionar com propriedades (ponto de fusão, condutividade, solubilidade) e montar fórmulas iônicas e estruturas de Lewis."},
+ partes:[
+  {id:"ionica",n:"Ligação iônica",c:[.62,.50,.92],f:"O metal (Na) perde um elétron e vira cátion Na⁺; o não metal (Cl) ganha e vira ânion Cl⁻. As cargas opostas se atraem e os íons se organizam num retículo cristalino, como no sal de cozinha.",dl:[["Exemplo","NaCl, cloreto de sódio"],["Estado ambiente","sólido, alto ponto de fusão"],["Conduz corrente","fundido ou em solução aquosa"]],pas:"Compostos iônicos sólidos não conduzem; dissolvidos ou fundidos, sim (íons livres)."},
+  {id:"covalente",n:"Ligação covalente",c:[.92,.42,.38],f:"Os átomos compartilham pares de elétrons. Na água, cada hidrogênio divide um par com o oxigênio, e o oxigênio fica com 8 elétrons na última camada.",dl:[["Exemplo","H₂O, água"],["Forma","moléculas"],["Conduz corrente","em geral não"]],pas:"Ligação simples (1 par), dupla (2 pares) e tripla (3 pares)."},
+  {id:"metalica",n:"Ligação metálica",c:[.78,.80,.86],f:"Os metais perdem facilmente os elétrons da última camada. Ficam cátions organizados num retículo, envolvidos por um 'mar' de elétrons livres que se movem por todo o metal.",dl:[["Exemplos","ferro, cobre, alumínio, ligas"],["Propriedades","conduzem calor e eletricidade, brilho, maleáveis"]],pas:"Os elétrons livres explicam a condutividade elétrica dos metais."},
+  {id:"cation",n:"Cátions",c:[.62,.50,.92],f:"Íons positivos: átomos que perderam elétrons. Ficam menores que o átomo original.",pas:"Metais tendem a formar cátions."},
+  {id:"anion",n:"Ânions",c:[.48,.86,.46],f:"Íons negativos: átomos que ganharam elétrons. Ficam maiores que o átomo original.",pas:"Não metais tendem a formar ânions."},
+  {id:"eletrons",n:"Elétrons",c:[1,.88,.40],f:"Na covalente, aparecem em pares compartilhados entre dois átomos. Na metálica, ficam livres e se movem pelo retículo.",pas:"Regra do octeto."},
+ ],
+ slider:E.slider, aoFocar:E.aoFocar, semApagar:["cation","anion","eletrons"],
+ brilho:{cation:.6,anion:.6,eletrons:.4}, aoRaio:0, fundo:["#13203F","#070C1E"], dist:3.6, pitch:.35, yaw:.6, giro:.0015, botoes:{corte:false},
+ constroi(A){monta(A,0);},
+ anima(t,A){if(E.st.k===2)A.refaz("lg",()=>monta(A,t));},
+ foco:{ionica:[[0,0,0],3.6,[.6,.35,1]],covalente:[[0,0,0],3,[.4,.3,1]],metalica:[[0,0,0],3.6,[.6,.35,1]],cation:[[0,0,0],2.2,[.6,.35,1]],anion:[[0,0,0],2.2,[.6,.35,1]],eletrons:[[0,0,0],2,[.4,.3,1]]},
+ etiquetas:[{id:"cation",p:[-.57,.75,.57],t:"Na⁺",quando:()=>E.st.k===0},{id:"anion",p:[-.19,.78,.57],t:"Cl⁻",quando:()=>E.st.k===0},{id:"anion",p:[0,.42,0],t:"O",quando:()=>E.st.k===1},{id:"cation",p:[.85,-.38,0],t:"H",quando:()=>E.st.k===1},{id:"eletrons",p:[.6,.08,.2],t:"Par compartilhado",quando:()=>E.st.k===1},{id:"eletrons",p:[0,.95,.6],t:"Mar de elétrons",quando:()=>E.st.k===2}],
+});
+function monta(A,t){
+ const k=E.st.k,g={grupo:"lg"},o=x=>Object.assign({},g,x);
+ if(k===0){const d=.38;for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let l=0;l<4;l++){const p=[(i-1.5)*d,(j-1.5)*d,(l-1.5)*d],na=(i+j+l)%2===0;
+   A.add(A.esfera(na?.1:.17,0,0,24),A.T(...p),na?"cation":"anion",o({c:na?[.62,.50,.92]:[.48,.86,.46]}));
+   if(i<3)A.linha(p,[p[0]+d,p[1],p[2]],.008,"ionica",o({a:.5}));if(j<3)A.linha(p,[p[0],p[1]+d,p[2]],.008,"ionica",o({a:.5}));if(l<3)A.linha(p,[p[0],p[1],p[2]+d],.008,"ionica",o({a:.5}));}}
+ else if(k===1){const O=[0,.12,0],a=104.5/2*Math.PI/180,H=[[Math.sin(a)*.8,.12-Math.cos(a)*.8,0],[-Math.sin(a)*.8,.12-Math.cos(a)*.8,0]];
+  A.add(A.esfera(.22,0,0,40),A.T(...O),"anion",o({c:[.86,.26,.22]}));
+  H.forEach(h=>{A.add(A.esfera(.14,0,0,32),A.T(...h),"cation",o({c:[.92,.93,.96]}));A.linha(O,h,.035,"covalente",o({c:[.82,.84,.90]}));
+   const m=[(O[0]+h[0])/2,(O[1]+h[1])/2,.0],n=[0,0,1];for(const s of [-1,1])A.add(A.esfera(.045,0,0,14),A.T(m[0],m[1],m[2]+s*.07+.12),"eletrons",o({emi:.8,c:[1,.88,.4]}));});
+  for(const z of [-1,1])for(const s of [-1,1])A.add(A.esfera(.04,0,0,14),A.T(s*.05,.4,z*.16),"eletrons",o({emi:.6,c:[.6,.85,1]}));}
+ else{const d=.42;for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let l=0;l<4;l++){const p=[(i-1.5)*d,(j-1.5)*d,(l-1.5)*d];A.add(A.esfera(.13,0,0,24),A.T(...p),"cation",o({c:[.74,.76,.82]}));}
+  const e=A.esfera(.03,0,0,10);for(let i=0;i<90;i++){const r=(q)=>{const x=Math.sin(i*91.7+q*37.3)*4375.5;return x-Math.floor(x);};
+   const p=[0,1,2].map(q=>{const v=(r(q)-.5)*1.4,x=r(q+3)*1.6-.8+v*t,L=.8;const m=((x+L)%(2*L)+2*L)%(2*L);return m<L?m-L+0:L-(m-L);});
+   A.add(e,A.T(...p),"eletrons",o({emi:.9,c:[1,.88,.4]}));}
+  A.add(A.caixa(1.65,1.65,1.65),A.T(0,0,0),"metalica",o({a:.06}));}
+}
+
+</script></body></html>

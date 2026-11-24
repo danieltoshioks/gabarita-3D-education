@@ -1,0 +1,50 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Estados físicos · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// estados físicos da matéria: as mesmas partículas num recipiente, com agitação diferente
+const EST=["solido","liquido","gasoso"],NE=["Sólido","Líquido","Gasoso"];
+const N=64,B=.8,R0=.075;
+const E=MV_ETAPAS(EST,NE,A=>parts(A,0),"pt","Estado");
+let TT=0;
+const rr=(i,k)=>{const x=Math.sin(i*127.1+k*311.7)*43758.5453;return x-Math.floor(x);};
+const tri=(x,a,b)=>{const L=b-a,m=((x-a)%(2*L)+2*L)%(2*L);return a+(m<L?m:2*L-m);};
+Modelo3D({
+ titulo:"Estados físicos", area:"Química", voltar:"index.html#quimica", rotLista:"Estados e partes", rotParte:"Estado",
+ geral:{t:"Sólido, líquido e gasoso",f:"A diferença entre os estados está na organização e na agitação das partículas. Quanto mais energia (temperatura), mais as partículas se agitam e mais se afastam umas das outras. Mude o estado no controle e veja as mesmas 64 partículas se comportarem de jeitos diferentes.",
+  dl:[["Fusão","sólido → líquido"],["Vaporização","líquido → gasoso (evaporação, ebulição, calefação)"],["Condensação","gasoso → líquido"],["Solidificação","líquido → sólido"],["Sublimação","sólido ↔ gasoso direto (ex.: gelo-seco)"]],
+  pas:"Mudanças de estado e o gráfico de aquecimento (a temperatura fica constante durante a mudança de estado de uma substância pura), diferença entre evaporação e ebulição e influência da pressão no ponto de ebulição."},
+ partes:[
+  {id:"solido",n:"Sólido",c:[.52,.70,.96],f:"Partículas bem juntas, presas em posições fixas e organizadas (retículo cristalino). Elas só vibram no lugar. Por isso o sólido tem forma e volume próprios.",dl:[["Forma","própria"],["Volume","próprio"],["Agitação","baixa (só vibração)"]],pas:"Exemplo: gelo, metais, sal de cozinha."},
+  {id:"liquido",n:"Líquido",c:[.42,.80,.86],f:"Partículas próximas, mas sem posição fixa: deslizam umas sobre as outras. O líquido tem volume próprio, mas toma a forma do recipiente.",dl:[["Forma","do recipiente"],["Volume","próprio"],["Agitação","média"]],pas:"Líquidos são pouco compressíveis."},
+  {id:"gasoso",n:"Gasoso",c:[.96,.66,.48],f:"Partículas muito afastadas e rápidas, que se espalham por todo o recipiente e batem nas paredes (é isso que causa a pressão do gás).",dl:[["Forma","do recipiente"],["Volume","do recipiente"],["Agitação","alta"]],pas:"Gases são muito compressíveis: botijão de gás de cozinha."},
+  {id:"particula",n:"Partículas",c:[.80,.86,.96],f:"Átomos, moléculas ou íons que formam a substância. Elas são as mesmas nos três estados: só muda a distância e a agitação entre elas.",pas:"Mudança de estado é fenômeno físico: a substância não muda."},
+  {id:"recipiente",n:"Recipiente",c:[.80,.84,.92],f:"Caixa transparente fechada. No estado gasoso, as batidas das partículas nas paredes produzem a pressão.",pas:"Mais temperatura → partículas mais rápidas → mais pressão (se o volume for fixo)."},
+ ],
+ slider:E.slider, aoFocar:E.aoFocar, semApagar:["particula","recipiente"],
+ brilho:{particula:.6}, aoRaio:0, fundo:["#14203F","#070C1E"], dist:3.6, pitch:.35, yaw:.6, giro:.0015, botoes:{corte:false},
+ constroi(A){
+  // arestas do recipiente
+  const c=[-B,B];for(const x of c)for(const y of c)A.linha([x,y,-B],[x,y,B],.008,"recipiente",{a:.6});
+  for(const x of c)for(const z of c)A.linha([x,-B,z],[x,B,z],.008,"recipiente",{a:.6});
+  for(const y of c)for(const z of c)A.linha([-B,y,z],[B,y,z],.008,"recipiente",{a:.6});
+  A.add(A.caixa(2*B,.01,2*B),A.T(0,-B-.005,0),"recipiente",{a:.35});
+  parts(A,0);
+ },
+ anima(t,A){TT=t;A.refaz("pt",()=>parts(A,t));},
+ foco:{solido:[[0,0,0],3.6,[.6,.35,1]],liquido:[[0,0,0],3.6,[.6,.35,1]],gasoso:[[0,0,0],3.6,[.6,.35,1]],particula:[[0,-.4,0],1.6,[.4,.3,1]],recipiente:[[0,0,0],3.6,[.6,.35,1]]},
+ etiquetas:[{p:[0,B+.15,0],t:"Recipiente",id:"recipiente"}],
+});
+function parts(A,t){
+ const k=E.st.k,g={grupo:"pt"},s=A.esfera(R0,0,0,16),cor=[[.52,.70,.96],[.42,.80,.86],[.96,.66,.48]][k],lim=B-R0;
+ for(let i=0;i<N;i++){let p;
+  if(k===0){const a=i%4,b=Math.floor(i/4)%4,c=Math.floor(i/16),d=.19;p=[(a-1.5)*d,-lim+R0+c*d,(b-1.5)*d].map((v,j)=>v+.012*Math.sin(t*14+i*1.7+j*2.1));}
+  else if(k===1){const v=[.25,.25,.25].map((m,j)=>(rr(i,j)-.5)*m);p=[tri(rr(i,3)*2*lim-lim+v[0]*t*.6+.08*Math.sin(t*1.3+i),-lim,lim),tri(-lim+rr(i,4)*.62+.05*Math.sin(t*2+i*1.3),-lim,-lim+.68),tri(rr(i,5)*2*lim-lim+v[2]*t*.6,-lim,lim)];}
+  else{const v=[0,1,2].map(j=>(rr(i,j)-.5)*1.6);p=[0,1,2].map(j=>tri(rr(i,j+3)*2*lim-lim+v[j]*t,-lim,lim));}
+  A.add(s,A.T(...p),"particula",Object.assign({c:cor},g));}
+}
+
+</script></body></html>

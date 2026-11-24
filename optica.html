@@ -1,0 +1,60 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Espelhos e lentes · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// lentes e espelhos esféricos: raios principais e imagem, com a posição do objeto ajustável (f = 1)
+const TP=["convergente","divergente","concavo","convexo"],NT=["Lente convergente","Lente divergente","Espelho côncavo","Espelho convexo"];
+let TI=0,P=2.5,SY=false;const H=.5;
+const img=()=>{const f=(TI===1||TI===3)?-1:1,inv=1/f-1/P;if(Math.abs(inv)<.02)return null;const pp=1/inv;return {pp,i:-pp/P*H};};
+const carac=()=>{const r=img();if(!r)return "Imagem imprópria (no infinito)";const real=r.pp>0,dir=r.i*H>0,m=Math.abs(r.i/H);return (real?"real":"virtual")+", "+(dir?"direita":"invertida")+", "+(m>1.03?"maior":m<.97?"menor":"do mesmo tamanho");};
+Modelo3D({
+ titulo:"Espelhos e lentes", area:"Física", voltar:"index.html#fisica", rotLista:"Instrumentos", rotParte:"Óptica",
+ geral:{t:"Formação de imagens",f:"Escolha uma lente ou espelho na lista e mova o objeto no controle. Os raios principais (amarelos) mostram onde a imagem se forma; as linhas tracejadas fracas são prolongamentos, usados quando a imagem é virtual. A distância focal vale 1 e o objeto está a p focos do instrumento.",
+  dl:[["Equação de Gauss","1/f = 1/p + 1/p'"],["Aumento","A = i/o = −p'/p"],["Convenção","f > 0 convergente/côncavo; f < 0 divergente/convexo"]],
+  pas:"Classificar a imagem (real ou virtual, direita ou invertida, maior ou menor), usar a equação de Gauss e ligar cada caso a um uso: lupa, projetor, câmera, retrovisor, espelho de maquiagem, óculos."},
+ partes:[
+  {id:"convergente",n:"Lente convergente",c:[.55,.85,1],f:"Mais grossa no meio. Raios paralelos ao eixo se juntam no foco. Com o objeto longe, forma imagem real e invertida (câmera, olho, projetor); com o objeto entre o foco e a lente, imagem virtual, direita e maior (lupa).",pas:"Corrige hipermetropia e presbiopia."},
+  {id:"divergente",n:"Lente divergente",c:[.70,.75,1],f:"Mais fina no meio. Espalha os raios, que parecem vir do foco. Sempre forma imagem virtual, direita e menor.",pas:"Corrige miopia."},
+  {id:"concavo",n:"Espelho côncavo",c:[.86,.90,.98],f:"Superfície refletora curvada para dentro. Longe do espelho, imagem real e invertida; muito perto (entre o foco e o espelho), imagem virtual, direita e maior.",pas:"Espelho de maquiagem e de dentista; faróis e antenas parabólicas (fonte no foco)."},
+  {id:"convexo",n:"Espelho convexo",c:[.90,.92,.98],f:"Superfície refletora curvada para fora. Sempre forma imagem virtual, direita e menor, mas mostra um campo de visão maior.",pas:"Retrovisor de moto, espelho de garagem e de loja."},
+  {id:"objeto",n:"Objeto",c:[1,.84,.40],f:"Seta vertical de onde partem os raios. Mova no controle 'Objeto' a distância até o instrumento.",pas:"p > 0 para objeto real."},
+  {id:"imagem",n:"Imagem",c:[1,.56,.40],f:"Onde os raios (ou seus prolongamentos) se encontram. Sólida quando é real, transparente quando é virtual.",pas:"Imagem real pode ser projetada numa tela; virtual não."},
+  {id:"focos",n:"Focos e eixo principal",c:[.70,1,.62],f:"O eixo principal passa pelo centro do instrumento. Os focos (F) ficam a uma distância f; nos espelhos, o centro de curvatura (C) fica a 2f.",pas:"Objeto em C (espelho côncavo): imagem em C, invertida e do mesmo tamanho."},
+  {id:"raios",n:"Raios principais",c:[1,.92,.55],f:"Raio paralelo ao eixo: sai passando pelo foco (ou como se viesse dele). Raio pelo centro da lente (ou pelo vértice do espelho): segue sem desvio (ou reflete simétrico).",oculto:true},
+ ],
+ semApagar:["objeto","imagem","focos","raios"],
+ aoRaio:0, fundo:["#13203F","#070C1E"], dist:6.6, pitch:.1, yaw:0, giro:0, alvo:[-.6,0,0], botoes:{corte:false,gira:false}, distMax:12,
+ slider:{rot:"Objeto",min:3,max:40,passo:1,valor:25,fmt:v=>"p = "+(v/10).toFixed(1).replace(".",",")+" f · "+carac(),muda(v,A){P=v/10;if(A.refaz)A.refaz("op",()=>monta(A));}},
+ aoFocar(o,A){if(!o)return;const k=TP.indexOf(o.id);if(k<0)return;TI=k;A.refaz("op",()=>monta(A));const sv=document.querySelector(".mv-sv");if(sv)sv.textContent="p = "+P.toFixed(1).replace(".",",")+" f · "+carac();},
+ constroi(A){monta(A);},
+ foco:{convergente:[[-.6,0,0],6.6,[0,.1,1]],divergente:[[-.6,0,0],6.6,[0,.1,1]],concavo:[[-.6,0,0],6.6,[0,.1,1]],convexo:[[-.6,0,0],6.6,[0,.1,1]],objeto:[[-P,.25,0],2.4,[0,.1,1]],imagem:[[0,0,0],4,[0,.1,1]],focos:[[0,0,0],5,[0,.1,1]]},
+ etiquetas:[{id:"focos",p:()=>[-1,-.14,0],t:"F"},{id:"focos",p:()=>[1,-.14,0],t:"F",quando:()=>TI<2},{id:"focos",p:()=>[-2,-.14,0],t:"C",quando:()=>TI>=2},{id:"objeto",p:()=>[-P,H+.16,0],t:"Objeto"},{id:"imagem",p:()=>{const r=img();return r?[TI<2?r.pp:-r.pp,r.i+(r.i>0?.16:-.16),0]:[0,-2,0];},t:"Imagem",quando:()=>!!img()&&Math.abs(img().pp)<6}],
+});
+function monta(A){
+ const g={grupo:"op"},o=x=>Object.assign({},g,x),PI=Math.PI,lente=TI<2,f=(TI===1||TI===3)?-1:1,id=TP[TI];
+ A.linha([-4.5,0,0],[4.5,0,0],.006,"focos",o({a:.6}));
+ for(const x of lente?[-1,1]:[-1,-2])A.add(A.esfera(.04,0,0,12),A.T(x,0,0),"focos",o({emi:.6}));
+ // instrumento
+ if(lente)A.add(A.param(48,24,(u,v)=>{const th=u*2*PI,ph=v*PI,r=1.1*Math.sin(ph),s=Math.cos(ph)>=0?1:-1,q=(r/1.1)**2,e=f>0?.12*(1-q)+.012:.025+.12*q;return [s*e,r*Math.cos(th),r*Math.sin(th)];}),A.T(0,0,0),id,o({a:.45}));
+ else A.add(A.param(48,16,(u,v)=>{const th=u*2*PI,r=1.1*v,x=(f>0?-1:1)*r*r/4;return [x,r*Math.cos(th),r*Math.sin(th)];}),A.T(0,0,0),id,o({c:[.86,.90,.98]}));
+ if(!lente)A.add(A.param(48,16,(u,v)=>{const th=u*2*PI,r=1.1*v,x=(f>0?-1:1)*r*r/4+.03;return [x,r*Math.cos(th),r*Math.sin(th)];}),A.T(0,0,0),id,o({c:[.30,.32,.40]}));
+ // objeto
+ A.seta([-P,0,0],[-P,H,0],.025,"objeto",o({emi:.5}));
+ const r=img(),O=[-P,H,0],RA={c:[1,.92,.55],emi:.9},VI={c:[1,.92,.55],a:.35,emi:.4};
+ const ate=(a,d,len)=>a.map((v,i)=>v+d[i]*len);
+ if(!r){ // objeto no foco: raios saem paralelos
+  A.linha(O,[0,H,0],.01,"raios",o(RA));A.linha(O,[0,0,0],.01,"raios",o(RA));
+  const d1=lente?A.norm([1,-H,0]):A.norm([-1,-H,0]);A.linha([0,H,0],ate([0,H,0],d1,4),.01,"raios",o(RA));A.linha([0,0,0],ate([0,0,0],lente?A.norm([P,-H,0]):A.norm([-P,-H,0]),4),.01,"raios",o(RA));return;}
+ const I=lente?[r.pp,r.i,0]:[-r.pp,r.i,0],sent=lente?1:-1;
+ for(const M of [[0,H,0],[0,0,0]]){A.linha(O,M,.01,"raios",o(RA));
+  let d=A.sub(I,M);const L=Math.hypot(...d);d=d.map(v=>v/L);if(d[0]*sent<0)d=d.map(v=>-v);
+  A.linha(M,ate(M,d,4.2),.01,"raios",o(RA));
+  if((lente&&r.pp<0)||(!lente&&r.pp<0))A.linha(M,I,.006,"raios",o(VI));}
+ // imagem
+ if(Math.abs(r.pp)<8){const real=r.pp>0;A.seta([I[0],0,0],[I[0],r.i,0],.025,"imagem",o(real?{emi:.5}:{a:.45,emi:.3}));}
+}
+
+</script></body></html>

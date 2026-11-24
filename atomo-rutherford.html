@@ -1,0 +1,48 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Modelo de Rutherford · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// modelo de Rutherford (1911): núcleo minúsculo e denso, elétrons girando ao redor e muito espaço vazio
+const RN=.06;let TT=0;
+const ORB=[[1.25,.55,0],[1.25,.55,Math.PI/3],[1.25,.55,-Math.PI/3]];
+const orbPos=(o,a)=>{const [ra,rb,g]=o,x=ra*Math.cos(a),y=rb*Math.sin(a);return [x*Math.cos(g)-y*Math.sin(g),x*Math.sin(g)+y*Math.cos(g),y*.45];};
+// trajetórias das partículas alfa: quase todas passam reto; poucas desviam e uma volta
+const ALFA=[[-.9,0,0],[-.5,.02,0],[-.15,.03,1],[.3,0,0],[.7,-.02,0],[.05,0,2],[-1.15,.01,0]];
+function alfaPos(k,t){const [y,z,tipo]=ALFA[k],u=((t*.45+k*.37)%2.4)-1.2,x=u*2.6;
+ if(tipo===0)return [x,y,z+.0];
+ if(tipo===1)return x<0?[x,y,z]:[x,y+x*.55,z+x*.12];
+ return x<0?[x,y,z]:[-x*.9,y+x*.35,z];}
+Modelo3D({
+ titulo:"Modelo de Rutherford", area:"Química", voltar:"index.html#quimica", rotLista:"Partes", rotParte:"Parte",
+ geral:{t:"Modelo de Rutherford (1911)",f:"Ernest Rutherford bombardeou uma folha finíssima de ouro com partículas alfa (positivas). Quase todas atravessaram sem desviar, mas algumas desviaram e poucas voltaram. Conclusão: o átomo é quase todo vazio, com um núcleo minúsculo, denso e positivo, e os elétrons girando em volta, como planetas em volta do Sol.",
+  dl:[["Quem","Ernest Rutherford, 1911"],["Apelido","modelo planetário"],["Experimento","partículas alfa na folha de ouro"],["Limite","pela física da época, o elétron perderia energia e cairia no núcleo"]],
+  pas:"Interpretar o experimento: a maioria passa reto (espaço vazio), algumas desviam (núcleo positivo) e poucas voltam (núcleo denso). O núcleo é cerca de 10.000 a 100.000 vezes menor que o átomo."},
+ partes:[
+  {id:"nucleo",n:"Núcleo",c:[.90,.36,.28],f:"Região central minúscula onde está quase toda a massa e toda a carga positiva do átomo. No modelo ele está muito aumentado: em escala real seria invisível.",pas:"Se o núcleo fosse uma formiga, o átomo seria do tamanho de um estádio."},
+  {id:"eletron",n:"Elétrons",c:[.40,.72,1],f:"Giram em órbitas ao redor do núcleo, na eletrosfera, atraídos pela carga positiva dele.",pas:"Núcleo e eletrosfera: as duas regiões do átomo a partir de Rutherford."},
+  {id:"orbita",n:"Eletrosfera (órbitas)",c:[.55,.65,.88],f:"Região em volta do núcleo onde ficam os elétrons. É quase toda espaço vazio.",pas:"A maior parte do volume do átomo é vazia."},
+  {id:"alfa",n:"Partículas alfa",c:[1,.84,.36],f:"Partículas positivas (2 prótons e 2 nêutrons) usadas no experimento. As que passam longe do núcleo seguem reto; as que passam perto são repelidas e desviam.",pas:"Cargas iguais se repelem: o desvio prova que o núcleo é positivo."},
+ ],
+ detalhe:{nucleo:30}, relevo:{nucleo:.06}, brilho:{eletron:.5,nucleo:.4},
+ aoRaio:0, fundo:["#0F1834","#050916"], dist:5.4, pitch:.15, yaw:.0, giro:.0015, botoes:{corte:false},
+ constroi(A){
+  const {add,esfera,toro,T,Rx,Ry,M,PI}=A;
+  add(esfera(RN,.0,0,32),T(0,0,0),"nucleo",{emi:.35});
+  add(esfera(RN*2.6,0,0,32),T(0,0,0),"nucleo",{emi:.6,a:.12});
+  ORB.forEach(o=>add(A.param(120,6,(u,v)=>{const a=u*2*PI,w=(v-.5)*2*PI,r=.004;const p=orbPos(o,a);return [p[0]+r*Math.cos(w),p[1]+r*Math.sin(w),p[2]];}),T(0,0,0),"orbita",{emi:.6,a:.5}));
+  moveis(A,0);
+ },
+ anima(t,A){TT=t;A.refaz("moveis",()=>moveis(A,t));},
+ foco:{nucleo:[[0,0,0],.9,[0,.3,1]],eletron:[[0,0,0],3.6,[0,.8,1]],orbita:[[0,0,0],4,[0,1.2,1]],alfa:[[0,0,0],4.4,[0,.25,1]]},
+ etiquetas:[{id:"nucleo",p:[0,.18,0],t:"Núcleo"},{id:"alfa",p:[-1.7,-1.05,0],t:"Partículas alfa"}],
+});
+function moveis(A,t){
+ const {add,esfera,T}=A,e=esfera(.05,0,0,14),al=esfera(.035,0,0,10);
+ ORB.forEach((o,k)=>add(e,T(...orbPos(o,t*(1.1+k*.2)+k*2.1)),"eletron",{grupo:"moveis",emi:.7}));
+ ALFA.forEach((_,k)=>{const p=alfaPos(k,t);if(Math.abs(p[0])<2.7)add(al,T(...p),"alfa",{grupo:"moveis",emi:.9});});
+}
+
+</script></body></html>

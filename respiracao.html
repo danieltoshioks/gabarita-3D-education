@@ -1,0 +1,157 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Respiração celular · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// respiração celular completa: glicólise no citosol e, ampliada, a mitocôndria (acetil-CoA, ciclo de Krebs, cadeia respiratória e ATP sintase)
+// titulo:"Respiração celular"
+const ET=["visao","glicolise","piruvato","krebs","cadeia","atp","saldo"];
+const NE=["Onde acontece","Glicólise","Formação do acetil-CoA","Ciclo de Krebs","Cadeia respiratória","Síntese de ATP","Saldo final"];
+const E=MV_ETAPAS(ET,NE,A=>estatico(A),"rs","Etapa");
+const OX=-9,OY=.3,MX=OX+.8;                     // célula com a mitocôndria, longe da cena ampliada
+const C1=-2,C2=-1.2,C3=-.4,C4=.6,AS=1.9;        // complexos na crista
+const KC=[-.9,1.65,0],KR=.55;                    // ciclo de Krebs
+const REL={piruvato:["piruvato","acetil","co2","nadh"],krebs:["krebs","acetil","co2","nadh","fadh","atpmol"],
+ cadeia:["c1","c2","c3","c4","q","cytc","eletron","hmais","nadh","fadh","o2","agua"],atp:["atpsintase","hmais","atpmol"]};
+const vis=id=>{const k=ET[E.st.k];return k==="visao"||k==="glicolise"||k==="saldo"||(REL[k]||[]).includes(id)||["crista","matriz","intermembranas"].includes(id);};
+const al=(id,a)=>vis(id)?(a===undefined?1:a):.12;
+const kp=a=>[KC[0]+KR*Math.cos(a),KC[1]+KR*Math.sin(a),0];
+const fr=x=>x-Math.floor(x);
+const pela=(P,u)=>{const L=[0];for(let i=1;i<P.length;i++)L.push(L[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1],P[i][2]-P[i-1][2]));const s=(u%1)*L[L.length-1];let i=1;while(i<P.length-1&&L[i]<s)i++;const f=(s-L[i-1])/((L[i]-L[i-1])||1);return P[i-1].map((v,k)=>v+(P[i][k]-v)*f);};
+const EL=[[C1,.35,0],[C1,0,0],[C3,0,0],[C3,-.3,0],[C4,-.3,0],[C4,.38,0]];
+const GL=[OX-1.35,OY+.3,0];                      // glicose no citosol
+let SF=null,TT=0;
+Modelo3D({
+ titulo:"Respiração celular", area:"Biologia", voltar:"index.html#biologia", rotLista:"Etapas e estruturas", rotParte:"Respiração",
+ geral:{t:"Glicose vira ATP",f:"A respiração celular aeróbia tira a energia da glicose e guarda em ATP, a moeda de energia da célula. Começa no citosol, com a glicólise, e continua na mitocôndria: formação do acetil-CoA e ciclo de Krebs na matriz, e cadeia respiratória com a ATP sintase nas cristas. Avance as etapas no controle.",
+  dl:[["Equação geral","C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + energia"],["Rendimento","cerca de 30 a 32 ATP por glicose (livros antigos: 36 a 38)"],["Aceptor final","O₂, que vira água"]],
+  pas:"Saber onde ocorre cada etapa, quantos ATP cada uma rende, de onde sai o CO₂ e para onde vai o O₂, e comparar com a fermentação e com a fotossíntese."},
+ partes:[
+  {id:"visao",n:"1. Onde acontece",c:[.96,.62,.46],f:"A glicólise ocorre no citosol, fora da mitocôndria. O piruvato formado entra na mitocôndria, que tem duas membranas: a externa, lisa, e a interna, dobrada em cristas. O espaço interno é a matriz.",dl:[["Citosol","glicólise"],["Matriz","acetil-CoA e Krebs"],["Cristas","cadeia respiratória e ATP sintase"]],pas:"Mitocôndria tem DNA e ribossomos próprios: endossimbiose."},
+  {id:"glicolise",n:"2. Glicólise",c:[.98,.80,.50],f:"No citosol, a glicose (6 carbonos) é quebrada em 2 piruvatos (3 carbonos cada). Gasta 2 ATP no começo e produz 4 no fim, com saldo de 2 ATP, e forma 2 NADH. Não precisa de oxigênio.",dl:[["Entra","1 glicose + 2 ATP + 2 NAD⁺"],["Sai","2 piruvato + 4 ATP + 2 NADH"],["Saldo","2 ATP e 2 NADH"]],pas:"Etapa comum à respiração aeróbia e à fermentação."},
+  {id:"piruvato",n:"3. Formação do acetil-CoA",c:[.90,.56,.40],f:"Cada piruvato entra na matriz da mitocôndria, perde um carbono na forma de CO₂ (descarboxilação) e se liga à coenzima A, formando acetil-CoA (2 carbonos). Forma também 1 NADH.",dl:[["Por glicose","2 acetil-CoA, 2 CO₂, 2 NADH"]],pas:"Primeiro CO₂ liberado na respiração."},
+  {id:"krebs",n:"4. Ciclo de Krebs",c:[.56,.80,.96],f:"Na matriz, o acetil-CoA (2C) se junta ao oxaloacetato (4C) e forma citrato (6C). Numa série de reações em círculo, saem 2 CO₂ e o oxaloacetato é refeito. Cada volta gera 3 NADH, 1 FADH₂ e 1 ATP. São 2 voltas por glicose.",dl:[["Por volta","2 CO₂, 3 NADH, 1 FADH₂, 1 ATP"],["Por glicose","4 CO₂, 6 NADH, 2 FADH₂, 2 ATP"]],pas:"Também chamado de ciclo do ácido cítrico. O CO₂ que expiramos sai daqui e do acetil-CoA."},
+  {id:"cadeia",n:"5. Cadeia respiratória",c:[1,.90,.44],f:"Na membrana das cristas, NADH e FADH₂ entregam elétrons a uma sequência de complexos de proteínas (I, II, III e IV). Os elétrons passam de um para outro e liberam energia, usada para bombear H⁺ da matriz para o espaço entre as membranas. No fim, o O₂ recebe os elétrons e os H⁺ e vira água.",dl:[["Aceptor final","O₂ → H₂O"],["Bombas de H⁺","complexos I, III e IV"]],pas:"Sem O₂ a cadeia para. O cianeto bloqueia o complexo IV."},
+  {id:"atp",n:"6. Síntese de ATP",c:[.96,.66,.36],f:"Os H⁺ acumulados entre as membranas voltam para a matriz pela ATP sintase. O fluxo faz a enzima girar e formar ATP a partir de ADP e fosfato. É a fosforilação oxidativa, que produz a maior parte do ATP.",dl:[["Nome","fosforilação oxidativa"],["Rende","cerca de 26 a 28 ATP"]],pas:"Quimiosmose: o mesmo mecanismo da fotossíntese, agora na mitocôndria."},
+  {id:"saldo",n:"7. Saldo final",c:[.86,.90,.96],f:"Somando tudo: 2 ATP da glicólise, 2 do Krebs e cerca de 26 a 28 da cadeia. Entram glicose e O₂; saem CO₂, água e energia. Sem oxigênio, a célula só faz glicólise e regenera o NAD⁺ por fermentação (lática ou alcoólica), com saldo de apenas 2 ATP.",dl:[["Entra","C₆H₁₂O₆ + 6 O₂"],["Sai","6 CO₂ + 6 H₂O + ~30 ATP"],["Fermentação","2 ATP, sem usar O₂"]],pas:"Respiração × fermentação × fotossíntese: compare onde ocorrem, o que entra e o que sai."},
+  {id:"citosol",n:"Citosol",c:[.96,.76,.66],f:"Líquido da célula, fora das organelas. Onde acontece a glicólise.",pas:"Glicólise: citosol."},
+  {id:"mitocondria",n:"Mitocôndria",c:[.92,.52,.44],f:"Organela da respiração aeróbia. Tem membrana externa lisa e membrana interna dobrada em cristas, que aumentam a área para a cadeia respiratória.",pas:"Quanto mais gasto de energia, mais mitocôndrias (ex.: músculo)."},
+  {id:"crista",n:"Membrana interna (crista)",c:[.94,.78,.62],f:"Onde ficam a cadeia respiratória e a ATP sintase.",pas:"Cristas: cadeia respiratória."},
+  {id:"matriz",n:"Matriz mitocondrial",c:[.96,.66,.56],f:"Interior da mitocôndria, com enzimas do ciclo de Krebs, DNA e ribossomos.",pas:"Matriz: Krebs."},
+  {id:"intermembranas",n:"Espaço intermembranas",c:[.98,.60,.66],f:"Espaço entre as duas membranas. Acumula H⁺ bombeados pela cadeia.",pas:"Gradiente de H⁺ que move a ATP sintase."},
+  {id:"c1",n:"Complexo I",c:[.86,.46,.40],f:"Recebe os elétrons do NADH e bombeia H⁺.",pas:"NADH entra no complexo I."},
+  {id:"c2",n:"Complexo II",c:[.62,.70,.40],f:"Recebe os elétrons do FADH₂. Não bombeia H⁺, por isso o FADH₂ rende menos ATP que o NADH.",pas:"FADH₂ ≈ 1,5 ATP; NADH ≈ 2,5 ATP."},
+  {id:"q",n:"Ubiquinona",c:[.96,.90,.56],f:"Molécula móvel que leva elétrons dos complexos I e II ao III.",oculto:true},
+  {id:"c3",n:"Complexo III",c:[.90,.62,.32],f:"Passa os elétrons para o citocromo c e bombeia H⁺.",pas:"Bomba de H⁺."},
+  {id:"cytc",n:"Citocromo c",c:[.92,.40,.50],f:"Proteína pequena que leva elétrons do complexo III ao IV.",oculto:true},
+  {id:"c4",n:"Complexo IV",c:[.48,.62,.92],f:"Entrega os elétrons ao O₂, que se junta a H⁺ e forma água. Também bombeia H⁺.",pas:"Cianeto e monóxido de carbono bloqueiam esse complexo."},
+  {id:"atpsintase",n:"ATP sintase",c:[.94,.80,.40],f:"Turbina molecular: os H⁺ passam por ela, a parte de cima gira e forma ATP.",pas:"Fosforilação oxidativa."},
+  {id:"krebsc",n:"Ciclo de Krebs",c:[.56,.80,.96],f:"Reações em círculo na matriz.",oculto:true},
+  {id:"glicose",n:"Glicose",c:[.98,.80,.50],f:"Açúcar de 6 carbonos, combustível da respiração.",pas:"C₆H₁₂O₆."},
+  {id:"piruvatom",n:"Piruvato",c:[.96,.64,.40],f:"Molécula de 3 carbonos formada na glicólise.",oculto:true},
+  {id:"acetil",n:"Acetil-CoA",c:[.90,.50,.64],f:"Grupo de 2 carbonos ligado à coenzima A, que entra no ciclo de Krebs.",oculto:true},
+  {id:"co2",n:"CO₂",c:[.40,.42,.46],f:"Sai da célula e é eliminado na expiração.",oculto:true},
+  {id:"nadh",n:"NADH",c:[.74,.60,.96],f:"Carregador de elétrons e hidrogênio formado na glicólise, no acetil-CoA e no Krebs.",oculto:true},
+  {id:"fadh",n:"FADH₂",c:[.56,.86,.70],f:"Carregador de elétrons formado no Krebs.",oculto:true},
+  {id:"eletron",n:"Elétrons",c:[1,.92,.40],f:"Elétrons passando pela cadeia.",oculto:true},
+  {id:"hmais",n:"Íons H⁺",c:[1,.56,.62],f:"Prótons acumulados no espaço intermembranas.",oculto:true},
+  {id:"o2",n:"O₂",c:[.92,.32,.30],f:"Oxigênio que respiramos: aceptor final dos elétrons.",oculto:true},
+  {id:"agua",n:"Água",c:[.50,.74,1],f:"Formada no complexo IV.",oculto:true},
+  {id:"atpmol",n:"ATP",c:[.96,.66,.36],f:"Moeda de energia da célula.",oculto:true},
+ ],
+ slider:E.slider, aoFocar:E.aoFocar,
+ semApagar:["citosol","mitocondria","crista","matriz","intermembranas","c1","c2","q","c3","cytc","c4","atpsintase","krebsc","glicose","piruvatom","acetil","co2","nadh","fadh","eletron","hmais","o2","agua","atpmol"],
+ brilho:{eletron:.6,hmais:.4,mitocondria:.2,crista:.18,c1:.15,c2:.15,c3:.15,c4:.15,atpsintase:.2},
+ textura:{mitocondria:5,crista:5,c1:5,c2:5,c3:5,c4:5,atpsintase:5,citosol:5}, relevo:{c1:.22,c2:.22,c3:.22,c4:.22,atpsintase:.18,crista:.08,mitocondria:.06}, detalhe:{c1:14,c2:14,c3:14,c4:14,atpsintase:16,crista:18,mitocondria:12}, aoRaio:.3, fundo:["#2A1414","#120808"], dist:4.6, pitch:.3, yaw:.35, giro:0, alvo:[OX,OY,0], botoes:{corte:false}, distMax:16,
+ constroi(A){estatico(A);anim(A,0);},
+ anima(t,A){TT=t;A.refaz("an",()=>anim(A,t));},
+ foco:{visao:[[OX,OY,0],4.8,[.3,.35,1]],glicolise:[[OX-.6,OY+.1,0],2.8,[.2,.3,1]],piruvato:[[-2.2,1.7,0],2.6,[.15,.15,1]],krebs:[[KC[0]-.3,KC[1],0],3,[.1,.1,1]],
+  cadeia:[[-.6,0,0],4,[.15,.2,1]],atp:[[AS-.3,.2,0],3.2,[.25,.2,1]],saldo:[[-.4,.8,0],6.4,[.15,.2,1]],
+  c1:[[C1,.2,0],1.8,[.3,.2,1]],c2:[[C2,.1,0],1.6,[.3,.2,1]],c3:[[C3,0,0],1.8,[.3,.2,1]],c4:[[C4,0,0],1.8,[.3,.2,1]],atpsintase:[[AS,.3,0],1.8,[.3,.2,1]],
+  citosol:[[OX,OY,0],4.8,[.3,.35,1]],mitocondria:[[MX,OY,0],2.8,[.3,.35,1]],crista:[[0,0,0],4,[.2,.3,1]],matriz:[[KC[0],1,0],4,[.1,.2,1]],intermembranas:[[0,-.5,0],3.6,[.2,.1,1]],glicose:[[GL[0],GL[1],0],1.4,[.2,.2,1]]},
+ etiquetas:[
+  {p:[OX-1.6,OY+1.05,.3],t:"Citosol",quando:()=>E.st.k<=1},{p:[MX,OY+.66,0],t:"Mitocôndria",quando:()=>E.st.k<=1},
+  {p:[GL[0],GL[1]+.3,0],t:"Glicose (6C)",quando:()=>E.st.k<=1},{p:[OX-.45,OY+.62,0],t:"2 piruvato (3C)",quando:()=>E.st.k===1},
+  {p:[OX-.75,OY-.38,0],t:"Saldo: 2 ATP + 2 NADH",quando:()=>E.st.k===1},{p:[MX+.2,OY-.62,.2],t:"Cristas",quando:()=>E.st.k===0},
+  {p:[-2.5,.9,0],t:"Matriz",quando:()=>E.st.k>1},{p:[-2.4,-.68,0],t:"Espaço intermembranas",quando:()=>E.st.k>1},
+  {p:[-3,2.45,0],t:"Piruvato",quando:()=>[2,6].includes(E.st.k)},{p:[-2.05,2.2,0],t:"Acetil-CoA",quando:()=>[2,3].includes(E.st.k)},
+  {p:[-2.75,1.45,0],t:"CO₂",quando:()=>E.st.k===2},{p:[-2.2,1.25,0],t:"NADH",quando:()=>E.st.k===2},
+  {p:[KC[0],KC[1],0],t:"Ciclo de Krebs",quando:()=>[3,6].includes(E.st.k)},{p:[KC[0]+.2,KC[1]+KR+.22,0],t:"Citrato (6C)",quando:()=>E.st.k===3},
+  {p:[KC[0]-KR-.45,KC[1]+.12,0],t:"Oxaloacetato (4C)",quando:()=>E.st.k===3},{p:[KC[0]+KR+.35,KC[1]+.55,0],t:"2 CO₂",quando:()=>E.st.k===3},
+  {p:[KC[0]+KR+.3,KC[1]-.2,0],t:"3 NADH + FADH₂ + ATP",quando:()=>E.st.k===3},
+  {p:[C1,.72,0],t:"Complexo I",quando:()=>E.st.k===4},{p:[C2,.5,0],t:"II",quando:()=>E.st.k===4},{p:[C3,.52,0],t:"III",quando:()=>E.st.k===4},{p:[C4,.62,0],t:"IV",quando:()=>E.st.k===4},
+  {p:[C4+.45,.85,0],t:"O₂ + H⁺ → H₂O",quando:()=>E.st.k===4},{p:[C1-.3,1.1,0],t:"NADH",quando:()=>E.st.k===4},{p:[-.1,-.65,0],t:"H⁺ acumulado",quando:()=>[4,5].includes(E.st.k)},
+  {p:[AS+.05,1.02,0],t:"ATP sintase",quando:()=>[5,6].includes(E.st.k)},{p:[AS+.35,1.2,0],t:"ADP + P → ATP",quando:()=>E.st.k===5}],
+});
+function hexa(A,c,r,id,o,a){for(let i=0;i<6;i++){const u=i/6*2*Math.PI,v=(i+1)/6*2*Math.PI,p=[c[0]+r*Math.cos(u),c[1]+r*Math.sin(u),c[2]],q=[c[0]+r*Math.cos(v),c[1]+r*Math.sin(v),c[2]];
+ A.add(A.esfera(.045,0,0,12),A.T(...p),id,o({c:i===5?[.92,.32,.30]:[.26,.27,.30],a}));A.linha(p,q,.014,id,o({c:[.90,.86,.76],a}));}}
+function cadeiaC(A,p,n,id,o,cor,a){for(let i=0;i<n;i++){const q=[p[0]+i*.11,p[1],p[2]];A.add(A.esfera(.045,0,0,12),A.T(...q),id,o({c:cor||[.26,.27,.30],a}));if(i)A.linha([q[0]-.11,q[1],q[2]],q,.014,id,o({c:[.90,.86,.76],a}));}}
+function estatico(A){
+ const {add,esfera,elipsoide,cilindro,caixa,toro,T,M,Rx,PI}=A,g={grupo:"rs"},o=x=>Object.assign({},g,x||{});
+ // ---- célula: citosol e mitocôndria ----
+ add(elipsoide(2.4,1.25,1.2,48),T(OX,OY,0),"citosol",o({a:.08}));
+ add(elipsoide(1.05,.5,.58,48),T(MX,OY,0),"mitocondria",o({a:.22}));add(elipsoide(.98,.44,.52,40),T(MX,OY,0),"mitocondria",o({a:.16,c:[.96,.66,.56]}));
+ // cristas: dobras da membrana interna em forma de prateleira, com borda arredondada e leve ondulação
+ for(let i=0;i<9;i++){const dx=-.76+i*.19,x=MX+dx,k=Math.sqrt(1-(dx/.98)**2),top=i%2===0,hy=.44*k,h=hy*1.25,w=.5*k*.88,cy=OY+(top?hy-h/2:-hy+h/2),sd=i*1.7;
+  add(A.param(28,18,(u,v)=>{const th=u*2*PI,ph=v*PI,yy=Math.cos(ph),ry=Math.sin(ph);const tip=top?(yy<0?1-.25*yy*yy:1):(yy>0?1-.25*yy*yy:1);return [.022*ry*Math.cos(th)+.025*Math.sin(yy*3+sd)*tip,h/2*yy,w*ry*Math.sin(th)*tip];}),T(x,cy,0),"crista",o({c:[.94,.70,.56],a:.8}));}
+ hexa(A,GL,.15,"glicose",o,1);
+ for(const s of [1,-1]){cadeiaC(A,[OX-.6,OY+s*.28,0],3,"piruvatom",o,[.40,.30,.24],1);A.seta([OX-.3,OY+s*.28,0],[MX-.95,OY+s*.12,0],.012,"piruvatom",o({a:.6,c:[.96,.64,.40]}));}
+ A.seta([GL[0]+.2,GL[1]-.05,0],[OX-.65,OY+.28,0],.012,"glicose",o({a:.6}));A.seta([GL[0]+.15,GL[1]-.2,0],[OX-.65,OY-.28,0],.012,"glicose",o({a:.6}));
+ for(let i=0;i<30;i++){const r=A.rnd(i+3),p=[OX+(r()-.5)*4,OY+(r()-.5)*2,(r()-.5)*1.6];if(Math.abs(p[0]-MX)<1.2&&Math.abs(p[1]-OY)<.6)continue;add(esfera(.025,0,0,8),T(...p),"citosol",o({c:[.86,.70,.66]}));}
+ // ---- crista ampliada ----
+ for(const y of [.075,-.075])add(A.param(90,24,(u,v)=>[(u-.5)*5.4,.012*Math.sin(u*37+v*5)*Math.sin(v*PI),(v-.5)*1.3]),T(0,y,0),"crista",o({a:.6}));
+ // cabeças dos fosfolipídios nas duas faces da bicamada
+ {const hd=esfera(.03,0,0,8),r=A.rnd(77),CX=[C1,C2,C3,C4,AS];for(let x=-2.64;x<2.7;x+=.1)for(let z=-.6;z<.62;z+=.1)for(const y of [.105,-.105]){if(CX.some(c=>Math.hypot(x-c,z)<.36))continue;add(hd,T(x+(r()-.5)*.03,y,z+(r()-.5)*.03),"crista",o({c:[.82,.74,.6]}));}}
+ add(caixa(5.4,.04,1.3),T(0,-1,0),"mitocondria",o({a:.3}));
+ add(caixa(5.4,.86,1.3),T(0,-.55,0),"intermembranas",o({a:.06}));
+ add(elipsoide(.26,.34,.28,36),T(C1,0,0),"c1",o({a:al("c1")}));add(elipsoide(.16,.3,.18,28),M(T(C1+.12,.45,0),A.Rz(-.35)),"c1",o({a:al("c1")}));
+ add(elipsoide(.2,.2,.2,28),T(C2,.12,0),"c2",o({a:al("c2")}));
+ add(elipsoide(.24,.36,.28,36),T(C3,0,0),"c3",o({a:al("c3")}));
+ add(elipsoide(.24,.34,.26,36),T(C4,0,0),"c4",o({a:al("c4")}));
+ add(cilindro(.21,.24,32),T(AS,0,0),"atpsintase",o({a:al("atpsintase")}));add(cilindro(.05,.36,12),T(AS,.3,0),"atpsintase",o({a:al("atpsintase"),c:[.80,.70,.40]}));
+ // piruvato → acetil-CoA
+ cadeiaC(A,[-3.1,2.2,0],3,"piruvatom",o,[.40,.30,.24],al("acetil"));A.seta([-2.75,2.2,0],[-2.35,2.05,0],.012,"acetil",o({a:al("acetil",.6)}));
+ A.seta([-2.6,2.15,0],[-2.75,1.6,0],.01,"co2",o({a:al("co2",.5)}));A.seta([-2.5,2.1,0],[-2.2,1.4,0],.01,"nadh",o({a:al("nadh",.5)}));
+ A.seta([-1.95,1.95,0],kp(2.4),.012,"acetil",o({a:al("acetil",.6),c:[.90,.50,.64]}));
+ // Krebs
+ add(toro(KR,.025,0,2*PI,72),M(T(...KC),Rx(PI/2)),"krebsc",o({a:al("krebs",.7),emi:.2,c:[.56,.80,.96]}));
+ A.seta(kp(.7),[KC[0]+KR+.35,KC[1]+.75,0],.01,"co2",o({a:al("co2",.5)}));A.seta(kp(-.3),[KC[0]+KR+.3,KC[1]-.35,0],.01,"nadh",o({a:al("nadh",.5)}));
+ A.seta(kp(-1.9),[C1+.15,.75,0],.012,"nadh",o({a:al("nadh",.55)}));A.seta(kp(-1.4),[C2,.36,0],.012,"fadh",o({a:al("fadh",.55)}));
+ // O₂ no complexo IV e saída do ATP
+ A.seta([C4+.5,.85,0],[C4+.12,.45,0],.01,"o2",o({a:al("o2",.6)}));
+}
+function anim(A,t){
+ const g={grupo:"an"},o=x=>Object.assign({},g,x||{}),{add,T,PI}=A;
+ if(!SF)SF={s4:A.esfera(.04,0,0,10),s5:A.esfera(.05,0,0,12),s7:A.esfera(.07,0,0,14),s11:A.esfera(.11,0,0,16)};
+ const {s4,s5,s7,s11}=SF;
+ // glicólise: pedaços de 3C indo até a mitocôndria
+ for(const s of [1,-1]){const u=fr(t*.25+(s>0?0:.5));add(s5,T(OX-.3+(MX-.95-OX+.3)*u,OY+s*(.28-.16*u),0),"piruvatom",o({c:[.96,.64,.40],emi:.4}));}
+ for(let i=0;i<2;i++){const u=fr(t*.3+i/2);add(s7,T(OX-.7+u*.1,OY-.62-u*.3,0),"atpmol",o({a:1-u,c:[.96,.66,.36]}));}
+ // acetil-CoA entrando no ciclo
+ {const u=fr(t*.3),a=[-1.95,1.95,0],b=kp(2.4);for(let k=0;k<2;k++)add(s5,T(a[0]+(b[0]-a[0])*u+k*.09,a[1]+(b[1]-a[1])*u,0),"acetil",o({a:al("acetil"),c:[.26,.27,.30]}));}
+ // moléculas no Krebs
+ for(let i=0;i<8;i++){const a=2.4-(t*.5+i/8*2*PI),f=fr((2.4-a)/(2*PI));add(s7,T(...kp(a)),"krebsc",o({a:al("krebs"),c:f<.33?[.90,.50,.64]:f<.66?[.56,.80,.96]:[.62,.86,.56],emi:.2}));}
+ // CO₂ saindo
+ for(let i=0;i<2;i++){const u=fr(t*.35+i/2),a=kp(.7),p=[a[0]+.4*u,a[1]+.75*u,0];add(s5,T(...p),"co2",o({a:al("co2"),c:[.26,.27,.30]}));for(const s of [-1,1])add(s5,T(p[0]+s*.09,p[1],0),"co2",o({a:al("co2"),c:[.92,.32,.30]}));}
+ // NADH e FADH₂ descendo para a cadeia
+ for(let i=0;i<2;i++){const u=fr(t*.3+i/2),a=kp(-1.9),b=[C1+.15,.75,0];add(s7,T(a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,0),"nadh",o({a:al("nadh"),c:[.74,.60,.96],emi:.3}));}
+ {const u=fr(t*.3+.3),a=kp(-1.4),b=[C2,.36,0];add(s7,T(a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,0),"fadh",o({a:al("fadh"),c:[.56,.86,.70],emi:.3}));}
+ // elétrons
+ for(let i=0;i<5;i++)add(s4,T(...pela(EL,t*.18+i/5)),"eletron",o({a:al("eletron"),emi:1}));
+ add(s7,T(C1+1.6*(.5+.5*Math.sin(t*1.1)),0,.25),"q",o({a:al("q")}));
+ add(s5,T(C3+1*(.5+.5*Math.sin(t*1.1+1)),-.3,-.22),"cytc",o({a:al("cytc")}));
+ // H⁺ entre as membranas e bombeados
+ const R=A.rnd(17);for(let i=0;i<46;i++){const x=(R()-.5)*4.8,y=-.25-R()*.65,z=(R()-.5)*1.1;add(s4,T(x+.03*Math.sin(t*2+i),y+.03*Math.cos(t*2.3+i),z),"hmais",o({a:al("hmais",.85),emi:.3}));}
+ for(const x of [C1,C3,C4])for(let i=0;i<2;i++){const u=fr(t*.4+i/2+x);add(s4,T(x+.14,.6-1.1*u,.18),"hmais",o({a:al("hmais"),emi:.5}));}
+ for(let i=0;i<3;i++){const u=fr(t*.4+i/3);add(s4,T(AS,-.5+1.1*u,.12),"hmais",o({a:al("hmais"),emi:.5}));}
+ // O₂ chegando e água saindo no complexo IV
+ {const u=fr(t*.35),p=[C4+.5-.38*u,.85-.4*u,0];for(const s of [-1,1])add(s5,T(p[0]+s*.05,p[1],0),"o2",o({a:al("o2")*(1-u*.6),c:[.92,.32,.30]}));
+  const q=[C4-.1-.3*u,.42+.3*u,0];add(s5,T(...q),"agua",o({a:al("agua")*u,c:[.92,.32,.30]}));for(const s of [-1,1])add(s4,T(q[0]+s*.06,q[1]-.04,0),"agua",o({a:al("agua")*u,c:[.94,.95,.98]}));}
+ // ATP sintase girando e ATP saindo
+ for(let i=0;i<6;i++){const a=i/6*2*PI+t*2.2;add(s11,T(AS+.15*Math.cos(a),.62,.15*Math.sin(a)),"atpsintase",o({a:al("atpsintase"),c:i%2?[.94,.80,.40]:[.86,.62,.30]}));}
+ for(let i=0;i<3;i++){const u=fr(t*.3+i/3),p=[AS+.25+.35*u,.75+.6*u,0],a=al("atpmol")*(1-u*.7);add(s7,T(...p),"atpmol",o({a,c:[.96,.66,.36]}));for(let k=1;k<=3;k++)add(s4,T(p[0]+.09+k*.06,p[1],0),"atpmol",o({a,c:[.98,.86,.40],emi:.4}));}
+}
+
+</script></body></html>

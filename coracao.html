@@ -1,0 +1,184 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Coração humano · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// Coração humano em vista frontal: o lado direito do paciente fica à esquerda de quem olha.
+// Forma anatômica: massa ventricular com sulcos, átrios com aurículas, grandes vasos, gordura nos sulcos,
+// coronárias e veias na superfície; por dentro, cavidades ocas com trabéculas, valvas, cordas e músculos papilares.
+const PI=Math.PI,ROT=.42,CR=Math.cos(ROT),SR=Math.sin(ROT),TA=1.0;
+const gs=(th,t0,w)=>{const d=Math.atan2(Math.sin(th-t0),Math.cos(th-t0));return Math.exp(-d*d/(w*w));};
+const L=(x,y,z)=>[x*CR-y*SR,x*SR+y*CR+.05,z+.04];                       // eixos do coração → mundo
+// superfície dos ventrículos: (a,b) no disco (1 = parede externa), y de -1 (ápice) a 1 (base)
+function Sl(a,b,y){const th=Math.atan2(b,a),ro=Math.hypot(a,b),s=Math.sqrt(Math.max(0,1-y*y)),k=.66+.34*(y+1)/2;
+ const r=1-.055*gs(th,TA,.15)*s-.045*gs(th,TA+PI+.25,.2)*s+.06*gs(th,TA+1.3,.8)*Math.max(0,y+.4)*s;
+ return [.8*k*s*r*ro*Math.cos(th),.95*(y<.45?y:.45+(y-.45)*.5),(Math.sin(th)<0?.56:.64)*k*s*r*ro*Math.sin(th)];}
+const S=(a,b,y)=>L(...Sl(a,b,y));
+const Sf=(th,y,d)=>{const e=.002,p=S(Math.cos(th),Math.sin(th),y),pa=S(Math.cos(th+e),Math.sin(th+e),y),pb=S(Math.cos(th),Math.sin(th),y+e),t1=[pa[0]-p[0],pa[1]-p[1],pa[2]-p[2]],t2=[pb[0]-p[0],pb[1]-p[1],pb[2]-p[2]];let n=[t1[1]*t2[2]-t1[2]*t2[1],t1[2]*t2[0]-t1[0]*t2[2],t1[0]*t2[1]-t1[1]*t2[0]];const c=S(0,0,y);if(n[0]*(p[0]-c[0])+n[1]*(p[1]-c[1])+n[2]*(p[2]-c[2])<0)n=n.map(x=>-x);const l=Math.hypot(...n)||1;return [p[0]+n[0]/l*d,p[1]+n[1]/l*d,p[2]+n[2]/l*d];};
+const cl=v=>Math.max(0,Math.min(1,v)),prof=v=>Math.sqrt(Math.sin(PI*(.1+.9*Math.pow(cl(v),.8))));
+// cavidade do ventrículo esquerdo (parede grossa) e do direito (em meia-lua, parede fina)
+const LC=[.24,-.1],LYT=.5,LYB=-.8;
+const LVp=(al,y,fr)=>{const rr=.38*prof((LYT-y)/(LYT-LYB))*(fr===undefined?1:fr);return S(LC[0]+rr*Math.cos(al),LC[1]+rr*Math.sin(al),y);};
+const RYT=.52,RYB=-.6;
+const RVp=(ph,y,fr)=>{const v=cl((RYT-y)/(RYT-RYB)),f=prof(v)*(fr===undefined?1:fr),th=2.35-.45*(1-v)*(1-v)+1.15*f*Math.cos(ph),ro=.65+.21*f*Math.sin(ph);return S(ro*Math.cos(th),ro*Math.sin(th),y);};
+// curva suave (Catmull-Rom) por uma lista de pontos
+const cr=(P,t)=>{const n=P.length-1,x=cl(t)*n*.99999,i=Math.floor(x),f=x-i,p0=P[Math.max(0,i-1)],p1=P[i],p2=P[i+1],p3=P[Math.min(n,i+2)];
+ return p1.map((_,k)=>.5*((2*p1[k])+(-p0[k]+p2[k])*f+(2*p0[k]-5*p1[k]+4*p2[k]-p3[k])*f*f+(-p0[k]+3*p1[k]-3*p2[k]+p3[k])*f*f*f));};
+const mix3=(a,b,f)=>a.map((v,k)=>v+(b[k]-v)*f);
+// pontos de referência
+const AOR=S(.08,0,.5),PTR=S(.1,.62,.52),BIF=[.14,1.05,.04];
+const TVl=Sl(.62*Math.cos(2.3),.62*Math.sin(2.3),.5),MVl=Sl(.36,-.2,.48),TV=L(...TVl),MV=L(...MVl);
+const RAC=[-.6,.5,.05],LAC=[.08,.68,-.28];
+const AO=[AOR,[-.2,.8,.06],[-.2,1.1,.04],[-.08,1.36,-.06],[.17,1.42,-.26],[.42,1.24,-.46],[.5,.8,-.56],[.5,.1,-.56],[.5,-.75,-.56]];
+const PT=[PTR,[-.05,.75,.3],[.08,.98,.16],BIF],PAE=[BIF,[.4,1.08,-.08],[.92,1.08,-.2]],PAD=[BIF,[0,1.04,-.14],[-.2,1.02,-.24],[-.5,1.0,-.27],[-.98,1.0,-.24]];
+const VCS=[[-.62,1.5,-.04],[-.62,1.1,-.03],[-.61,.74,0]],VCI=[[-.62,-.32,-.26],[-.63,0,-.2],[-.61,.3,-.06]];
+const RVC=RVp(0,0,0),RVB=RVp(0,-.42,0),RVO=RVp(-.4,.36,.5),LVC=LVp(0,-.05,0),LVB=LVp(0,-.6,0),LVO=S(.1,0,.3);
+// caminhos do sangue: venoso (azul) e arterial (vermelho)
+const VEN=[VCS[0],VCS[1],RAC,TV,RVC,RVB,RVC,RVO,PTR,PT[1],PT[2],BIF,PAE[1],PAE[2]];
+const VEN2=[VCI[0],VCI[1],RAC,TV,RVC,RVB,RVC,RVO,PTR,PT[1],PT[2],BIF,PAD[1],PAD[2],PAD[3],PAD[4]];
+const ART=[[.98,.7,-.32],[.42,.68,-.3],LAC,MV,LVC,LVB,LVC,LVO,AOR,AO[1],AO[2],AO[3],AO[4],AO[5],AO[6],AO[7]];
+const ART2=[[-1.0,.7,-.34],[-.3,.68,-.33],LAC,MV,LVC,LVB,LVC,LVO,AOR,AO[1],AO[2],AO[3],AO[4],AO[5],AO[6],AO[7]];
+// sistema de condução
+const NSA=[-.5,.82,.2],NAV=S(-.1,.14,.52);
+const HIS=[NAV,S(-.14,.2,.4),S(-.17,.22,.2),S(-.18,.23,0)];
+const RD=[S(-.18,.23,0),RVp(-PI/2,-.15,.96),RVp(-PI/2,-.4,.96),RVp(-.3,-.5,.9),RVp(PI/2,-.35,.95),RVp(PI/2,-.05,.95),RVp(PI/2,.2,.95)];
+const RE=[S(-.18,.23,0),LVp(2.45,-.15,.97),LVp(2.45,-.5,.97),LVp(2.45,-.74,.9),LVp(-.6,-.72,.9),LVp(-.6,-.45,.97),LVp(-.6,-.1,.97),LVp(-.6,.2,.97)];
+let TT=0;
+const bate=()=>{const y=((TT%1)+.28)%1,ss=x=>{x=cl(x);return x*x*(3-2*x);};return .06*(y<.14?ss(y/.14):1-ss((y-.14)/.32));};
+let API=null;API=Modelo3D({
+ titulo:"Coração humano", area:"Biologia", voltar:"index.html#biologia", rotLista:"Estruturas", rotParte:"Estrutura",
+ geral:{t:"Coração: duas bombas lado a lado",f:"Órgão muscular com quatro cavidades, do tamanho aproximado de um punho fechado. O lado direito recebe o sangue pobre em oxigênio do corpo e manda para os pulmões (pequena circulação). O lado esquerdo recebe o sangue oxigenado dos pulmões e manda para o corpo todo (grande circulação). As bolinhas mostram o caminho do sangue: azul é sangue venoso (pobre em O₂) e vermelho, arterial (rico em O₂). Por dentro, o lado direito está pintado de azul e o esquerdo de vermelho só para facilitar o estudo. Ligue o Corte para ver por dentro: cavidades, valvas, cordas tendíneas e o sistema de condução.",
+  dl:[["Cavidades","2 átrios e 2 ventrículos"],["Circulação","dupla, fechada e completa"],["Ciclo cardíaco","sístole (contração) e diástole (relaxamento)"],["Frequência","60 a 100 batimentos por minuto em repouso"],["Comando","automático, pelo nó sinoatrial (marca-passo)"]],
+  pas:"Trajeto do sangue nas duas circulações, por que os lados não se misturam (circulação completa) e comparação com peixes, anfíbios e répteis."},
+ partes:[
+  {id:"miocardio",n:"Miocárdio (parede)",c:[.62,.2,.2],f:"Camada muscular do coração, de músculo estriado cardíaco: contração involuntária e células ligadas por discos intercalares. Por dentro é forrado pelo endocárdio e por fora pelo epicárdio; o pericárdio é a bolsa que envolve o órgão. No corte, repare que a parede do ventrículo esquerdo é bem mais grossa que a do direito.",dl:[["Camadas","endocárdio, miocárdio, epicárdio"],["Envoltório","pericárdio"]],pas:"Músculo cardíaco: estriado e involuntário (diferente do esquelético, que é voluntário)."},
+  {id:"ad",n:"Átrio direito",c:[.42,.48,.82],f:"Recebe das veias cavas o sangue venoso que voltou do corpo. A bolsinha enrugada na frente dele é a aurícula direita.",pas:"Início da pequena circulação."},
+  {id:"vd",n:"Ventrículo direito",c:[.36,.43,.80],f:"Bombeia o sangue venoso para os pulmões pela artéria pulmonar. A parede é mais fina que a do esquerdo, porque o caminho até os pulmões é curto. As saliências da parede interna são as trabéculas.",pas:"Pequena circulação: ventrículo direito → pulmões → átrio esquerdo."},
+  {id:"ae",n:"Átrio esquerdo",c:[.86,.30,.28],f:"Recebe das veias pulmonares o sangue oxigenado que veio dos pulmões. Fica na parte de trás do coração; pela frente só aparece a aurícula esquerda.",pas:"Fim da pequena circulação: o sangue oxigenado volta dos pulmões."},
+  {id:"ve",n:"Ventrículo esquerdo",c:[.80,.24,.22],f:"Bombeia o sangue oxigenado para o corpo todo pela aorta. Tem a parede mais grossa do coração.",pas:"Grande circulação: ventrículo esquerdo → corpo → átrio direito."},
+  {id:"septo",n:"Septo",c:[.74,.38,.36],f:"Parede que separa o lado direito do esquerdo. Por isso o sangue venoso e o arterial não se misturam em mamíferos e aves.",pas:"Répteis (exceto crocodilos) têm septo incompleto: mistura parcial."},
+  {id:"valvas",n:"Valvas atrioventriculares",c:[.95,.88,.76],f:"Portas de mão única entre átrios e ventrículos: tricúspide (3 folhetos) no lado direito e mitral ou bicúspide (2 folhetos) no esquerdo. Fecham quando o ventrículo contrai, para o sangue não voltar ao átrio.",pas:"O primeiro som do coração ('tum') é o fechamento dessas valvas."},
+  {id:"semilunares",n:"Valvas semilunares",c:[.98,.92,.80],f:"Ficam na saída dos ventrículos: valva pulmonar (no tronco pulmonar) e valva aórtica (na aorta), cada uma com três bolsinhas. Fecham quando o ventrículo relaxa, para o sangue não voltar.",pas:"O segundo som do coração ('tá') é o fechamento das semilunares."},
+  {id:"cordas",n:"Cordas tendíneas e músculos papilares",c:[.96,.90,.84],f:"Cordinhas fibrosas que prendem os folhetos das valvas tricúspide e mitral aos músculos papilares da parede do ventrículo. Impedem que as valvas virem para dentro do átrio quando o ventrículo contrai.",pas:"Funcionam como as cordas de um paraquedas."},
+  {id:"conducao",n:"Sistema de condução",c:[1,.86,.36],f:"O coração bate sozinho. O nó sinoatrial (marca-passo natural, no átrio direito) dispara o impulso; ele passa pelos átrios, chega ao nó atrioventricular, desce pelo feixe de His no septo e se espalha pelas fibras de Purkinje nas paredes dos ventrículos.",dl:[["Marca-passo","nó sinoatrial"],["Caminho","nó SA → nó AV → feixe de His → fibras de Purkinje"]],pas:"Automatismo cardíaco: o sistema nervoso só acelera (simpático) ou desacelera (parassimpático) o ritmo."},
+  {id:"coronarias",n:"Artérias coronárias",c:[.86,.2,.18],f:"Saem da base da aorta e correm pelos sulcos da superfície do coração, levando oxigênio para o próprio músculo cardíaco. Ficam na superfície, junto com a gordura dos sulcos.",pas:"Entupimento de uma coronária causa infarto do miocárdio: parte do músculo morre por falta de oxigênio."},
+  {id:"vcard",n:"Veias cardíacas",c:[.30,.38,.72],f:"Recolhem o sangue pobre em oxigênio do próprio músculo cardíaco. Correm ao lado das coronárias e chegam ao seio coronário, que desemboca no átrio direito.",pas:"O coração também tem a sua própria circulação: a circulação coronária."},
+  {id:"gordura",n:"Gordura epicárdica",c:[.94,.80,.46],f:"Tecido adiposo que se acumula nos sulcos do coração, em volta das coronárias e das veias cardíacas. É normal: protege os vasos e serve de reserva de energia para o músculo.",pas:"Não confundir com as placas de gordura (ateromas) da aterosclerose, que se formam por DENTRO das artérias."},
+  {id:"aorta",n:"Artéria aorta",c:[.80,.23,.21],f:"Maior artéria do corpo. Sai do ventrículo esquerdo, sobe, faz um arco para a esquerda do corpo e desce pelo tórax e abdome, passando por trás do coração. Do arco saem as artérias que vão para a cabeça e os braços (tronco braquiocefálico, carótida comum esquerda e subclávia esquerda).",pas:"Artéria leva sangue para fora do coração (nem sempre é sangue arterial)."},
+  {id:"pulmonar",n:"Tronco e artérias pulmonares",c:[.36,.44,.80],f:"O tronco pulmonar sai do ventrículo direito e se divide, embaixo do arco da aorta, nas artérias pulmonares direita e esquerda, uma para cada pulmão. Levam sangue venoso para ser oxigenado.",pas:"Pegadinha: artéria com sangue venoso."},
+  {id:"cavas",n:"Veias cavas",c:[.33,.40,.74],f:"A cava superior traz o sangue da cabeça e dos braços; a inferior, do resto do corpo. As duas chegam ao átrio direito.",pas:"Veia leva sangue de volta ao coração."},
+  {id:"vpulm",n:"Veias pulmonares",c:[.84,.30,.28],f:"Quatro veias, duas de cada pulmão, que trazem o sangue oxigenado ao átrio esquerdo, na parte de trás do coração.",pas:"Pegadinha: veia com sangue arterial. Veia é definida pelo sentido (chega ao coração), não pelo tipo de sangue."},
+  {id:"sangue",n:"Fluxo de sangue",c:[.9,.9,.95],f:"Azul: sangue venoso, pobre em oxigênio. Vermelho: sangue arterial, rico em oxigênio.",oculto:true},
+ ],
+ cortaveis:["miocardio","ad","vd","ae","ve"], corteInicial:false, corteY:.15,
+ semApagar:["sangue"], detalhe:{miocardio:9,aorta:10,pulmonar:10,cavas:10,vpulm:10,gordura:24}, relevo:{miocardio:.1,gordura:.3,coronarias:.04,vcard:.04,valvas:.05,cordas:.03,conducao:0},
+ brilho:{coronarias:.45,vcard:.4,miocardio:.42,aorta:.36,pulmonar:.36,cavas:.32,vpulm:.32,valvas:.45,semilunares:.45,gordura:.3,ad:.4,ae:.4,vd:.45,ve:.45,septo:.2,cordas:.4},
+ textura:{miocardio:1,gordura:2,aorta:3,pulmonar:3,cavas:3,vpulm:3}, texturaAltura:[-.25,.75],
+ pulso:{base:S(0,0,.5),apice:S(0,0,-1),ids:["miocardio","vd","ve","septo","cordas","coronarias","vcard","gordura","conducao"],f:bate},
+ aoRaio:0, fundo:["#2A1420","#12080D"], dist:4.7, pitch:.1, yaw:0, giro:0, alvo:[0,.42,0],
+ constroi(A){
+  const {add,elipsoide,tubo,T,M,Rz,Ry,Rx}=A,O=T(0,0,0);
+  const blob=(rx,ry,rz,q,amp,sd)=>A.param(q,Math.round(q*.7),(u,v)=>{const th=u*2*PI,ph=(1-v)*PI,d=1+amp*(Math.sin(th*3+sd)*Math.sin(ph*2+sd*1.3)*.6+Math.sin(th*5+ph*4+sd*2.1)*.4)*Math.sin(ph);return [rx*d*Math.sin(ph)*Math.cos(th),ry*d*Math.cos(ph),rz*d*Math.sin(ph)*Math.sin(th)];});
+  const CARNE=[.60,.21,.22],VASO={tx:3,rel:.05,det:10};
+  // ---- ventrículos por fora: cone arredondado com sulcos, ápice para baixo e para a esquerda do paciente
+  add(A.param(132,96,(u,v)=>{const th=u*2*PI;return S(Math.cos(th),Math.sin(th),Math.cos((1-v)*PI));}),O,"miocardio",{solido:1});
+  // cone arterial: a parte do ventrículo direito que sobe até o tronco pulmonar
+  add(tubo(u=>cr([Sf(1.5,.2,-.1),Sf(1.45,.42,-.02),mix3(Sf(1.42,.5,0),PTR,.6),PTR],u),u=>.155-.05*u,30,24),O,"miocardio",{solido:1});
+  // ---- cavidades (o forro por dentro; o lado direito em azul e o esquerdo em vermelho, para estudo)
+  const FORRO={tx:4,rel:.3,det:15,esp:.5};
+  add(A.param(64,56,(u,v)=>RVp(u*2*PI,RYT+(RYB-RYT)*v)),O,"vd",{mat:FORRO});
+  add(A.param(64,56,(u,v)=>LVp(u*2*PI,LYT+(LYB-LYT)*v)),O,"ve",{mat:FORRO});
+  // trabécula septomarginal (banda moderadora) do ventrículo direito
+  add(tubo(u=>cr([RVp(-PI/2,-.38,1),RVp(-.3,-.44,.5),RVp(PI/2,-.36,1)],u),u=>.03+.02*Math.abs(u-.5),20,10),O,"vd",{c:[.45,.33,.6],cut:0,mat:{rel:.1,det:20,esp:.4}});
+  // ---- septo interventricular
+  add(A.param(44,40,(u,v)=>{const ph=u*2*PI,y=.44-1.08*v,f=Math.sqrt(Math.sin(PI*(.05+.9*v))),th=2.45+.85*f*Math.cos(ph),ro=.3-.085*f*Math.sin(ph);return S(ro*Math.cos(th),ro*Math.sin(th),y);}),O,"septo",{cut:1,solido:1});
+  // ---- átrios: parede por fora (cor de músculo), forro por dentro, e as aurículas enrugadas
+  const atrio=(id,c,rx,ry,rz,sd,forro)=>{add(blob(rx,ry,rz,56,.07,sd),T(...c),id,{c:CARNE,solido:1,mat:{tx:1,rel:.12,det:9}});add(blob(rx*.86,ry*.86,rz*.86,48,.07,sd),T(...c),id,{mat:FORRO});};
+  atrio("ad",RAC,.28,.34,.27,1.3);
+  atrio("ae",LAC,.33,.23,.2,4.1);
+  const auric=(rx,ry,rz,sd)=>A.param(60,36,(u,v)=>{const th=u*2*PI,ph=v*PI,w=1+.16*Math.sin(th*7+sd)*Math.sin(ph)+.1*Math.sin(th*13+ph*5+sd*2)*Math.sin(ph),tp=.55+.45*Math.cos(ph*.5);return [rx*Math.cos(ph)*1.0,ry*w*tp*Math.sin(ph)*Math.cos(th),rz*w*tp*Math.sin(ph)*Math.sin(th)];});
+  add(auric(.24,.15,.1,.7),M(T(-.33,.7,.25),M(Ry(.5),Rz(-.25))),"ad",{c:[.56,.2,.22],cut:0,mat:{tx:1,rel:.2,det:16}});
+  add(auric(.2,.12,.09,2.9),M(T(.3,.72,.1),M(Ry(-1.0),Rz(.5))),"ae",{c:[.58,.21,.22],cut:0,mat:{tx:1,rel:.2,det:16}});
+  // ---- valvas atrioventriculares: funis de folhetos (tricúspide com 3, mitral com 2)
+  const funil=(c,R,h,n,p0)=>A.param(60,10,(u,v)=>{const ph=u*2*PI,hh=h*(.62+.38*Math.cos(n*ph+p0)),rr=R*(1-.46*v);return L(c[0]+rr*Math.cos(ph),c[1]-hh*v,c[2]+rr*Math.sin(ph));});
+  const borda=(c,R,h,n,p0,k)=>{const ph=(k+.0)*2*PI/n-p0/n,hh=h*(.62+.38*Math.cos(n*ph+p0)),rr=R*.54;return L(c[0]+rr*Math.cos(ph),c[1]-hh,c[2]+rr*Math.sin(ph));};
+  add(funil(TVl,.15,.2,3,.4),O,"valvas");add(funil(MVl,.14,.22,2,1.1),O,"valvas");
+  [[TVl,.15],[MVl,.14]].forEach(([c,R])=>add(tubo(u=>{const a=u*2*PI;return L(c[0]+R*Math.cos(a),c[1],c[2]+R*Math.sin(a));},.016,48,8),O,"valvas",{c:[.9,.8,.68]}));
+  // ---- valvas semilunares: três bolsinhas na saída de cada ventrículo
+  const lua=(P,dz)=>{for(let k=0;k<3;k++){const a=k*2*PI/3+.5;add(A.param(20,12,(u,v)=>{const th=u*PI-PI/2+a,ph=v*PI*.5;return L(.062*Math.cos(a)+.05*Math.sin(ph)*Math.cos(th)*.9,-.05*Math.cos(ph),.062*Math.sin(a)+.05*Math.sin(ph)*Math.sin(th)*.9);}),T(P[0]-L(0,0,0)[0],P[1]-L(0,0,0)[1]+dz,P[2]-L(0,0,0)[2]),"semilunares");}};
+  lua(AOR,.0);lua(PTR,.0);
+  // ---- músculos papilares e cordas tendíneas
+  const papilar=(base,valva,c,R,h,n,p0,ks)=>{const tip=mix3(base,valva,.42);add(tubo(u=>mix3(base,tip,u),u=>.05-.03*u,10,12),O,"cordas",{c:[.62,.22,.22],mat:{rel:.12,det:18,esp:.4}});
+   ks.forEach(k=>{const e=borda(c,R,h,n,p0,k);add(tubo(u=>{const p=mix3(tip,e,u);return [p[0],p[1]-.02*Math.sin(u*PI),p[2]];},.0055,8,6),O,"cordas");});};
+  papilar(LVp(.5,-.42,1),MV,MVl,.14,.22,2,1.1,[0,.18,-.18,.36]);papilar(LVp(-2.3,-.4,1),MV,MVl,.14,.22,2,1.1,[1,1.18,.82,.64]);
+  papilar(RVp(PI/2,-.28,1),TV,TVl,.15,.2,3,.4,[0,.2,-.2]);papilar(RVp(PI*.92,-.2,1),TV,TVl,.15,.2,3,.4,[1,1.2,.8]);papilar(RVp(-PI/2,-.1,1),TV,TVl,.15,.2,3,.4,[2,2.2,1.8]);
+  // ---- grandes vasos
+  add(tubo(u=>cr(AO,.035+u*.965),u=>.125*(1+.2*Math.exp(-Math.pow((u-.03)/.035,2)))*(1-.17*u),150,24),O,"aorta",{mat:VASO});
+  const ramo=(P,r0,r1)=>add(tubo(u=>cr(P,u),u=>r0+(r1-r0)*u,34,14),O,"aorta",{mat:VASO});
+  ramo([[-.09,1.4,-.06],[-.14,1.6,-.08],[-.17,1.74,-.09]],.058,.05);ramo([[-.17,1.74,-.09],[-.28,1.86,-.1],[-.44,1.92,-.12]],.044,.038);ramo([[-.17,1.74,-.09],[-.15,1.88,-.09],[-.14,2.0,-.08]],.04,.036);
+  ramo([[.07,1.46,-.18],[.08,1.72,-.2],[.09,2.0,-.2]],.042,.036);ramo([[.24,1.42,-.32],[.3,1.66,-.34],[.44,1.84,-.34],[.6,1.9,-.34]],.046,.038);
+  add(tubo(u=>cr(PT,.06+u*.94),u=>.118-.012*u,60,22),O,"pulmonar",{mat:VASO});
+  add(tubo(u=>cr(PAE,u),u=>.092-.012*u,44,18),O,"pulmonar",{mat:VASO});add(tubo(u=>cr(PAD,u),u=>.092-.014*u,70,18),O,"pulmonar",{mat:VASO});
+  add(tubo(u=>cr(VCS,u),.102,44,20),O,"cavas",{mat:VASO});add(tubo(u=>cr(VCI,u),.108,36,20),O,"cavas",{mat:VASO});
+  [[[.98,.82,-.3],[.6,.78,-.3],[.3,.74,-.3]],[[.98,.58,-.34],[.6,.6,-.33],[.3,.63,-.3]],[[-1.0,.82,-.33],[-.5,.8,-.34],[-.14,.74,-.33]],[[-1.0,.6,-.36],[-.5,.62,-.36],[-.14,.64,-.33]]].forEach(P=>add(tubo(u=>cr(P,u),u=>.058+.008*u,40,16),O,"vpulm",{mat:VASO}));
+  // ---- gordura nos sulcos (atrioventricular e interventriculares)
+  const lobo=(u,a,b)=>a*(1+.3*Math.sin(u*61)+.22*Math.sin(u*137+1.7))+b;
+  add(tubo(u=>Sf(1.98+u*(2*PI-1.12),.5+.03*Math.sin(u*23),.0),u=>lobo(u,.06,.012)*(.55+.45*Math.sin(PI*Math.min(1,u*6))*Math.sin(PI*Math.min(1,(1-u)*6))),220,14),O,"gordura");
+  add(tubo(u=>Sf(TA+.04*Math.sin(u*9),.47-1.12*u,-.005),u=>lobo(u,.04,.006)*(1-.6*u),90,12),O,"gordura");
+  add(tubo(u=>Sf(TA+PI+.25+.04*Math.sin(u*8),.47-1.05*u,-.005),u=>lobo(u,.038,.006)*(1-.6*u),80,12),O,"gordura");
+  // ---- coronárias (vermelho) e veias cardíacas (azul) por cima da gordura, com ramos finos
+  const vaso=(id,P,r0,r1,d)=>add(tubo(u=>{const q=cr(P,u);return Sf(q[0],q[1],(d===undefined?.045:d)*.55);},u=>r0+(r1-r0)*u,Math.max(40,P.length*26),10),O,id,{cut:0});
+  let sd=11;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647;};
+  const galhos=(id,P,n,lado,r)=>{for(let i=0;i<n;i++){const u=.15+.75*(i+rnd()*.6)/n,q=cr(P,u),s=lado||(rnd()<.5?-1:1),l=.22+.2*rnd();vaso(id,[q,[q[0]+s*l*.45,q[1]-.08-.06*rnd()],[q[0]+s*l*.8,q[1]-.2-.1*rnd()],[q[0]+s*l,q[1]-.36-.12*rnd()]],r,r*.4,.02);}};
+  const DA=[[.82,.52],[.96,.44],[TA+.02,.2],[TA-.03,-.2],[TA+.03,-.55],[TA,-.9]];vaso("coronarias",DA,.03,.012);galhos("coronarias",DA,5,-1,.013);galhos("coronarias",DA,3,1,.01);
+  vaso("coronarias",[[TA,.3],[.7,.05],[.45,-.3],[.3,-.62]],.02,.009);                                         // ramo diagonal
+  const CX=[[.82,.52],[.5,.53],[0,.52],[-.6,.5],[-1.3,.5],[-1.9,.5]];vaso("coronarias",CX,.027,.014,.07);
+  vaso("coronarias",[[.1,.52],[.02,.2],[.0,-.15],[.08,-.5]],.019,.009);                                       // marginal esquerda
+  const CD=[[1.98,.52],[2.3,.52],[2.8,.51],[3.4,.5],[4.0,.5],[4.36,.45],[4.39,.1],[4.36,-.3],[4.4,-.7]];vaso("coronarias",CD,.028,.011,.07);
+  vaso("coronarias",[[2.85,.5],[2.78,.2],[2.72,-.15],[2.62,-.55]],.019,.008);galhos("coronarias",[[2.3,.5],[2.9,.5],[3.5,.48]],3,0,.011);
+  const GV=[[TA+.09,-.8],[TA+.11,-.4],[TA+.07,0],[TA+.1,.32],[.86,.6],[.4,.6],[-.3,.59],[-1.1,.58],[-1.9,.57]];vaso("vcard",GV,.014,.03,.05);
+  vaso("vcard",[[2.55,-.45],[2.6,-.1],[2.5,.25],[2.42,.5]],.009,.017,.03);vaso("vcard",[[2.05,-.3],[2.1,0],[2.02,.3],[2.0,.5]],.008,.015,.03);
+  vaso("vcard",[[4.47,-.65],[4.45,-.2],[4.47,.2],[4.5,.5]],.01,.022,.05);vaso("vcard",[[.25,-.5],[.2,-.1],[.24,.3],[.2,.58]],.008,.016,.03);
+  conducao(A,0);
+  sangue(A,0);
+ },
+ anima(t,A){TT=t;A.refaz("sangue",()=>sangue(A,t));A.refaz("cond",()=>conducao(A,t));},
+ foco:{miocardio:[[0,.1,0],3.8,[0,.1,1]],ad:[RAC,2.4,[-.2,.1,1]],vd:[RVC,2.5,[0,.1,1]],ae:[LAC,2.4,[0,.25,-1]],ve:[LVC,2.5,[0,.1,1]],septo:[S(-.18,.23,0),2.5,[0,.1,1]],valvas:[mix3(TV,MV,.5),2.1,[0,.25,1]],aorta:[[.1,1.2,-.2],3.0,[.3,.2,1]],pulmonar:[[0,1,.1],2.8,[.2,.3,1]],semilunares:[mix3(AOR,PTR,.5),1.8,[0,.35,1]],cordas:[mix3(RVC,LVC,.5),2.4,[0,.1,1]],conducao:[[-.2,.1,.05],3.2,[0,.1,1]],coronarias:[[.1,0,.4],3.4,[.25,.15,1]],vcard:[[.1,0,.4],3.4,[.3,.15,1]],gordura:[[0,.4,.3],3.0,[.1,.3,1]],cavas:[[-.6,.5,0],3.0,[-.4,.1,1]],vpulm:[[0,.7,-.3],3.0,[0,.2,-1]]},
+ apagaForte:.8, abre:{septo:[0,.2,.55]}, ancora:{ad:[-.7,.5,.2],ae:[.3,.74,.14],miocardio:Sf(.6,-.3,.02),coronarias:Sf(TA,.05,.03),vcard:Sf(TA+.1,-.3,.05),gordura:Sf(1.98+1.2,.5,.03),aorta:[.08,1.5,-.12],pulmonar:[.3,1.06,.1],cavas:[-.72,1.32,-.03],vpulm:[.98,.64,-.3],conducao:NSA},
+ aoFocar(o,A){const DENTRO=["vd","ve","septo","valvas","semilunares","cordas","conducao"];
+  if(o&&DENTRO.includes(o.id)){if(!A.corte()){A.poeCorte(true);this._ligou=true;}}else if(this._ligou){A.poeCorte(false);this._ligou=false;}},
+ etiquetasLinha:true, etiquetaDist:62, etiquetaAtras:.4, centroEtiquetas:[0,.35,0],
+ etiquetas:[
+  {id:"ad",p:[-.74,.48,.26],t:"Átrio direito"},
+  {id:"ae",p:[.36,.76,.2],t:"Átrio esquerdo"},
+  {id:"vd",p:Sf(2.0,-.15,.04),t:"Ventrículo direito"},
+  {id:"ve",p:Sf(.35,-.3,.04),t:"Ventrículo esquerdo"},
+  {id:"aorta",p:[.08,1.5,-.12],t:"Aorta"},
+  {id:"pulmonar",p:[.7,1.08,-.08],t:"Artéria pulmonar"},
+  {id:"cavas",p:[-.72,1.32,-.03],t:"Veia cava superior"},
+  {id:"cavas",p:[-.72,-.22,-.22],t:"Veia cava inferior"},
+  {id:"vpulm",p:[.98,.64,-.3],t:"Veias pulmonares"},
+  {id:"coronarias",p:Sf(TA,.05,.03),t:"Artéria coronária",quando:()=>!(API&&API.corte())},
+  {id:"conducao",p:NSA,t:"Nó sinoatrial"},
+  {id:"valvas",p:TV,t:"Valva tricúspide",quando:()=>!!(API&&API.corte())},
+  {id:"valvas",p:MV,t:"Valva mitral",quando:()=>!!(API&&API.corte())},
+  {id:"miocardio",p:Sf(.9,-.92,.04),t:"Ápice"}],
+});
+function sangue(A,t){
+ const {add,esfera,T}=A,b=esfera(.034,0,0,10);
+ for(let i=0;i<16;i++){const u=((t*.1)+i/16)%1;add(b,T(...cr(i%2?VEN2:VEN,u)),"sangue",{grupo:"sangue",c:[.42,.55,1],emi:.7});add(b,T(...cr(i%2?ART2:ART,u)),"sangue",{grupo:"sangue",c:[1,.32,.28],emi:.7});}
+}
+// sistema de condução: o impulso acende do nó sinoatrial até as fibras de Purkinje (1 batida por segundo)
+function conducao(A,t){
+ const {add,esfera,tubo,T}=A,f=(t%1),O=T(0,0,0),g=e=>({grupo:"cond",emi:e});
+ const luz=k=>{const d=f*6-k;return d>=0&&d<1.2?1:.25;};
+ add(esfera(.05,0,0,14),T(...NSA),"conducao",g(luz(0)));
+ add(tubo(u=>cr([NSA,[-.5,.62,.3],[-.32,.5,.26],NAV],u),.009,24,6),O,"conducao",g(luz(1)));
+ add(esfera(.042,0,0,14),T(...NAV),"conducao",g(luz(2)));
+ add(tubo(u=>cr(HIS,u),.012,20,6),O,"conducao",g(luz(3)));
+ add(tubo(u=>cr(RD,u),.009,44,6),O,"conducao",g(luz(4.3)));add(tubo(u=>cr(RE,u),.009,48,6),O,"conducao",g(luz(4.3)));
+}
+
+</script></body></html>

@@ -1,0 +1,33 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Modelo de Thomson · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// modelo de Thomson (1897-1904): esfera positiva com elétrons incrustados ("pudim de passas")
+const ELT=[];
+Modelo3D({
+ titulo:"Modelo de Thomson", area:"Química", voltar:"index.html#quimica", rotLista:"Partes", rotParte:"Parte",
+ geral:{t:"Modelo de Thomson (1904)",f:"Ao estudar os raios catódicos, J. J. Thomson descobriu o elétron: uma partícula negativa muito menor que o átomo. Então o átomo não era indivisível. Ele propôs uma esfera de carga positiva com os elétrons espalhados por ela, de modo que o total fica neutro.",
+  dl:[["Quem","J. J. Thomson, 1897 a 1904"],["Apelido","pudim de passas"],["Descoberta","o elétron (raios catódicos)"],["Limite","não tem núcleo; caiu com o experimento de Rutherford"]],
+  pas:"Natureza elétrica da matéria: eletrização, raios catódicos e a primeira partícula subatômica."},
+ partes:[
+  {id:"massa",n:"Esfera positiva",c:[.92,.58,.52],f:"Massa de carga positiva espalhada por todo o átomo, como a massa do pudim. A carga positiva total é igual à soma das cargas dos elétrons.",pas:"O átomo é neutro: carga positiva = carga negativa."},
+  {id:"eletron",n:"Elétrons",c:[.40,.68,1],f:"Partículas negativas incrustadas na esfera, como passas no pudim. Thomson mediu a relação entre a carga e a massa do elétron.",pas:"Um átomo que perde elétrons vira íon positivo (cátion); que ganha, vira íon negativo (ânion)."},
+ ],
+ casca:"massa", cortaveis:["massa"], corteInicial:true,
+ citoplasma:[[.42,.18,.20],[.70,.36,.34]],
+ detalhe:{massa:4,eletron:20}, relevo:{massa:.04}, brilho:{eletron:.5,massa:.3},
+ aoRaio:0, fundo:["#1B1530","#0B0818"], dist:3.4, pitch:.3, giro:.0025,
+ pontos:{n:700,raio:.96,cor:[1,.7,.62],tam:1.4},
+ constroi(A){
+  const {add,esfera,T}=A,R=A.rnd(4),e=esfera(.07,0,0,22);
+  add(esfera(1,0,0,96),T(0,0,0),"massa");
+  for(let i=0;ELT.length<14&&i<500;i++){const r=.25+.6*Math.cbrt(R()),th=R()*2*Math.PI,ph=Math.acos(2*R()-1);const p=[r*Math.sin(ph)*Math.cos(th),r*Math.cos(ph),r*Math.sin(ph)*Math.sin(th)];
+   if(ELT.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1],q[2]-p[2])<.32))continue;ELT.push(p);add(e,T(...p),"eletron",{emi:.4});}
+ },
+ get foco(){const p=ELT[0]||[0,0,.5];return {massa:[[0,0,0],3.2,[0,.3,1]],eletron:[p,.9,[p[0]+.01,p[1]+.3,p[2]+1]]};},
+});
+
+</script></body></html>

@@ -1,0 +1,61 @@
+[
+  {
+    "tipo": "ce",
+    "tag": "PAS 1 · História",
+    "texto": "Na Inglaterra do século XVI, o rompimento do rei Henrique VIII com a autoridade papal deu origem à Igreja Anglicana por meio do Ato de Supremacia.",
+    "opcoes": [],
+    "gabarito": "C"
+  },
+  {
+    "tipo": "ce",
+    "tag": "PAS 1 · Biologia",
+    "texto": "Na fabricação de pão, o crescimento da massa deve-se à liberação de gás carbônico (CO₂) produzido durante a fermentação alcoólica realizada por leveduras.",
+    "opcoes": [],
+    "gabarito": "C"
+  },
+  {
+    "tipo": "ce",
+    "tag": "PAS 1 · Química",
+    "texto": "A molécula de gás oxigênio (O₂) apresenta ligação covalente polar e geometria angular.",
+    "opcoes": [],
+    "gabarito": "E"
+  },
+  {
+    "tipo": "ce",
+    "tag": "PAS 1 · Física",
+    "texto": "No ponto mais alto da trajetória de um lançamento oblíquo no vácuo, o vetor velocidade do projétil é nulo.",
+    "opcoes": [],
+    "gabarito": "E"
+  },
+  {
+    "tipo": "mc",
+    "tag": "Vestibular · Geografia",
+    "texto": "Sobre o índice de Gini, indicador amplamente utilizado em estudos socioeconômicos, assinale a alternativa correta:",
+    "opcoes": [
+      {
+        "l": "A",
+        "t": "Valores próximos de zero indicam menor desigualdade na distribuição de renda."
+      },
+      {
+        "l": "B",
+        "t": "Valores iguais a um representam distribuição de renda perfeitamente igualitária."
+      },
+      {
+        "l": "C",
+        "t": "Mede exclusivamente a taxa de alfabetização de um país."
+      },
+      {
+        "l": "D",
+        "t": "Não pode ser aplicado a comparações entre unidades federativas."
+      }
+    ],
+    "gabarito": "A"
+  },
+  {
+    "tipo": "disc",
+    "tag": "PAS 1 · Matemática (Tipo B)",
+    "texto": "Calcule o valor de x na equação log₂(x) + log₂(4) = 5. Registre o resultado numérico obtido.",
+    "opcoes": [],
+    "gabarito": "008"
+  }
+]

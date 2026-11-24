@@ -1,0 +1,85 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mitose · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// mitose de uma célula animal com 2n = 4 (dois pares de cromossomos homólogos)
+const FASES=["interfase","profase","metafase","anafase","telofase","citocinese"];
+const NOMES=["Interfase","Prófase","Metáfase","Anáfase","Telófase","Citocinese"];
+const COMP=["cromossomo","fuso","centro","carioteca","membrana"];
+let F=2,SYNC=false;
+const lerp=(a,b,t)=>a.map((x,i)=>x+(b[i]-x)*t);
+// cromossomos: [comprimento, cor, posição no plano equatorial (y,z)]
+const CR=[[.34,[.86,.42,.40],[.24,.10]],[.34,[.92,.62,.52],[-.20,.18]],[.22,[.42,.58,.86],[.06,-.24]],[.22,[.60,.74,.94],[-.10,-.06]]];
+Modelo3D({
+ titulo:"Mitose", area:"Biologia", voltar:"index.html#biologia", rotLista:"Fases e estruturas", rotParte:"Mitose",
+ geral:{t:"Mitose: uma célula vira duas iguais",f:"Divisão em que uma célula forma duas células-filhas com o mesmo número de cromossomos da mãe. Serve para crescimento, regeneração e reprodução assexuada. Mude a fase no controle ou toque numa fase da lista. Neste modelo a célula tem 2n = 4 cromossomos.",
+  dl:[["Resultado","2 células com 2n"],["Material genético","duplicado na interfase (fase S)"],["Ordem","prófase, metáfase, anáfase, telófase"]],
+  pas:"Identificar a fase pela posição dos cromossomos, comparar mitose e meiose e relacionar com câncer (divisão descontrolada)."},
+ partes:[
+  {id:"interfase",n:"Interfase",c:[.62,.66,.80],f:"Fase entre divisões, a mais longa do ciclo. O DNA está descondensado (cromatina) e é duplicado na fase S. A célula cresce e duplica os centríolos.",dl:[["Etapas","G1, S, G2"]],pas:"Não faz parte da mitose propriamente dita, mas é quando o DNA se duplica."},
+  {id:"profase",n:"Prófase",c:[.86,.58,.52],f:"A cromatina se condensa e aparecem os cromossomos, cada um com duas cromátides-irmãs unidas pelo centrômero. Os centrossomos migram para os polos e começam a formar o fuso. O nucléolo e a carioteca desaparecem.",pas:"Sinal típico: cromossomos já visíveis e núcleo se desfazendo."},
+  {id:"metafase",n:"Metáfase",c:[.92,.76,.42],f:"Os cromossomos, no grau máximo de condensação, se alinham no meio da célula (placa equatorial), presos às fibras do fuso pelo centrômero.",pas:"Melhor fase para contar e estudar cromossomos (cariótipo)."},
+  {id:"anafase",n:"Anáfase",c:[.56,.80,.56],f:"As cromátides-irmãs se separam e são puxadas para polos opostos pelo encurtamento das fibras do fuso. Cada cromátide passa a ser um cromossomo.",pas:"Na mitose separam-se cromátides-irmãs; na meiose I, cromossomos homólogos."},
+  {id:"telofase",n:"Telófase",c:[.52,.70,.92],f:"Os cromossomos chegam aos polos e se descondensam. Reaparecem a carioteca e o nucléolo, formando dois núcleos. O fuso se desfaz.",pas:"Praticamente o inverso da prófase."},
+  {id:"citocinese",n:"Citocinese",c:[.74,.60,.90],f:"Divisão do citoplasma. Na célula animal a membrana se estrangula de fora para dentro (centrípeta); na vegetal, forma-se a lamela média de dentro para fora (centrífuga).",pas:"Comparação da citocinese animal e vegetal."},
+  {id:"cromossomo",n:"Cromossomos",c:[.86,.42,.40],f:"DNA bem enrolado em proteínas. Depois da duplicação, cada cromossomo tem duas cromátides-irmãs idênticas unidas pelo centrômero. As cores mostram os pares de homólogos (um veio do pai e outro da mãe).",pas:"Diferença entre cromátides-irmãs (cópias idênticas) e homólogos (um de cada genitor)."},
+  {id:"fuso",n:"Fuso mitótico",c:[.80,.84,.92],f:"Fibras de microtúbulos que saem dos polos e se prendem aos centrômeros. Elas puxam as cromátides para os polos na anáfase.",pas:"A colchicina impede a formação do fuso e para a divisão na metáfase."},
+  {id:"centro",n:"Centrossomos (centríolos)",c:[.96,.84,.40],f:"Organizam o fuso. Ficam um em cada polo. Células vegetais superiores não têm centríolos, e o fuso se forma mesmo assim (mitose anastral).",pas:"Mitose astral (animal) × anastral (vegetal)."},
+  {id:"carioteca",n:"Carioteca",c:[.62,.56,.80],f:"Membrana do núcleo. Some na prófase e reaparece na telófase.",pas:"Presença ou ausência da carioteca ajuda a identificar a fase."},
+  {id:"membrana",n:"Membrana plasmática",c:[.86,.70,.66],f:"Envolve a célula. Na citocinese, um anel de proteínas a estrangula até separar as duas células.",pas:"Citocinese centrípeta na célula animal."},
+ ],
+ semApagar:COMP, detalhe:{cromossomo:20,membrana:6}, relevo:{membrana:.03}, brilho:{cromossomo:.35,membrana:.2},
+ aoRaio:0, fundo:["#1A1C38","#0A0B1C"], dist:3.5, pitch:.35, yaw:.35, giro:.0015, botoes:{corte:false},
+ slider:{rot:"Fase",min:0,max:5,passo:1,valor:2,fmt:v=>NOMES[v],muda(v,A){if(SYNC)return;if(v===F&&!A.foca)return;F=v;A.refaz("cel",()=>cel(A));if(A.foca){SYNC=true;A.foca(FASES[v]);SYNC=false;}}},
+ aoFocar(o,A){if(!o||SYNC)return;const k=FASES.indexOf(o.id);if(k<0)return;F=k;A.refaz("cel",()=>cel(A));const inp=document.querySelector(".mv-slider input"),sv=document.querySelector(".mv-sv");if(inp){inp.value=k;sv.textContent=NOMES[k];}},
+ constroi(A){cel(A,1);},
+ foco:{interfase:[[0,0,0],3.5,[.6,.35,1]],profase:[[0,0,0],3.5,[.6,.35,1]],metafase:[[0,0,0],3.5,[.6,.35,1]],anafase:[[0,0,0],3.5,[.6,.35,1]],telofase:[[0,0,0],3.7,[.6,.35,1]],citocinese:[[0,0,0],4,[.6,.35,1]],
+  cromossomo:[[0,0,0],1.6,[.9,.2,.4]],fuso:[[0,0,0],2.6,[.2,.6,1]],centro:[[.9,0,0],1.0,[.4,.4,1]],carioteca:[[0,0,0],2.4,[.6,.35,1]],membrana:[[0,0,0],3.5,[.6,.35,1]]},
+ etiquetas:[{id:"centro",p:()=>[F<2?.55:.92,.14,0],t:"Polo",quando:()=>F>=1&&F<=4},{id:"cromossomo",p:[0,.46,0],t:"Placa equatorial",quando:()=>F===2}],
+});
+function cel(A){
+ const {add,esfera,elipsoide,tubo,toro,T,M,Ry,Rz,PI}=A,g={grupo:"cel"},R=A.rnd(7);
+ const o=(x)=>Object.assign({},g,x);
+ // membrana
+ if(F<4)add(esfera(1,0,0,72),T(0,0,0),"membrana",o({a:.2}));
+ else if(F===4){add(A.param(72,48,(u,v)=>{const th=u*2*PI,ph=v*PI,x=Math.cos(ph),s=Math.sin(ph);const pinch=1-.32*Math.exp(-(x*x)/.05);return [x*1.25,s*Math.cos(th)*.92*pinch,s*Math.sin(th)*.92*pinch];}),T(0,0,0),"membrana",o({a:.2}));}
+ else{add(esfera(.7,0,0,64),T(-.8,0,0),"membrana",o({a:.2}));add(esfera(.7,0,0,64),T(.8,0,0),"membrana",o({a:.2}));}
+ // polos e centríolos
+ const polo=[0,.55,.92,.92,1.05,.95][F];
+ const par=p=>{const c=A.cilindro(.022,.1,10);add(c,T(...p),"centro",o({emi:.3}));add(c,M(T(p[0],p[1]+.04,p[2]+.03),Rz(PI/2)),"centro",o({emi:.3}));};
+ if(F===0){par([.35,.62,.1]);}
+ else if(F<5){par([polo,.05,0]);par([-polo,-.05,0]);}
+ else{par([-1.18,.1,0]);par([1.18,.1,0]);}
+ // ásteres e fuso
+ const fibra=(a,b,r)=>add(tubo(u=>lerp(a,b,u),r||.006,4,6),T(0,0,0),"fuso",o({a:.7,emi:.25}));
+ if(F>=1&&F<=4){for(const s of [1,-1]){const P=[s*polo,s*.05,0];for(let i=0;i<10;i++){const a=i/10*2*PI;fibra(P,[P[0]+s*.18,P[1]+.2*Math.cos(a),.2*Math.sin(a)],.004);}}}
+ // cromossomos
+ const cromatide=(c,len,cor,dir,curva)=>add(tubo(u=>{const t=(u-.5)*len;return [c[0]+dir[0]*t+(curva||0)*Math.abs(t)*Math.abs(t)*4,c[1]+dir[1]*t,c[2]+dir[2]*t];},u=>.045*Math.pow(Math.sin(PI*Math.min(1,Math.max(0,u))),.35)+.004,24,12),T(0,0,0),"cromossomo",o({c:cor}));
+ const X=(c,len,cor,ang)=>{const rot=d=>[d[0],d[1]*Math.cos(ang)-d[2]*Math.sin(ang),d[1]*Math.sin(ang)+d[2]*Math.cos(ang)],k=.26;
+  cromatide(c,len,cor,rot([Math.sin(k),Math.cos(k),0]));cromatide(c,len,cor,rot([-Math.sin(k),Math.cos(k),0]));add(esfera(.034,0,0,12),T(...c),"cromossomo",o({c:cor.map(x=>x*.7)}));};
+ // cromátide separada em forma de V, com o centrômero puxado na frente (para o polo)
+ const V=(c,len,cor,s)=>add(tubo(u=>{const t=(u-.5)*2;return [c[0]-s*Math.abs(t)*len*.42,c[1]+t*len*.42,c[2]];},u=>.042*Math.pow(Math.sin(PI*Math.min(1,Math.max(0,u))),.3)+.004,30,12),T(0,0,0),"cromossomo",o({c:cor}));
+ if(F===0){ // cromatina: fios finos enovelados dentro do núcleo
+  add(esfera(.48,0,0,56),T(0,0,0),"carioteca",o({a:.28}));add(esfera(.12,.05,2,24),T(.12,.1,.05),"carioteca",o({c:[.42,.32,.55]}));
+  CR.forEach(([len,cor],k)=>{for(let j=0;j<2;j++){const s=R()*9;add(tubo(u=>{const a=u*14+s;const r=.12+.22*Math.abs(Math.sin(u*5+s));return [r*Math.cos(a)*Math.sin(u*7+s),r*Math.sin(a*.7),r*Math.cos(u*6+s)*.9];},.006,160,5),T(0,0,0),"cromossomo",o({c:cor}));}});
+ }else if(F===1){
+  add(esfera(.5,0,0,56),T(0,0,0),"carioteca",o({a:.14}));
+  CR.forEach(([len,cor],k)=>X([(k%2?.12:-.14)+(k>1?.05:0),(k<2?.18:-.16)+(k%2?.04:0),k%2?.15:-.12],len*.85,cor,k*1.1));
+ }else if(F===2){
+  CR.forEach(([len,cor,[y,z]])=>{X([0,y,z],len,cor,0);fibra([polo,.05,0],[.03,y,z]);fibra([-polo,-.05,0],[0,y,z]);});
+ }else if(F===3||F===4){
+  const px=F===3?.45:.72;
+  CR.forEach(([len,cor,[y,z]])=>{for(const s of [1,-1]){const c=[s*px,y*(F===3?.8:.5),z*(F===3?.8:.5)];
+   if(F===3){V(c,len,cor,s);fibra([s*polo,s*.05,0],c);}
+   else cromatide(c,len*.9,cor.map(x=>x*.9+.08),[.2,.95,.2]);}});
+  if(F===4){add(esfera(.32,0,0,48),T(.72,0,0),"carioteca",o({a:.22}));add(esfera(.32,0,0,48),T(-.72,0,0),"carioteca",o({a:.22}));}
+ }else{
+  for(const s of [1,-1]){add(esfera(.3,0,0,48),T(s*.8,0,0),"carioteca",o({a:.3}));
+   CR.forEach(([len,cor],k)=>{const sd=R()*9+k;add(tubo(u=>{const a=u*12+sd;const r=.06+.16*Math.abs(Math.sin(u*4+sd));return [s*.8+r*Math.cos(a)*Math.sin(u*6+sd),r*Math.sin(a*.7),r*Math.cos(u*5+sd)*.9];},.005,120,5),T(0,0,0),"cromossomo",o({c:cor}));});}
+ }
+}
+
+</script></body></html>

@@ -1,0 +1,126 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tabela periódica · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>
+:root{--bg:#060A1B;--pn:#0C132B;--ln:rgba(255,255,255,.09);--tx:#E9ECF7;--mu:#98A1BF;--am:#FFC928;
+ --am1:#E2735E;--ate:#E59A55;--mt:#C9A35E;--mr:#8FA6A0;--sm:#7FB08A;--nm:#6FA7C9;--hal:#5C8FD6;--gn:#9B87D6;--ln2:#C77FA6;--an:#B06C86}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:15px/1.5 Inter,system-ui,sans-serif}
+.tp{display:grid;grid-template-columns:minmax(0,1fr) 380px;height:100%}
+.cena{position:relative;overflow:hidden;background:radial-gradient(90% 80% at 50% 40%,#13204A,#060A1B 70%)}
+.topo{position:absolute;inset:18px 20px auto 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;z-index:3;pointer-events:none}
+.topo a{color:var(--am);font-size:13px;font-weight:600;text-decoration:none;pointer-events:auto}
+.topo h1{font:700 34px/1.05 Jost,sans-serif;margin:2px 0 0;letter-spacing:-.01em}
+.bts{display:flex;gap:8px;pointer-events:auto}
+.bt{min-height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--ln);background:#0C132BCC;color:var(--tx);font:600 14px Inter,sans-serif;cursor:pointer;white-space:nowrap}
+.bt:focus-visible,.el:focus-visible,.lg button:focus-visible{outline:2px solid var(--am);outline-offset:2px}
+.palco{position:absolute;inset:0;perspective:1400px;display:grid;place-items:center;padding:96px 24px 120px}
+.mesa{--s:1;display:grid;grid-template-columns:repeat(18,minmax(0,1fr));grid-template-rows:repeat(7,1fr) .45fr repeat(2,1fr);gap:4px;width:min(100%,1180px);aspect-ratio:18/10.6;
+ transform-style:preserve-3d;transform:rotateX(var(--rx,22deg)) rotateZ(var(--rz,0deg)) scale(var(--s));transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.el{position:relative;border:0;padding:0;border-radius:6px;cursor:pointer;color:#0B1022;font:inherit;background:var(--c);
+ transform:translateZ(calc(var(--h,0)*1px));transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .3s,opacity .3s;
+ box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -2px 0 rgba(0,0,0,.25) inset,0 6px 10px rgba(0,0,0,.35);container-type:size}
+.el::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(160deg,rgba(255,255,255,.28),transparent 45%,rgba(0,0,0,.18))}
+.el b{position:absolute;inset:0;display:grid;place-items:center;font:700 44cqh/1 Jost,sans-serif}
+.el i{position:absolute;left:8%;top:5%;font:600 22cqh/1 Inter,sans-serif;font-style:normal;opacity:.75}
+.el:hover,.el.on{--h:28;filter:brightness(1.12)}
+.mesa.filtro .el:not(.f){opacity:.16;filter:saturate(.2)}
+.mesa.filtro .el.f{--h:14}
+.rot{position:absolute;color:var(--mu);font:600 11px Inter;transform:translateZ(1px)}
+.lg{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:6px;width:min(96%,900px);z-index:3}
+.lg button{display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;border:1px solid var(--ln);background:#0C132BD9;color:var(--tx);font:500 12.5px Inter;cursor:pointer}
+.lg button[aria-pressed=true]{border-color:var(--am);background:#2A2A1ED9}
+.lg span{width:10px;height:10px;border-radius:3px;background:var(--c)}
+aside{background:var(--pn);border-left:1px solid var(--ln);overflow:auto;padding:24px}
+.tag{display:flex;align-items:center;gap:8px;color:var(--mu);font-size:13px}.tag span{width:11px;height:11px;border-radius:3px;background:var(--c,var(--am))}
+aside h2{font:700 30px/1.1 Jost,sans-serif;margin:8px 0 10px}
+aside p{color:#C5CBE0;margin:0 0 14px}
+.card{display:grid;grid-template-columns:104px 1fr;gap:16px;align-items:center;margin:4px 0 16px}
+.tile{aspect-ratio:1;border-radius:14px;background:var(--c);color:#0B1022;display:grid;place-items:center;position:relative;box-shadow:0 10px 30px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.4) inset}
+.tile b{font:700 50px/1 Jost}.tile i{position:absolute;left:10px;top:7px;font:600 14px Inter;font-style:normal}.tile s{position:absolute;bottom:8px;font:500 11.5px Inter;text-decoration:none}
+dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 14px;font-size:14px}dt{color:var(--mu)}dd{margin:0}
+.cfg{font:500 13.5px/1.7 Inter;word-spacing:2px}.cfg sup{font-size:.7em}
+.pas{background:#2A2610;border:1px solid #5A4C14;border-radius:12px;padding:12px 14px;margin-top:6px}.pas b{display:block;color:var(--am);font-size:12.5px}
+svg.bohr{width:100%;max-width:300px;display:block;margin:6px auto 12px}
+@media (max-width:860px){.tp{grid-template-columns:1fr;grid-template-rows:62vh auto;height:auto}html,body{height:auto}
+ .topo h1{font-size:24px}.bt{min-height:34px;padding:0 10px;font-size:12.5px}.palco{padding:78px 6px 112px}.mesa{gap:2px}.el{border-radius:3px}.lg{bottom:10px}.lg button{padding:4px 8px;font-size:11px}aside{border-left:0;border-top:1px solid var(--ln)}}
+@media (prefers-reduced-motion:reduce){.mesa,.el{transition:none}}
+</style></head><body>
+<div class="tp">
+ <div class="cena">
+  <div class="topo"><div><a href="index.html#quimica">← Química</a><h1>Tabela periódica</h1></div>
+   <div class="bts"><button class="bt" id="vista" type="button">Ver de cima</button><button class="bt" id="geral" type="button">Visão geral</button></div></div>
+  <div class="palco"><div class="mesa" id="mesa"></div></div>
+  <div class="lg" id="lg"></div>
+ </div>
+ <aside id="info" aria-live="polite"></aside>
+</div>
+<script>
+/* os modelos só abrem dentro do site (Acesso completo ou amostra de 10 s); aberto direto, volta para a página inicial */ try{if(window.top===window.self&&!/teste/.test(location.hash))location.replace("/");}catch(e){}
+
+const S="H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og".split(" ");
+const N="Hidrogênio,Hélio,Lítio,Berílio,Boro,Carbono,Nitrogênio,Oxigênio,Flúor,Neônio,Sódio,Magnésio,Alumínio,Silício,Fósforo,Enxofre,Cloro,Argônio,Potássio,Cálcio,Escândio,Titânio,Vanádio,Cromo,Manganês,Ferro,Cobalto,Níquel,Cobre,Zinco,Gálio,Germânio,Arsênio,Selênio,Bromo,Criptônio,Rubídio,Estrôncio,Ítrio,Zircônio,Nióbio,Molibdênio,Tecnécio,Rutênio,Ródio,Paládio,Prata,Cádmio,Índio,Estanho,Antimônio,Telúrio,Iodo,Xenônio,Césio,Bário,Lantânio,Cério,Praseodímio,Neodímio,Promécio,Samário,Európio,Gadolínio,Térbio,Disprósio,Hólmio,Érbio,Túlio,Itérbio,Lutécio,Háfnio,Tântalo,Tungstênio,Rênio,Ósmio,Irídio,Platina,Ouro,Mercúrio,Tálio,Chumbo,Bismuto,Polônio,Astato,Radônio,Frâncio,Rádio,Actínio,Tório,Protactínio,Urânio,Netúnio,Plutônio,Amerício,Cúrio,Berquélio,Califórnio,Einstênio,Férmio,Mendelévio,Nobélio,Laurêncio,Rutherfórdio,Dúbnio,Seabórgio,Bóhrio,Hássio,Meitnério,Darmstácio,Roentgênio,Copernício,Nihônio,Fleróvio,Moscóvio,Livermório,Tenesso,Oganessônio".split(",");
+const M=[1.008,4.003,6.94,9.012,10.81,12.01,14.01,16.00,19.00,20.18,22.99,24.31,26.98,28.09,30.97,32.06,35.45,39.95,39.10,40.08,44.96,47.87,50.94,52.00,54.94,55.85,58.93,58.69,63.55,65.38,69.72,72.63,74.92,78.97,79.90,83.80,85.47,87.62,88.91,91.22,92.91,95.95,98,101.1,102.9,106.4,107.9,112.4,114.8,118.7,121.8,127.6,126.9,131.3,132.9,137.3,138.9,140.1,140.9,144.2,145,150.4,152.0,157.3,158.9,162.5,164.9,167.3,168.9,173.0,175.0,178.5,180.9,183.8,186.2,190.2,192.2,195.1,197.0,200.6,204.4,207.2,209.0,209,210,222,223,226,227,232.0,231.0,238.0,237,244,243,247,247,251,252,257,258,259,266,267,268,269,270,269,278,281,282,285,286,289,290,293,294,294];
+const CAT={am:["Metais alcalinos","--am1","Grupo 1 (menos o H). Têm 1 elétron na camada de valência, que perdem com facilidade: são muito reativos e formam cátions +1.","Reagem com água formando bases fortes (hidróxidos)."],
+ ate:["Metais alcalino-terrosos","--ate","Grupo 2. Têm 2 elétrons de valência e formam cátions +2.","Cálcio e magnésio na água dura e nos ossos."],
+ mt:["Metais de transição","--mt","Grupos 3 a 12. Preenchem o subnível d. Bons condutores, formam íons com cargas variadas e compostos coloridos.","Ferro, cobre e zinco no cotidiano e na indústria."],
+ mr:["Outros metais","--mr","Metais dos grupos 13 a 16, mais moles e com pontos de fusão menores que os de transição.","Alumínio: leve, reciclável, protegido por camada de óxido."],
+ sm:["Semimetais","--sm","Propriedades intermediárias entre metais e não metais. Vários são semicondutores.","Silício e germânio em chips e painéis solares."],
+ nm:["Não metais","--nm","Tendem a ganhar elétrons ou compartilhar (ligação covalente). Formam a maior parte da matéria viva: C, H, O, N, P, S.","Ligação covalente e moléculas orgânicas."],
+ hal:["Halogênios","--hal","Grupo 17. Têm 7 elétrons de valência e ganham 1 com facilidade, formando ânions −1. Muito reativos.","Formação de sais (como o NaCl) com os metais alcalinos."],
+ gn:["Gases nobres","--gn","Grupo 18. Camada de valência completa (octeto, ou 2 no hélio): quase não reagem.","Base da regra do octeto."],
+ ln:["Lantanídeos","--ln2","Preenchem o subnível 4f. Chamados de terras-raras, usados em ímãs, telas e catalisadores.","Ficam numa linha separada só para a tabela caber na página."],
+ an:["Actinídeos","--an","Preenchem o subnível 5f. Todos são radioativos; do 93 em diante, sintéticos.","Urânio e plutônio na energia nuclear."]};
+const cat=z=>[3,11,19,37,55,87].includes(z)?"am":[4,12,20,38,56,88].includes(z)?"ate":[2,10,18,36,54,86,118].includes(z)?"gn":[9,17,35,53,85,117].includes(z)?"hal":[1,6,7,8,15,16,34].includes(z)?"nm":[5,14,32,33,51,52].includes(z)?"sm":(z>=57&&z<=71)?"ln":(z>=89&&z<=103)?"an":((z>=21&&z<=30)||(z>=39&&z<=48)||(z>=72&&z<=80)||(z>=104&&z<=112))?"mt":"mr";
+function pos(z){ // [linha, coluna] na grade 18 × 10
+ if(z===1)return[1,1];if(z===2)return[1,18];
+ if(z>=57&&z<=71)return[9,z-57+3];if(z>=89&&z<=103)return[10,z-89+3];
+ const ini=[3,11,19,37,55,87],p=ini.filter(a=>z>=a).length+1,a=ini[p-2],d=z-a;
+ if(p<=3)return[p,d<2?d+1:d+11];
+ if(p<=5)return[p,d+1];
+ const e=d<2?d+1:d+1-14;return[p,e];}
+const ORD=["1s","2s","2p","3s","3p","4s","3d","4p","5s","4d","5p","6s","4f","5d","6p","7s","5f","6d","7p"],CAP={s:2,p:6,d:10,f:14};
+function pauling(z){let r=z;const out=[];for(const o of ORD){if(r<=0)break;const q=Math.min(CAP[o[1]],r);out.push([o,q]);r-=q;}return out;}
+const camadas=z=>{const c=[0,0,0,0,0,0,0];pauling(z).forEach(([o,q])=>c[+o[0]-1]+=q);while(c.length&&!c[c.length-1])c.pop();return c;};
+const LET="KLMNOPQ",EXC=[24,29,41,42,44,45,46,47,57,58,64,78,79,89,90,91,92,93,96,103];
+const mesa=document.getElementById("mesa"),info=document.getElementById("info");
+for(let z=1;z<=118;z++){const [l,c]=pos(z),k=cat(z),b=document.createElement("button");b.type="button";b.className="el";b.dataset.z=z;b.dataset.k=k;
+ b.style.cssText=`grid-row:${l};grid-column:${c};--c:var(${CAT[k][1]})`;b.innerHTML=`<i>${z}</i><b>${S[z-1]}</b>`;b.setAttribute("aria-label",`${N[z-1]}, número atômico ${z}`);
+ b.onclick=()=>abre(z);mesa.appendChild(b);}
+[["1",1,1],["2",2,2],["13",2,13],["18",1,18]].forEach(([t,l,c])=>{});
+const lg=document.getElementById("lg");let filt=null;
+Object.entries(CAT).forEach(([k,v])=>{const b=document.createElement("button");b.type="button";b.style.setProperty("--c",`var(${v[1]})`);b.innerHTML=`<span></span>${v[0]}`;b.setAttribute("aria-pressed","false");
+ b.onclick=()=>{filt=filt===k?null:k;lg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b&&filt?"true":"false"));
+  mesa.classList.toggle("filtro",!!filt);mesa.querySelectorAll(".el").forEach(e=>e.classList.toggle("f",e.dataset.k===filt));if(filt&&!sel)mostraCat(k);};lg.appendChild(b);});
+let sel=null,cima=false;
+function vista(){mesa.style.setProperty("--rx",cima?"0deg":"22deg");}
+document.getElementById("vista").onclick=e=>{cima=!cima;e.target.textContent=cima?"Ver inclinada":"Ver de cima";vista();};
+document.getElementById("geral").onclick=geral;
+function bohr(z){const c=camadas(z),R=[34,52,70,88,106,124,142].map(r=>r*.95),W=300;let s=`<svg class="bohr" viewBox="0 0 ${W} ${W}" role="img" aria-label="Elétrons por camada: ${c.join(", ")}"><defs><radialGradient id="ng"><stop offset="0" stop-color="#FFB49A"/><stop offset="1" stop-color="#B9473A"/></radialGradient></defs>`;
+ c.forEach((q,i)=>{const r=R[i]*(c.length>5?.92:1);s+=`<circle cx="150" cy="150" r="${r}" fill="none" stroke="#5E6C9A" stroke-width="1.2" opacity=".8"/>`;
+  s+=`<g style="transform-origin:150px 150px;animation:gira ${8+i*5}s linear infinite">`;for(let j=0;j<q;j++){const a=j/q*2*Math.PI+i*.5;s+=`<circle cx="${150+r*Math.cos(a)}" cy="${150+r*Math.sin(a)}" r="3.6" fill="#7EC0FF"/>`;}s+="</g>";
+  s+=`<text x="${150+r*.71+4}" y="${150-r*.71-4}" fill="#98A1BF" font-size="11" font-family="Inter">${LET[i]}</text>`;});
+ return s+`<circle cx="150" cy="150" r="20" fill="url(#ng)"/><text x="150" y="155" text-anchor="middle" font:700 font-size="14" font-family="Jost" font-weight="700" fill="#2A0E0A">${S[z-1]}</text></svg><style>@keyframes gira{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){svg.bohr g{animation:none!important}}</style>`;}
+function abre(z){sel=z;mesa.querySelectorAll(".el").forEach(e=>e.classList.toggle("on",+e.dataset.z===z));
+ const [l,c]=pos(z),k=cat(z),v=CAT[k],cm=camadas(z),pl=pauling(z),val=cm[cm.length-1];
+ // aproxima a "câmera" do elemento: desloca e amplia a mesa
+ const r=mesa.getBoundingClientRect(),cx=(c-.5)/18,cy=(l-.5)/10.6;mesa.style.transformOrigin=`${cx*100}% ${cy*100}%`;mesa.style.setProperty("--s",window.innerWidth>860?1.9:1.6);mesa.style.setProperty("--rx","30deg");
+ const per=l>=9?(l===9?6:7):l,grp=l>=9?"3 (série "+(l===9?"dos lantanídeos":"dos actinídeos")+")":c;
+ info.innerHTML=`<div class="tag" style="--c:var(${v[1]})"><span></span>${v[0]}</div><h2>${N[z-1]}</h2>
+ <div class="card"><div class="tile" style="--c:var(${v[1]})"><i>${z}</i><b>${S[z-1]}</b><s>${String(M[z-1]).replace(".",",")}</s></div>
+ <dl><dt>Número atômico</dt><dd>${z} prótons</dd><dt>Massa atômica</dt><dd>${String(M[z-1]).replace(".",",")} u</dd><dt>Período</dt><dd>${per} (${cm.length} camadas)</dd><dt>Grupo</dt><dd>${grp}</dd></dl></div>
+ ${bohr(z)}
+ <dl><dt>Por camada</dt><dd>${cm.map((q,i)=>LET[i]+" = "+q).join(" · ")}</dd><dt>Valência</dt><dd>${val} elétron${val>1?"s":""} na camada ${LET[cm.length-1]}</dd></dl>
+ <p class="cfg"><b style="color:var(--mu);font-weight:500">Diagrama de Pauling:</b><br>${pl.map(([o,q])=>o+"<sup>"+q+"</sup>").join(" ")}${EXC.includes(z)?'<br><small style="color:var(--mu)">Na realidade este elemento foge um pouco do diagrama de Pauling (ex.: Cr e Cu). Para a prova, use o diagrama, a não ser que a questão diga o contrário.</small>':""}</p>
+ <p>${v[2]}</p><div class="pas"><b>No PAS</b>${v[3]} O período indica o número de camadas. Nos grupos 1 e 2, o número do grupo é o número de elétrons de valência; nos grupos 13 a 18, é o número do grupo menos 10 (o hélio é exceção, com 2).</div>`;}
+function mostraCat(k){const v=CAT[k];info.innerHTML=`<div class="tag" style="--c:var(${v[1]})"><span></span>Família</div><h2>${v[0]}</h2><p>${v[2]}</p><div class="pas"><b>No PAS</b>${v[3]}</div>`;}
+function geral(){sel=null;mesa.querySelectorAll(".el.on").forEach(e=>e.classList.remove("on"));mesa.style.setProperty("--s",1);vista();
+ info.innerHTML=`<div class="tag"><span></span>Visão geral</div><h2>Tabela periódica</h2><p>Os 118 elementos estão em ordem crescente de número atômico. Cada linha é um período (número de camadas eletrônicas) e cada coluna é um grupo ou família (elementos com propriedades parecidas). Toque num elemento para ver a distribuição eletrônica, ou numa família na legenda.</p>
+ <dl><dt>Períodos</dt><dd>7 linhas</dd><dt>Grupos</dt><dd>18 colunas</dd><dt>Metais</dt><dd>cerca de 3/4 dos elementos</dd></dl>
+ <div class="pas"><b>No PAS</b>Propriedades periódicas (raio atômico, eletronegatividade, energia de ionização), distribuição eletrônica pelo diagrama de Pauling e previsão do tipo de ligação.</div>`;}
+geral();
+// leve paralaxe com o ponteiro
+document.querySelector(".cena").addEventListener("pointermove",e=>{if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;const r=e.currentTarget.getBoundingClientRect();mesa.style.setProperty("--rz",((e.clientX-r.left)/r.width-.5)*-4+"deg");});
+if(window.parent!==window){const v=document.querySelector(".topo a");v.textContent="← Voltar aos modelos";v.addEventListener("click",e=>{e.preventDefault();parent.postMessage({mv:"fechar"},"*");});addEventListener("keydown",e=>{if(e.key==="Escape")parent.postMessage({mv:"fechar"},"*");});}
+if(location.hash==="#teste")window.__tp={abre,geral};
+</script></body></html>

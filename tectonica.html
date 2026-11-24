@@ -1,0 +1,81 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tectônica de placas · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// limites entre placas tectônicas em blocos-diagrama (altura exagerada)
+const TIPOS=["convergente","divergente","transformante"],NT=["Convergente","Divergente","Transformante"];
+let TP=0,SYNC=false;
+const X0=-2,X1=2,ZZ=1.1,BASE=-1.15;
+const sm=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+const ru=(x,z)=>Math.sin(x*9.1+z*4.3)*.5+Math.sin(x*17-z*11)*.3+Math.sin(x*31+z*27)*.2;
+Modelo3D({
+ titulo:"Tectônica de placas", area:"Geografia", voltar:"index.html#geografia", rotLista:"Limites e camadas", rotParte:"Tectônica",
+ geral:{t:"As placas se movem sobre o manto",f:"A litosfera (crosta + parte rígida do manto) é quebrada em placas que se movem poucos centímetros por ano, arrastadas pelas correntes de convecção do manto. Quase todos os terremotos, vulcões e cordilheiras ficam nos limites entre elas. Escolha o tipo de limite na lista ou no controle.",
+  dl:[["Velocidade","~2 a 10 cm por ano"],["Motor","correntes de convecção do manto"],["Teoria","deriva continental (Wegener) + tectônica de placas"]],
+  pas:"Relacionar cada limite com o relevo e os riscos: Andes e Japão (convergente), dorsal mesoatlântica (divergente), falha de San Andreas (transformante). O Brasil fica no meio da placa Sul-Americana, por isso tem poucos terremotos fortes."},
+ partes:[
+  {id:"convergente",n:"Limite convergente",c:[.86,.42,.30],f:"As placas se chocam. Quando uma placa oceânica (mais densa) encontra uma continental, ela afunda por baixo (subducção). Isso forma uma fossa no oceano, cordilheiras e vulcões no continente e terremotos fortes.",dl:[["Exemplos","Andes, Japão, Himalaia (continente com continente)"],["Relevo","fossas, cordilheiras, dobramentos modernos"]],pas:"Dobramentos modernos (Andes, Alpes, Himalaia) nascem em limites convergentes."},
+  {id:"divergente",n:"Limite divergente",c:[.98,.62,.24],f:"As placas se afastam. O magma sobe pela abertura, esfria e forma crosta oceânica nova. No fundo do mar surge uma cadeia de montanhas submarinas, a dorsal.",dl:[["Exemplos","Dorsal Mesoatlântica, Islândia, Rift africano"],["Efeito","o Atlântico alarga alguns centímetros por ano"]],pas:"É o que separou a América do Sul da África: a costa das duas se encaixa."},
+  {id:"transformante",n:"Limite transformante",c:[.62,.70,.86],f:"As placas deslizam lado a lado, em sentidos opostos. Não cria nem destrói crosta, mas a tensão acumulada causa terremotos.",dl:[["Exemplo","Falha de San Andreas (Califórnia)"],["Efeito","terremotos rasos e frequentes"]],pas:"Limite conservativo: a crosta é preservada."},
+  {id:"oceanica",n:"Litosfera oceânica",c:[.30,.34,.40],f:"Formada por basalto, é fina (5 a 10 km de crosta) e mais densa. Por isso afunda quando encontra uma placa continental.",pas:"Densidade explica quem afunda na subducção."},
+  {id:"continental",n:"Litosfera continental",c:[.62,.52,.40],f:"Formada principalmente por granito, é mais espessa e menos densa. Não afunda: se dobra e se eleva.",pas:"Crosta continental × oceânica."},
+  {id:"manto",n:"Astenosfera (manto)",c:[.86,.44,.20],f:"Parte do manto quente e plástica sobre a qual as placas deslizam. As setas mostram as correntes de convecção.",pas:"Convecção: material quente sobe, esfria e desce."},
+  {id:"magma",n:"Magma e vulcões",c:[1,.50,.14],f:"Rocha derretida que sobe por fraturas. Nas dorsais forma crosta nova; nas zonas de subducção alimenta vulcões explosivos.",pas:"Círculo de Fogo do Pacífico: vulcões nas bordas de placas."},
+  {id:"agua",n:"Oceano",c:[.26,.50,.70],f:"",oculto:true},
+ ],
+ semApagar:["oceanica","continental","manto","magma","agua"], relevoPadrao:.05, relevo:{manto:.12,agua:.02}, detalhe:{oceanica:12,continental:12,manto:5}, brilho:{agua:.8,magma:.3},
+ aoRaio:0, fundo:["#1E2A48","#0B1226"], dist:6.6, pitch:.45, yaw:-.5, giro:.0012, botoes:{corte:false},
+ slider:{rot:"Limite",min:0,max:2,passo:1,valor:0,fmt:v=>NT[v],muda(v,A){if(v===TP&&!A.foca)return;TP=v;A.refaz("tec",()=>tec(A));if(A.foca){SYNC=true;A.foca(TIPOS[v]);SYNC=false;}}},
+ aoFocar(o,A){if(!o||SYNC)return;const k=TIPOS.indexOf(o.id);if(k<0)return;TP=k;A.refaz("tec",()=>tec(A));const inp=document.querySelector(".mv-slider input");if(inp){inp.value=k;document.querySelector(".mv-sv").textContent=NT[k];}},
+ constroi(A){tec(A);},
+ foco:{convergente:[[0,0,0],6.6,[-.6,.5,1]],divergente:[[0,0,0],6.6,[-.6,.5,1]],transformante:[[0,0,0],6.6,[-.4,.9,1]],oceanica:[[-1,-.2,0],3,[-.4,.4,1]],continental:[[1,0,0],3,[.4,.4,1]],manto:[[0,-.9,ZZ],3.4,[0,.2,1]],magma:[[0,-.2,0],3,[-.3,.4,1]]},
+ etiquetas:[{id:"oceanica",p:()=>TP===0?[-1.5,-.32,ZZ]:[-1.3,-.32,ZZ],t:"Placa oceânica"},{id:"continental",p:[1.3,.2,ZZ],t:"Placa continental",quando:()=>TP===0},{id:"manto",p:[0,-.95,ZZ],t:"Astenosfera"},{id:"magma",p:[1.05,.85,.15],t:"Vulcão",quando:()=>TP===0},{id:"magma",p:[0,-.05,0],t:"Dorsal",quando:()=>TP===1},{id:"transformante",p:[0,.1,0],t:"Falha",quando:()=>TP===2}],
+});
+function tec(A){
+ const {add,terreno,faces,tubo,cone,caixa,T,M,Ry,Rz,PI}=A,g={grupo:"tec"},o=x=>Object.assign({},g,x);
+ // bloco: superfície h(x,z), fundo da litosfera b(x,z); laterais como faces
+ const bloco=(id,x0,x1,z0,z1,h,b,cor)=>{const nx=Math.max(10,Math.round((x1-x0)*40)),nz=Math.max(8,Math.round((z1-z0)*30)),cx=(x0+x1)/2,cz=(z0+z1)/2;
+  add(terreno(nx,nz,x1-x0,z1-z0,(x,z)=>h(x+cx,z+cz)),T(cx,0,cz),id,o(cor?{c:cor}:{}));
+  const L=[],N=60;
+  for(const zs of [z1,z0])for(let i=0;i<N;i++){const xa=x0+(x1-x0)*i/N,xb=x0+(x1-x0)*(i+1)/N,q=[[xa,b(xa,zs),zs],[xb,b(xb,zs),zs],[xb,h(xb,zs),zs],[xa,h(xa,zs),zs]];L.push(zs===z1?q:q.slice().reverse());}
+  for(const xs of [x0,x1])for(let i=0;i<N/2;i++){const za=z0+(z1-z0)*i/(N/2),zb=z0+(z1-z0)*(i+1)/(N/2),q=[[xs,b(xs,za),za],[xs,b(xs,zb),zb],[xs,h(xs,zb),zb],[xs,h(xs,za),za]];L.push(xs===x0?q:q.slice().reverse());}
+  add(faces(L),T(0,0,0),id,o(cor?{c:cor.map(x=>x*.8)}:{}));};
+ // manto (astenosfera) por baixo de tudo
+ bloco("manto",X0,X1,-ZZ,ZZ,()=>-.62,()=>BASE);
+ // setas de convecção: arcos com ponta
+ const seta=(cx,s)=>{const R=.32;add(tubo(u=>{const a=PI*(.1+.8*u);return [cx+s*R*Math.cos(a),-.9+R*Math.sin(a)*.7,ZZ+.02];},.025,40,8),T(0,0,0),"manto",o({c:[1,.82,.5],emi:.6}));
+  const a=PI*.9,p=[cx+s*R*Math.cos(a),-.9+R*Math.sin(a)*.7,ZZ+.02];add(cone(.06,.14,16),M(T(...p),Rz(s>0?-PI*.65:PI*.65)),"manto",o({c:[1,.82,.5],emi:.6}));};
+ const agua=(x0,x1,nivel)=>add(terreno(30,20,x1-x0,2*ZZ,()=>0),T((x0+x1)/2,nivel,0),"agua",o({a:TP===2?.4:.6}));
+ if(TP===0){ // oceânica (esq.) mergulha sob a continental (dir.)
+  const hO=(x,z)=>-.22-sm(-.4,.25,x)*.22+ru(x,z)*.008, bO=(x,z)=>hO(x,z)-.16;
+  bloco("oceanica",X0,.25,-ZZ,ZZ,hO,bO);
+  // placa descendo (subducção)
+  add(faces([[[.25,-.44,ZZ+.006],[1.2,-1.12,ZZ+.006],[1.2,-1.12,-ZZ],[.25,-.44,-ZZ]],[[.25,-.6,-ZZ],[1.05,-1.15,-ZZ],[1.05,-1.15,ZZ+.006],[.25,-.6,ZZ+.006]],[[.25,-.44,ZZ+.006],[.25,-.6,ZZ+.006],[1.05,-1.15,ZZ+.006],[1.2,-1.12,ZZ+.006]]]),T(0,0,0),"oceanica",o({}));
+  const hC=(x,z)=>.0+sm(.15,.7,x)*.22+Math.exp(-(((x-1.0)/.28)**2))*.32*(1+.25*Math.sin(z*5))+ru(x,z)*.03, bC=(x,z)=>-.62;
+  bloco("continental",.25,X1,-ZZ,ZZ,hC,(x,z)=>Math.min(hC(x,z)-.05,-.3-.35*sm(.25,.9,x)));
+  agua(X0,.35,-.02);
+  // vulcão e magma subindo
+  add(cone(.22,.38,40),T(1.05,.6,.15),"magma",o({c:[.42,.36,.32]}));
+  add(tubo(u=>[.85+u*.2,-.95+u*1.62,.15],.04,30,10),T(0,0,0),"magma",o({emi:.9}));
+  seta(-1.0,1);seta(1.45,-1);
+ }else if(TP===1){ // duas oceânicas se afastando com dorsal no meio
+  const h=(x,z)=>-.32+Math.exp(-((x/.45)**2))*.2-Math.exp(-((x/.07)**2))*.08+ru(x,z)*.01, b=(x,z)=>h(x,z)-.12-Math.abs(x)*.05;
+  bloco("oceanica",X0,-.03,-ZZ,ZZ,h,b);bloco("oceanica",.03,X1,-ZZ,ZZ,h,b,[.34,.38,.44]);
+  agua(X0,X1,0);
+  add(tubo(u=>[Math.sin(u*9)*.02,-1.0+u*.86,.0+(u-.5)*0],.06,30,12),T(0,0,0),"magma",o({emi:.9}));
+  add(caixa(.06,.5,2*ZZ),T(0,-.38,0),"magma",o({emi:.6,a:.85}));
+  seta(-.55,-1);seta(.55,1);
+ }else{ // transformante: dorsais deslocadas ligadas por uma falha
+  const h=(x,z)=>-.3+ru(x,z)*.012+ (z<0?Math.exp(-(((x+.5)/.25)**2))*.12:Math.exp(-(((x-.5)/.25)**2))*.12), b=(x,z)=>h(x,z)-.16;
+  bloco("oceanica",X0,X1,-ZZ,-.02,h,b);bloco("oceanica",X0,X1,.02,ZZ,h,b,[.36,.40,.46]);
+  agua(X0,X1,0);
+  add(caixa(3.2,.02,.03),T(0,-.27,0),"magma",o({c:[1,.84,.4],emi:.8}));
+  // setas de movimento opostas na superfície
+  for(const [z,s] of [[-.55,1],[.55,-1]]){add(tubo(u=>[(u-.5)*.9*s,0,z],.03,4,8),T(-.0,.03,0),"transformante",o({c:[1,.86,.4],emi:.7}));add(cone(.07,.16,16),M(T(.45*s,.03,z),Rz(-s*PI/2)),"transformante",o({c:[1,.86,.4],emi:.7}));}
+ }
+}
+
+</script></body></html>

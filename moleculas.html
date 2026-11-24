@@ -1,0 +1,85 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Geometria molecular · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// geometria molecular (teoria da repulsão dos pares de elétrons da camada de valência, VSEPR)
+const ATO={H:[.22,[.92,.93,.96]],O:[.34,[.86,.26,.22]],C:[.34,[.26,.27,.30]],N:[.33,[.30,.42,.86]],B:[.32,[.92,.66,.60]],F:[.27,[.70,.92,.55]],Cl:[.34,[.36,.78,.32]],S:[.38,[.92,.80,.30]],P:[.38,[.96,.55,.22]],Xe:[.42,[.40,.70,.80]],Br:[.37,[.62,.24,.18]]};
+const RAD=Math.PI/180,LIG=1.15;
+const eq=(deg)=>[Math.cos(deg*RAD),0,Math.sin(deg*RAD)];
+const tet=[[0,1,0],[Math.sqrt(8/9),-1/3,0],[-Math.sqrt(2/9),-1/3,Math.sqrt(2/3)],[-Math.sqrt(2/9),-1/3,-Math.sqrt(2/3)]];
+const pir=i=>[Math.sin(112*RAD)*Math.cos(i*120*RAD),Math.cos(112*RAD),Math.sin(112*RAD)*Math.sin(i*120*RAD)];
+const ang=(meio,deg)=>[[Math.sin(deg/2*RAD),-Math.cos(deg/2*RAD),0],[-Math.sin(deg/2*RAD),-Math.cos(deg/2*RAD),0]];
+const Y=[0,1,0],NY=[0,-1,0];
+// c = átomo central; l = ligantes [elemento, direção, ordem]; p = pares livres; a = duas ligações para marcar o ângulo
+const MOL={
+ co2:{n:"CO₂ · linear",nu:2,c:"C",l:[["O",[1,0,0],2],["O",[-1,0,0],2]],p:[],ang:"180°",a:[[0,.7,0],[0,.7,0]],pol:"apolar",
+  f:"O carbono tem 2 nuvens eletrônicas (duas ligações duplas) e nenhum par livre. Elas ficam em lados opostos.",pas:"As ligações C=O são polares, mas se anulam: a molécula é apolar."},
+ bf3:{n:"BF₃ · trigonal plana",nu:3,c:"B",l:[0,120,240].map(g=>["F",eq(g),1]),p:[],ang:"120°",a:[eq(0),eq(120)],pol:"apolar",
+  f:"O boro tem 3 nuvens, todas ligantes, espalhadas num plano. Fica com só 6 elétrons na valência (exceção ao octeto).",pas:"Exceção ao octeto: boro e berílio ficam com menos de 8 elétrons."},
+ so2:{n:"SO₂ · angular",nu:3,c:"S",l:ang(0,119).map(d=>["O",d,2]),p:[Y],ang:"~119°",a:ang(0,119),pol:"polar",
+  f:"O enxofre tem 3 nuvens: duas ligações e um par livre. As 3 nuvens formam um triângulo, mas como o par livre não é átomo, a molécula fica angular.",pas:"Angular com 1 par livre (≈119°) × angular com 2 pares livres, como a água (104,5°)."},
+ ch4:{n:"CH₄ · tetraédrica",nu:4,c:"C",l:tet.map(d=>["H",d,1]),p:[],ang:"109,5°",a:[tet[0],tet[1]],pol:"apolar",
+  f:"Quatro nuvens ligantes em volta do carbono apontam para os vértices de um tetraedro.",pas:"Carbono com 4 ligações simples é tetraédrico (hibridização sp³), base da química orgânica."},
+ nh3:{n:"NH₃ · piramidal",nu:4,c:"N",l:[0,1,2].map(i=>["H",pir(i),1]),p:[Y],ang:"~107°",a:[pir(0),pir(1)],pol:"polar",
+  f:"O nitrogênio tem 4 nuvens: 3 ligações e 1 par livre. As nuvens formam um tetraedro; sem contar o par livre, os átomos formam uma pirâmide.",pas:"O par livre repele mais e fecha o ângulo para menos de 109,5°."},
+ h2o:{n:"H₂O · angular",nu:4,c:"O",l:ang(0,104.5).map(d=>["H",d,1]),p:[[0,.6,.8],[0,.6,-.8]],ang:"104,5°",a:ang(0,104.5),pol:"polar",
+  f:"O oxigênio tem 4 nuvens: 2 ligações e 2 pares livres. Os dois pares livres empurram as ligações e o ângulo fica ainda menor.",pas:"A água é polar e faz ligações de hidrogênio: ponto de ebulição alto e ótimo solvente."},
+ pcl5:{n:"PCl₅ · bipirâmide trigonal",nu:5,c:"P",l:[["Cl",Y,1],["Cl",NY,1],...[0,120,240].map(g=>["Cl",eq(g),1])],p:[],ang:"90° e 120°",a:[Y,eq(0)],pol:"apolar",
+  f:"O fósforo tem 5 nuvens ligantes: 3 no plano do meio (a 120°) e 2 nos polos (a 90° do plano). O fósforo fica com 10 elétrons (octeto expandido).",pas:"Octeto expandido: elementos do 3º período em diante podem passar de 8 elétrons."},
+ sf4:{n:"SF₄ · gangorra",nu:5,c:"S",l:[["F",Y,1],["F",NY,1],["F",eq(60),1],["F",eq(-60),1]],p:[[-1,0,0]],ang:"~102° e ~173°",a:[eq(60),eq(-60)],pol:"polar",
+  f:"5 nuvens (bipirâmide trigonal), sendo 4 ligações e 1 par livre. O par livre ocupa uma posição do plano do meio, onde tem mais espaço, e a molécula fica com formato de gangorra.",pas:"Pares livres vão para as posições equatoriais da bipirâmide."},
+ clf3:{n:"ClF₃ · forma de T",nu:5,c:"Cl",l:[["F",Y,1],["F",NY,1],["F",[1,0,0],1]],p:[eq(120),eq(240)],ang:"~87,5°",a:[Y,[1,0,0]],pol:"polar",
+  f:"5 nuvens: 3 ligações e 2 pares livres. Os pares livres ficam no plano do meio, e os 3 flúor formam um T.",pas:"Mesma regra: os pares livres ocupam as posições equatoriais."},
+ xef2:{n:"XeF₂ · linear",nu:5,c:"Xe",l:[["F",Y,1],["F",NY,1]],p:[0,120,240].map(eq),ang:"180°",a:[[.6,.3,0],[.6,.3,0]],pol:"apolar",
+  f:"5 nuvens: 2 ligações e 3 pares livres. Os 3 pares livres ocupam todo o plano do meio, e os 2 flúor ficam nos polos, em linha reta.",pas:"Linear também com pares livres: o que importa é a posição dos átomos."},
+ sf6:{n:"SF₆ · octaédrica",nu:6,c:"S",l:[[1,0,0],[-1,0,0],Y,NY,[0,0,1],[0,0,-1]].map(d=>["F",d,1]),p:[],ang:"90°",a:[Y,[1,0,0]],pol:"apolar",
+  f:"6 nuvens ligantes apontando para os vértices de um octaedro, todas a 90° das vizinhas. O enxofre fica com 12 elétrons.",pas:"Molécula muito simétrica e apolar, mesmo com ligações bem polares."},
+ brf5:{n:"BrF₅ · pirâmide quadrada",nu:6,c:"Br",l:[["F",NY,1],...[[1,0,0],[-1,0,0],[0,0,1],[0,0,-1]].map(d=>["F",d,1])],p:[Y],ang:"~85°",a:[NY,[1,0,0]],pol:"polar",
+  f:"6 nuvens (octaedro): 5 ligações e 1 par livre. Sem o par livre, os átomos formam uma pirâmide de base quadrada.",pas:"O par livre deixa a molécula polar."},
+ xef4:{n:"XeF₄ · quadrado planar",nu:6,c:"Xe",l:[[1,0,0],[-1,0,0],[0,0,1],[0,0,-1]].map(d=>["F",d,1]),p:[Y,NY],ang:"90°",a:[[1,0,0],[0,0,1]],pol:"apolar",
+  f:"6 nuvens: 4 ligações e 2 pares livres. Os pares livres ficam em lados opostos (em cima e embaixo) e os 4 flúor formam um quadrado num plano.",pas:"Pares livres opostos se cancelam: a molécula é apolar."},
+};
+const ORD=["co2","bf3","so2","ch4","nh3","h2o","pcl5","sf4","clf3","xef2","sf6","brf5","xef4"];
+const VIS={co2:[.3,.3,1],bf3:[.3,1.1,1],so2:[.4,.3,1],ch4:[.7,.5,1],nh3:[.5,.35,1],h2o:[.9,.25,.6],pcl5:[.3,.8,1],sf4:[.8,.3,1],clf3:[.6,.3,1],xef2:[.3,.9,1],sf6:[.6,.45,1],brf5:[.6,.4,1],xef4:[.5,.6,1]};
+let MK="h2o",SYNC=false;
+Modelo3D({
+ titulo:"Geometria molecular", area:"Química", voltar:"index.html#quimica", rotLista:"Geometrias e partes", rotParte:"Geometria",
+ geral:{t:"Por que cada molécula tem um formato",f:"As nuvens eletrônicas em volta do átomo central (ligações e pares livres) se repelem e ficam o mais longe possível umas das outras. O número de nuvens define o arranjo; o formato da molécula é dado só pela posição dos átomos. Aqui estão as 13 geometrias, de 2 a 6 nuvens. Escolha na lista ou no controle.",
+  dl:[["2 nuvens","linear"],["3 nuvens","trigonal plana ou angular"],["4 nuvens","tetraédrica, piramidal ou angular"],["5 nuvens","bipirâmide trigonal, gangorra, T ou linear"],["6 nuvens","octaédrica, pirâmide quadrada ou quadrado planar"]],
+  pas:"Relacionar geometria com polaridade: se os vetores das ligações se anulam (moléculas simétricas, sem par livre no central), a molécula é apolar. Daí vêm solubilidade e pontos de ebulição."},
+ partes:[
+  ...ORD.map(k=>{const m=MOL[k];return {id:k,n:m.n,c:ATO[m.c][1].map(x=>Math.max(x,.3)),f:m.f,dl:[["Nuvens no central",String(m.nu)],["Pares livres",String(m.p.length)],["Ângulo",m.ang],["Polaridade",m.pol]],pas:m.pas};}),
+  {id:"central",n:"Átomo central",c:[.74,.76,.84],f:"Átomo ligado aos demais. A quantidade de nuvens eletrônicas em volta dele (ligações e pares livres) decide o arranjo.",pas:"Primeiro passo: contar as nuvens do átomo central."},
+  {id:"ligacao",n:"Ligações covalentes",c:[.80,.82,.88],f:"Pares de elétrons compartilhados. Ligação dupla aparece com dois bastões, mas conta como uma nuvem só.",pas:"Simples, dupla e tripla: cada uma conta como uma nuvem."},
+  {id:"parlivre",n:"Pares livres",c:[.55,.75,1],f:"Pares de elétrons do átomo central que não fazem ligação. Ocupam espaço e repelem mais que os pares ligantes.",pas:"Pares livres explicam por que a água é angular e não linear."},
+ ],
+ semApagar:["central","ligacao","parlivre"], brilho:{central:.6,ligacao:.4,parlivre:.3}, relevo:{central:.01}, relevoPadrao:.01,
+ aoRaio:0, fundo:["#13203F","#070C1E"], dist:4.6, pitch:.25, yaw:1, giro:.003, botoes:{corte:false},
+ slider:{rot:"Molécula",min:0,max:ORD.length-1,passo:1,valor:ORD.indexOf("h2o"),fmt:v=>MOL[ORD[v]].n.split(" · ")[0],muda(v,A){if(ORD[v]===MK&&!A.foca)return;MK=ORD[v];A.refaz("mol",()=>mol(A));if(A.foca){SYNC=true;A.foca(MK);SYNC=false;}}},
+ aoFocar(o,A){if(!o||SYNC||!MOL[o.id])return;MK=o.id;A.refaz("mol",()=>mol(A));const k=ORD.indexOf(MK),inp=document.querySelector(".mv-slider input");if(inp){inp.value=k;document.querySelector(".mv-sv").textContent=MOL[MK].n.split(" · ")[0];}},
+ constroi(A){mol(A);},
+ foco:Object.assign(Object.fromEntries(ORD.map(k=>[k,[[0,0,0],4.6,VIS[k]]])),{central:[[0,0,0],2.4,[.6,.3,1]],ligacao:[[.5,0,0],2.6,[.4,.4,1]],parlivre:[[0,.7,0],2.6,[.8,.5,1]]}),
+ etiquetas:[{p:()=>{const d=MOL[MK].p[0]||[0,1,0],n=Math.hypot(...d);return d.map(x=>x/n*1.3);},t:"Par livre",id:"parlivre",quando:()=>MOL[MK].p.length>0},{p:()=>{const a=MOL[MK].a;return [(a[0][0]+a[1][0])*.45,(a[0][1]+a[1][1])*.45+.02,(a[0][2]+a[1][2])*.45];},t:"",id:null}],
+});
+// texto do ângulo: atualiza a etiqueta sem nome
+setInterval(()=>{const t=document.querySelectorAll(".mv-tag");if(t[1])t[1].textContent=MOL[MK].ang;if(t[0])t[0].textContent=MOL[MK].p.length>1?"Pares livres":"Par livre";},300);
+function mol(A){
+ const {add,esfera,tubo,elipsoide,T,M,PI}=A,m=MOL[MK],g={grupo:"mol"},o=x=>Object.assign({},g,x);
+ const [rc,cc]=ATO[m.c];add(esfera(rc,0,0,48),T(0,0,0),"central",o({c:cc}));
+ m.l.forEach(([el,d,ord])=>{const [r,c]=ATO[el],L=LIG,p=d.map(x=>x*L);add(esfera(r,0,0,40),T(...p),MK,o({c}));
+  const perp=Math.abs(d[1])<.9?[0,1,0]:[1,0,0],cx=[d[1]*perp[2]-d[2]*perp[1],d[2]*perp[0]-d[0]*perp[2],d[0]*perp[1]-d[1]*perp[0]],ln=Math.hypot(...cx),q=cx.map(x=>x/ln);
+  const offs=ord===1?[0]:ord===2?[-.07,.07]:[-.1,0,.1];
+  offs.forEach(k=>add(tubo(u=>[d[0]*u*L+q[0]*k,d[1]*u*L+q[1]*k,d[2]*u*L+q[2]*k],.05,3,14),T(0,0,0),"ligacao",o({c:[.80,.82,.88]})));});
+ // pares livres: lóbulos translúcidos com dois pontinhos (os elétrons)
+ m.p.forEach(d=>{const n=Math.hypot(...d),u=d.map(x=>x/n),c=u.map(x=>x*.62);
+  add(A.param(40,24,(a,b)=>{const th=b*PI,ph=a*2*PI,r=.55*Math.pow(Math.sin(th/2),.0)*1;const loc=[.24*Math.sin(th)*Math.cos(ph),.42*Math.cos(th),.24*Math.sin(th)*Math.sin(ph)];
+   // gira o lóbulo (eixo y) para a direção u
+   const yv=u,xv=Math.abs(u[1])<.9?[u[2],0,-u[0]]:[1,0,0],xn=Math.hypot(...xv),xx=xv.map(x=>x/xn),zz=[yv[1]*xx[2]-yv[2]*xx[1],yv[2]*xx[0]-yv[0]*xx[2],yv[0]*xx[1]-yv[1]*xx[0]];
+   return [c[0]+loc[0]*xx[0]+loc[1]*yv[0]+loc[2]*zz[0],c[1]+loc[0]*xx[1]+loc[1]*yv[1]+loc[2]*zz[1],c[2]+loc[0]*xx[2]+loc[1]*yv[2]+loc[2]*zz[2]];}),T(0,0,0),"parlivre",o({a:.32,emi:.25}));
+  const zz=Math.abs(u[1])<.9?[u[2],0,-u[0]]:[1,0,0],zn=Math.hypot(...zz);[-1,1].forEach(s=>add(esfera(.045,0,0,12),T(...u.map((x,i)=>x*.78+zz[i]/zn*s*.07)),"parlivre",o({emi:.8,c:[.6,.85,1]})));});
+}
+
+</script></body></html>

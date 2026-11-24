@@ -1,0 +1,62 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Formas de relevo · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// diorama de um corte do relevo brasileiro, do litoral para o interior (escala vertical exagerada)
+const X0=-2,X1=2,Z=1.3;
+const sm=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+const ru=(x,z)=>Math.sin(x*7.1+z*3.3)*.5+Math.sin(x*13.7-z*9.1)*.3+Math.sin(x*29+z*23)*.2;
+function H(x,z){
+ let h=-.34+sm(-2,-1.25,x)*.36;                 // fundo do mar subindo pela plataforma continental
+ h+=sm(-.95,-.62,x)*.48;                       // escarpa da serra
+ h+=Math.exp(-(((x+.62)/.12)**2))*.18*(1+.4*Math.sin(z*6)); // cristas da serra
+ h-=sm(.55,.9,x)*.30;                          // desce para a depressão
+ h+=sm(1.25,1.6,x)*.18;                        // volta a subir: chapada (planalto residual)
+ const vale=Math.exp(-(((z-.15*Math.sin(x*2.2))/.09)**2))*sm(-.6,-.3,x)*(1-sm(.55,.8,x))*.10; // rio encaixado no planalto
+ const rug=x<-1.25?.008:x<-.95?.006:x<-.5?.05:x<.6?.02:x<1.25?.012:.02;
+ return h-vale+ru(x,z)*rug;
+}
+const faixa=x=>x<-1.25?"oceano":x<-.95?"planicie":x<-.5?"serra":x<.6?"planalto":x<1.25?"depressao":"chapada";
+Modelo3D({
+ titulo:"Formas de relevo", area:"Geografia", voltar:"index.html#geografia", rotLista:"Formas", rotParte:"Forma",
+ geral:{t:"Relevo: do litoral ao interior",f:"Um corte imaginário do Brasil do oceano para o interior, com a altura exagerada para as formas aparecerem. O relevo é moldado por agentes internos (tectonismo, vulcanismo) e externos (chuva, rios, vento), que desgastam e depositam sedimentos.",
+  dl:[["Agentes internos","constroem o relevo"],["Agentes externos","esculpem: erosão e sedimentação"],["Classificação","Aziz Ab'Sáber e Jurandyr Ross"]],
+  pas:"Planalto × planície (desgaste × deposição), as classificações do relevo brasileiro e a relação entre relevo, ocupação e problemas ambientais (deslizamentos nas encostas)."},
+ partes:[
+  {id:"oceano",n:"Plataforma continental",c:[.20,.42,.58],f:"Continuação submersa do continente, rasa (até ~200 m). Depois dela o fundo cai no talude continental. Concentra boa parte da pesca. O petróleo do pré-sal fica mais adiante e mais fundo, sob lâminas d'água de cerca de 2.000 m e embaixo de uma camada de sal.",pas:"Pré-sal, mar territorial e zona econômica exclusiva."},
+  {id:"planicie",n:"Planície costeira",c:[.78,.72,.52],f:"Área plana e baixa onde predomina a deposição de sedimentos trazidos pelos rios e pelo mar. Restingas, mangues e praias ficam aqui.",pas:"Planície = deposição maior que erosão."},
+  {id:"serra",n:"Serra (escarpa)",c:[.36,.50,.32],f:"Borda íngreme do planalto, como a Serra do Mar. As encostas são muito inclinadas e, com chuva forte e ocupação irregular, sujeitas a deslizamentos.",pas:"Escarpas, Mata Atlântica e tragédias em encostas urbanas."},
+  {id:"planalto",n:"Planalto",c:[.56,.58,.36],f:"Superfície elevada e mais ou menos plana onde predomina a erosão. Os rios correm encaixados e formam quedas d'água, bons para hidrelétricas.",pas:"Planalto = erosão maior que deposição. Rios de planalto e potencial hidrelétrico."},
+  {id:"depressao",n:"Depressão",c:[.70,.58,.38],f:"Área mais baixa que as terras ao redor, formada por erosão intensa. No Brasil as depressões são relativas (acima do nível do mar), como a Depressão Sertaneja.",pas:"Depressão relativa × absoluta (abaixo do nível do mar, como o Mar Morto)."},
+  {id:"chapada",n:"Chapada",c:[.66,.44,.30],f:"Planalto com topo plano e bordas em paredões, que resistiu à erosão enquanto o entorno foi rebaixado. Ex.: Chapada Diamantina e Chapada dos Guimarães.",pas:"Relevos residuais e erosão diferencial."},
+  {id:"agua",n:"Rio e mar",c:[.30,.55,.72],f:"A água é o principal agente externo do relevo: os rios escavam vales e transportam sedimentos que vão formar as planícies.",pas:"Erosão fluvial, assoreamento e a bacia hidrográfica como unidade de estudo."},
+  {id:"solo",n:"Perfil do terreno",c:[.42,.32,.26],f:"Corte lateral do terreno, com a altura muito exagerada em relação à distância horizontal para as formas ficarem visíveis.",oculto:true},
+ ],
+ relevoPadrao:.06, detalhe:{oceano:9,planicie:14,serra:12,planalto:10,depressao:10,chapada:10,solo:18,agua:6}, relevo:{agua:.02,solo:.18}, brilho:{agua:.8},
+ aoRaio:0, fundo:["#22314F","#0B1226"], dist:5.9, pitch:.6, yaw:-.5, giro:.0012, botoes:{corte:false},
+ constroi(A){
+  const {add,terreno,faces,T}=A;
+  // superfície em faixas, cada uma pertence a uma forma de relevo
+  const cortes=[X0,-1.25,-.95,-.5,.6,1.25,X1];
+  for(let i=0;i<cortes.length-1;i++){const a=cortes[i],b=cortes[i+1],w=b-a,cx=(a+b)/2,id=faixa(cx);
+   add(terreno(Math.max(8,Math.round(w*70)),90,w,2*Z,(x,z)=>H(x+cx,z)),T(cx,0,0),id);}
+  // água: mar e rio
+  add(terreno(30,20,1.15,2*Z,()=>0),T(X0+.575,-.005,0),"agua",{a:.78});
+  const rio=[];for(let i=0;i<=60;i++){const x=-.55+i/60*1.1;rio.push(x);}
+  add(A.tubo(u=>{const x=-.5+u*1.0;return [x,H(x,.15*Math.sin(x*2.2))+.012,.15*Math.sin(x*2.2)];},.022,120,8),T(0,0,0),"agua",{c:[.32,.58,.76]});
+  // laterais do bloco (perfil do terreno)
+  const fundo=-.55,lados=[];const N=160;
+  for(const zs of [Z,-Z]){for(let i=0;i<N;i++){const xa=X0+(X1-X0)*i/N,xb=X0+(X1-X0)*(i+1)/N;
+   const q=[[xa,fundo,zs],[xb,fundo,zs],[xb,H(xb,zs),zs],[xa,H(xa,zs),zs]];lados.push(zs>0?q:q.slice().reverse());}}
+  for(const xs of [X0,X1]){for(let i=0;i<N/2;i++){const za=-Z+2*Z*i/(N/2),zb=-Z+2*Z*(i+1)/(N/2);
+   const q=[[xs,fundo,za],[xs,fundo,zb],[xs,H(xs,zb),zb],[xs,H(xs,za),za]];lados.push(xs<0?q:q.slice().reverse());}}
+  add(faces(lados),T(0,0,0),"solo");
+ },
+ foco:{oceano:[[-1.6,-.1,0],1.8,[-.6,.7,1]],planicie:[[-1.1,0,0],1.4,[-.3,.6,1]],serra:[[-.7,.25,0],2.4,[-.8,.4,1]],planalto:[[0,.4,0],1.9,[0,.8,1]],depressao:[[.9,.2,0],1.6,[.2,.6,1]],chapada:[[1.6,.3,0],1.6,[.6,.5,1]],agua:[[0,.42,.1],1.2,[-.3,.9,1]],solo:[[0,0,Z],3,[0,.3,1]]},
+ etiquetas:[{id:"oceano",p:[-1.65,.05,-.3],t:"Plataforma continental"},{id:"planicie",p:[-1.1,.12,-.4],t:"Planície"},{id:"serra",p:[-.65,.72,-.3],t:"Serra"},{id:"planalto",p:[.05,.62,-.5],t:"Planalto"},{id:"depressao",p:[.92,.32,-.4],t:"Depressão"},{id:"chapada",p:[1.62,.52,-.4],t:"Chapada"}],
+});
+
+</script></body></html>

@@ -1,0 +1,64 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Folha em corte · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// corte transversal de uma folha (mesófilo dorsiventral), com estômatos na face de baixo
+const LX=1.25,LZ=.55;
+Modelo3D({
+ titulo:"Folha em corte", area:"Biologia", voltar:"index.html#biologia", rotLista:"Tecidos", rotParte:"Tecido",
+ geral:{t:"Por dentro de uma folha",f:"A folha é o principal órgão da fotossíntese. Entre as duas epidermes fica o mesófilo, cheio de cloroplastos. A luz entra por cima, o CO₂ entra pelos estômatos da face de baixo e a água chega pelo xilema das nervuras. As setas mostram as trocas de gases.",
+  dl:[["Fotossíntese","6 CO₂ + 6 H₂O → C₆H₁₂O₆ + 6 O₂ (com luz)"],["Entrada de CO₂","estômatos"],["Água","chega pelo xilema"],["Açúcar","sai pelo floema"]],
+  pas:"Relacionar cada tecido com sua função, a abertura e o fechamento dos estômatos (transpiração × perda de água) e adaptações de plantas de ambientes secos."},
+ partes:[
+  {id:"cuticula",n:"Cutícula",c:[.96,.92,.60],f:"Camada de cera (cutina) por cima da epiderme. Impermeabiliza a folha e reduz a perda de água.",pas:"Plantas do Cerrado e da Caatinga costumam ter cutícula grossa."},
+  {id:"epiderme",n:"Epiderme",c:[.78,.90,.76],f:"Camada de células vivas, transparentes e sem cloroplastos (exceto as células-guarda), que reveste e protege a folha.",pas:"Tecido de revestimento."},
+  {id:"palicadico",n:"Parênquima paliçádico",c:[.34,.66,.32],f:"Células alongadas e bem juntas, logo abaixo da epiderme de cima, cheias de cloroplastos. É onde acontece a maior parte da fotossíntese.",pas:"Parênquima clorofiliano: tecido da fotossíntese."},
+  {id:"lacunoso",n:"Parênquima lacunoso",c:[.52,.76,.44],f:"Células arredondadas e soltas, com muitos espaços de ar entre elas. Os espaços facilitam a circulação de CO₂, O₂ e vapor de água até os estômatos.",pas:"Também faz fotossíntese, mas em menor quantidade."},
+  {id:"estomato",n:"Estômatos",c:[.30,.60,.40],f:"Poros formados por duas células-guarda em forma de feijão. Quando estão túrgidas (cheias de água), o poro abre; quando perdem água, fecha. Por eles entra CO₂ e saem O₂ e vapor de água.",dl:[["Abrem com","luz, água disponível, pouco CO₂"],["Fecham com","falta de água (hormônio ácido abscísico)"]],pas:"Dilema da planta: abrir para pegar CO₂ e perder água, ou fechar e parar a fotossíntese."},
+  {id:"xilema",n:"Xilema",c:[.80,.48,.36],f:"Vasos de células mortas, com paredes reforçadas por lignina, que levam água e sais minerais (seiva bruta) da raiz até as folhas.",pas:"Seiva bruta sobe pelo xilema puxada pela transpiração (teoria da coesão-tensão)."},
+  {id:"floema",n:"Floema",c:[.92,.70,.40],f:"Vasos de células vivas (tubos crivados) que levam os açúcares produzidos na folha (seiva elaborada) para o resto da planta.",pas:"Anel de Malpighi: retirar a casca de um tronco corta o floema e as raízes morrem por falta de açúcar."},
+  {id:"cloroplasto",n:"Cloroplastos",c:[.22,.56,.24],f:"Organelas verdes que fazem a fotossíntese, com a clorofila nas pilhas de tilacoides.",pas:"Fase fotoquímica nos tilacoides e fase química no estroma."},
+  {id:"gases",n:"Trocas gasosas",c:[.80,.90,1],f:"CO₂ entra pelos estômatos; O₂ e vapor de água saem por eles. De dia a fotossíntese supera a respiração, e a folha libera mais O₂ do que consome.",pas:"Ponto de compensação fótico: fotossíntese = respiração."},
+ ],
+ semApagar:["cloroplasto","gases"], relevoPadrao:.05, detalhe:{epiderme:8,palicadico:10,lacunoso:9}, brilho:{cuticula:.6,epiderme:.35,palicadico:.18,lacunoso:.16,cloroplasto:.2,xilema:.12,floema:.12},
+ textura:{palicadico:8,lacunoso:8,cloroplasto:8,epiderme:5,estomato:8,xilema:9,floema:9},
+ aoRaio:.5, fundo:["#132A1E","#08140E"], dist:4.2, pitch:.42, yaw:-.5, giro:.0012, botoes:{corte:false},
+ constroi(A){
+  const {add,esfera,capsula,caixa,cilindro,toro,elipsoide,T,M,Rz,Rx,Ry,PI}=A,R=A.rnd(31),cl=esfera(.018,0,0,8);
+  // célula de cantos arredondados (superelipsoide), com leve irregularidade
+  const cel=(a,b,c,e,sd,q)=>A.param(q||16,12,(u,v)=>{const th=u*2*PI-PI,ph=v*PI-PI/2,sg=(x,p)=>Math.sign(x)*Math.pow(Math.abs(x),p),w=1+.06*Math.sin(th*3+sd)*Math.cos(ph);
+   return [a*w*sg(Math.cos(ph),e)*sg(Math.cos(th),e),b*sg(Math.sin(ph),e),c*w*sg(Math.cos(ph),e)*sg(Math.sin(th),e)];});
+  // cutículas (cera brilhante, levemente ondulada) e epidermes de células achatadas
+  const cut=y=>A.param(60,24,(u,v)=>[(u-.5)*2*LX,y+.006*Math.sin(u*40)*Math.sin(v*17),(v-.5)*2*LZ]);
+  add(cut(.66),T(0,0,0),"cuticula",{a:.7});add(cut(-.615),T(0,0,0),"cuticula",{a:.7});
+  for(let x=-LX+.07;x<LX;x+=.14)for(let z=-LZ+.07;z<LZ;z+=.14){const j=(R()-.5)*.02;add(cel(.066,.05,.066,.35,R()*6),T(x+j,.6,z-j),"epiderme",{a:.85});add(cel(.066,.04,.066,.35,R()*6),T(x-j,-.56,z+j),"epiderme",{a:.85});}
+  // paliçádico: colunas justas, com cloroplastos achatados encostados na parede
+  const clp=elipsoide(.02,.009,.02,8);
+  for(let x=-LX+.06;x<LX;x+=.12)for(let z=-LZ+.06;z<LZ;z+=.12){if(Math.abs(x)<.28)continue;const h=.3+(R()-.5)*.04,xx=x+(R()-.5)*.015,zz=z+(R()-.5)*.015;add(capsula(.052,h-.1,16),T(xx,.36,zz),"palicadico",{a:.8});
+   for(let k=0;k<7;k++){const a=R()*2*PI,y=.36+(R()-.5)*.28;add(clp,M(T(xx+.046*Math.cos(a),y,zz+.046*Math.sin(a)),Ry(-a),Rz(PI/2)),"cloroplasto");}}
+  // lacunoso: células irregulares, frouxas, com espaços de ar entre elas
+  for(let i=0;i<150;i++){const x=(R()*2-1)*(LX-.06),z=(R()*2-1)*(LZ-.06),y=-.4+R()*.48;if(Math.abs(x)<.3&&y>-.25)continue;add(esfera(.06,.12,i,12),M(T(x,y,z),A.S(1,.8+R()*.4,1)),"lacunoso",{a:.85});
+   for(let k=0;k<3;k++){const a=R()*2*PI,bb=(R()-.5)*1.6;add(clp,M(T(x+.052*Math.cos(a)*Math.cos(bb),y+.045*Math.sin(bb),z+.052*Math.sin(a)*Math.cos(bb)),Ry(-a),Rz(PI/2)),"cloroplasto");}}
+  // nervura: bainha de células em volta, xilema (com reforço em espiral de lignina) em cima e floema embaixo
+  add(cilindro(.27,2*LZ,40),M(T(0,-.02,0),Rx(PI/2)),"lacunoso",{a:.18,c:[.86,.90,.70]});
+  for(let k=0;k<22;k++){const a=k/22*2*PI;for(let zz=-LZ+.06;zz<LZ;zz+=.13)add(esfera(.045,.1,k,10),T(.25*Math.cos(a),-.02+.25*Math.sin(a),zz),"lacunoso",{c:[.66,.8,.5]});}
+  for(const [x,y,r] of [[-.12,.12,.05],[0,.15,.06],[.12,.12,.05],[-.06,.04,.04],[.06,.04,.04]]){add(cilindro(r,2*LZ,20,false),M(T(x,y,0),Rx(PI/2)),"xilema",{a:.75});
+   add(A.tubo(u=>{const a=u*2*PI*26;return [x+r*.97*Math.cos(a),y+r*.97*Math.sin(a),-LZ+u*2*LZ];},r*.16,420,5),T(0,0,0),"xilema",{c:[.62,.32,.22]});}
+  for(const [x,y] of [[-.1,-.1],[0,-.13],[.1,-.1],[-.05,-.18],[.05,-.18]]){add(cilindro(.032,2*LZ,16),M(T(x,y,0),Rx(PI/2)),"floema",{a:.8});
+   for(let zz=-LZ+.1;zz<LZ;zz+=.22)add(A.cilindro(.031,.006,16),M(T(x,y,zz),Rx(PI/2)),"floema",{c:[.75,.52,.28]});}
+  // estômatos na epiderme de baixo
+  [[-.8,.25],[-.55,-.3],[.65,.2],[.95,-.25],[-1.05,-.05],[.45,-.15]].forEach(([x,z])=>{for(const sg of [-1,1])add(toro(.07,.03,-PI/2,PI/2,24),M(T(x,-.6,z),A.S(.75,1,1),Ry(sg>0?0:PI)),"estomato");});
+  // trocas gasosas: CO₂ entra e O₂ sai por um estômato
+  A.seta([-.8,-1.15,.25],[-.8,-.66,.25],.018,"gases",{c:[.86,.88,.96],emi:.5});
+  A.seta([-.55,-.66,-.3],[-.55,-1.15,-.3],.018,"gases",{c:[.62,.86,1],emi:.5});
+  // luz chegando por cima
+  for(const x of [-.6,.3,.9])A.seta([x,1.35,-.1],[x,.75,-.1],.012,"gases",{c:[1,.92,.5],emi:.8});
+ },
+ foco:{cuticula:[[0,.6,0],2.2,[0,.6,1]],epiderme:[[0,.55,0],2.2,[0,.4,1]],palicadico:[[-.6,.36,0],1.6,[-.2,.3,1]],lacunoso:[[-.6,-.2,0],1.6,[-.2,.2,1]],estomato:[[-.8,-.6,.25],1.1,[0,-.8,.6]],xilema:[[0,.08,LZ],1.1,[0,.2,1]],floema:[[0,-.14,LZ],1.1,[0,.1,1]],cloroplasto:[[-.6,.36,LZ],1.0,[0,.2,1]],gases:[[-.7,-.8,0],2.2,[0,-.3,1]]},
+ etiquetas:[{id:"cuticula",p:[-1.1,.72,LZ],t:"Cutícula"},{id:"palicadico",p:[-.95,.36,LZ+.05],t:"Paliçádico"},{id:"lacunoso",p:[-.95,-.2,LZ+.05],t:"Lacunoso"},{id:"xilema",p:[0,.24,LZ+.05],t:"Xilema"},{id:"floema",p:[0,-.26,LZ+.05],t:"Floema"},{id:"gases",p:[-.8,-1.22,.25],t:"CO₂"},{id:"gases",p:[-.55,-1.22,-.3],t:"O₂ e H₂O"},{id:"gases",p:[.3,1.42,-.1],t:"Luz"}],
+});
+
+</script></body></html>

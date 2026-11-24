@@ -1,0 +1,91 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Olho humano · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// olho humano em corte; a luz vem da esquerda (objeto) e forma a imagem invertida na retina
+const VIS=["normal","miopia","hipermetropia"],NV=["Visão normal","Miopia","Hipermetropia"];
+const OBJ=-3.6,OH=.55;
+const E=MV_ETAPAS(VIS,NV,A=>raios(A),"raios","Visão");
+Modelo3D({
+ titulo:"Olho humano", area:"Biologia", voltar:"index.html#biologia", rotLista:"Estruturas e visão", rotParte:"Olho",
+ geral:{t:"Como o olho forma a imagem",f:"A luz entra pela córnea, passa pela pupila e é focalizada pelo cristalino sobre a retina, onde células sensíveis à luz geram impulsos que o nervo óptico leva ao cérebro. A imagem na retina é real, menor e invertida; o cérebro a interpreta na posição certa. Mude o tipo de visão no controle.",
+  dl:[["Lente principal","córnea + cristalino (convergentes)"],["Imagem na retina","real, invertida e menor"],["Ajuste de foco","acomodação do cristalino"]],
+  pas:"Óptica da visão: miopia (corrigida com lente divergente) e hipermetropia (lente convergente); funções de cones e bastonetes."},
+ partes:[
+  {id:"normal",n:"Visão normal",c:[.55,.85,1],f:"Os raios de luz se encontram exatamente sobre a retina e a imagem fica nítida.",pas:"Olho emétrope."},
+  {id:"miopia",n:"Miopia",c:[1,.62,.40],f:"O olho é mais comprido que o normal (ou converge demais): a imagem de objetos distantes se forma antes da retina e chega borrada. O míope enxerga bem de perto e mal de longe.",dl:[["Correção","lente divergente"]],pas:"Miopia → lente divergente (bordas grossas)."},
+  {id:"hipermetropia",n:"Hipermetropia",c:[.60,.90,.50],f:"O olho é mais curto que o normal (ou converge de menos): a imagem se formaria depois da retina. A dificuldade é maior para ver de perto.",dl:[["Correção","lente convergente"]],pas:"Hipermetropia → lente convergente (bordas finas). Presbiopia (vista cansada) também é corrigida com convergente."},
+  {id:"esclera",n:"Esclera",c:[.92,.90,.86],f:"Camada externa branca e resistente que dá forma ao olho e protege as estruturas internas.",pas:"O 'branco do olho'."},
+  {id:"cornea",n:"Córnea",c:[.70,.86,.98],f:"Parte da frente da esclera, transparente e curva. Faz a maior parte do desvio (refração) da luz que entra no olho.",pas:"Cirurgias de miopia mudam a curvatura da córnea."},
+  {id:"iris",n:"Íris e pupila",c:[.42,.56,.38],f:"A íris é o disco colorido com músculos que mudam o tamanho da pupila, o orifício por onde a luz passa. Com muita luz, a pupila fecha; no escuro, abre.",pas:"Reflexo pupilar: controle automático da quantidade de luz."},
+  {id:"cristalino",n:"Cristalino",c:[.96,.92,.70],f:"Lente biconvexa e elástica. Os músculos ciliares mudam sua curvatura para focalizar objetos perto ou longe (acomodação visual).",pas:"Com a idade o cristalino perde elasticidade (presbiopia) ou fica opaco (catarata)."},
+  {id:"retina",n:"Retina",c:[.92,.46,.40],f:"Camada interna com as células fotorreceptoras: bastonetes (visão com pouca luz, em preto e branco) e cones (cores, com bastante luz). Funciona como o 'sensor' de uma câmera.",dl:[["Bastonetes","pouca luz, sem cores"],["Cones","cores e detalhes"]],pas:"Falta de vitamina A prejudica os bastonetes (cegueira noturna). Daltonismo está ligado aos cones."},
+  {id:"fovea",n:"Fóvea",c:[1,.84,.34],f:"Pequena região da retina com muitos cones, onde a visão é mais nítida. É para onde olhamos quando prestamos atenção em algo.",pas:"Ponto de maior acuidade visual."},
+  {id:"nervo",n:"Nervo óptico e ponto cego",c:[.94,.82,.64],f:"Leva os impulsos da retina ao cérebro. Onde ele sai do olho não há fotorreceptores: é o ponto cego.",pas:"O cérebro 'preenche' o ponto cego, por isso não o percebemos."},
+  {id:"humores",n:"Humor aquoso e vítreo",c:[.60,.74,.92],f:"Líquido (aquoso, na frente) e gel transparente (vítreo, atrás do cristalino) que mantêm a forma do olho e deixam a luz passar.",pas:"Aumento da pressão do humor aquoso causa glaucoma."},
+  {id:"musculos",n:"Músculos do olho",c:[.72,.30,.30],f:"Seis músculos presos na esclera giram o olho para cima, para baixo e para os lados. Por dentro, o músculo ciliar (o anel em volta do cristalino) puxa as fibras que mudam a curvatura da lente.",pas:"Acomodação visual: o músculo ciliar contrai para focalizar objetos próximos."},
+  {id:"raios",n:"Raios de luz",c:[1,.92,.55],f:"Partem do topo do objeto, são desviados pela córnea e pelo cristalino e se cruzam, formando a imagem invertida.",oculto:true},
+ ],
+ slider:E.slider, aoFocar:E.aoFocar,
+ casca:"esclera", cortaveis:["esclera"], citoplasma:[[.20,.10,.10],[.42,.20,.18]], semApagar:["raios","humores"],
+ detalhe:{esclera:6,retina:8,iris:10}, relevo:{esclera:.03,retina:.06}, brilho:{cornea:.8,cristalino:.8,esclera:.3,iris:.2,retina:.2,musculos:.15,nervo:.1},
+ textura:{esclera:6,retina:6,iris:10,nervo:9,musculos:9}, texturaAltura:[3,9],
+ aoRaio:0, fundo:["#161A2E","#080A16"], dist:5.6, pitch:.2, yaw:0, giro:0, alvo:[-1.1,0,0], botoes:{corte:false,gira:false},
+ constroi(A){
+  const {add,esfera,param,tubo,elipsoide,T,M,Rz,PI}=A;
+  add(esfera(1,0,0,72),T(0,0,0),"esclera",{a:.9});
+  // retina: casca interna na metade de trás
+  add(param(64,40,(u,v)=>{const th=u*2*PI,ph=v*PI*.62;return [.95*Math.cos(ph),.95*Math.sin(ph)*Math.cos(th),.95*Math.sin(ph)*Math.sin(th)];}),T(0,0,0),"retina");
+  add(esfera(.06,0,0,16),T(.94,0,0),"fovea",{emi:.3});
+  // córnea: calota transparente na frente
+  add(param(48,20,(u,v)=>{const th=u*2*PI,r=.52*v,x=-.86-.18*(1-v*v);return [x,r*Math.cos(th),r*Math.sin(th)];}),T(0,0,0),"cornea",{a:.35});
+  // íris: anel com a pupila no meio
+  add(param(64,8,(u,v)=>{const th=u*2*PI,r=.17+.32*v;return [-.78+.02*v,r*Math.cos(th),r*Math.sin(th)];}),T(0,0,0),"iris");
+  add(elipsoide(.14,.36,.36,40),T(-.6,0,0),"cristalino",{a:.55});
+  add(esfera(.93,0,0,48),T(0,0,0),"humores",{a:.08});
+  add(tubo(u=>[.9+u*.9,-.18-u*.12,0],.14,20,18),T(0,0,0),"nervo");
+  // vasos da retina saindo do disco óptico (ponto cego)
+  const OD=[.9,-.18,0];let sd=7;const rn=()=>{sd=(sd*16807)%2147483647;return sd/2147483647;};
+  const naRet=(y,z)=>{const x=Math.sqrt(Math.max(0,.93*.93-y*y-z*z));return [x,y,z];};
+  for(let k=0;k<7;k++){const a=k/7*2*PI+.3,L=.55+.25*rn(),w=rn()*4;const pts=u=>{const r=.03+L*u;return naRet(-.18+r*Math.cos(a+.25*Math.sin(u*3+w)),r*Math.sin(a+.25*Math.sin(u*3+w)));};
+   add(tubo(pts,u=>.011*(1-.7*u),50,6),T(0,0,0),"retina",{c:k%2?[.55,.08,.1]:[.7,.12,.12]});
+   for(let j=0;j<2;j++){const u0=.35+.3*j,q=pts(u0),b=a+(rn()-.5)*1.6;add(tubo(u=>{const r=.25*u;return naRet(q[1]+r*Math.cos(b),q[2]+r*Math.sin(b));},u=>.006*(1-.6*u),24,5),T(0,0,0),"retina",{c:[.6,.1,.12]});}}
+  add(esfera(.07,0,0,16),M(T(.92,-.18,0),A.S(.3,1,1)),"nervo",{c:[.98,.86,.62]});
+  // corpo ciliar (anel muscular) e fibras que seguram o cristalino
+  add(A.toro(.43,.045,0,2*PI,48),M(T(-.6,0,0),Rz(PI/2)),"musculos",{c:[.5,.22,.2]});
+  for(let k=0;k<48;k++){const a=k/48*2*PI;A.linha([-.6,.34*Math.cos(a),.34*Math.sin(a)],[-.6,.41*Math.cos(a),.41*Math.sin(a)],.004,"musculos",{c:[.9,.86,.8]});}
+  // músculos retos presos na esclera
+  for(let k=0;k<4;k++){const a=k*PI/2,ca=Math.cos(a),sa=Math.sin(a);const P=[];for(let i=0;i<=8;i++){const ph=.95+i/8*(PI-1.5),r=1.035;P.push([-r*Math.cos(ph),r*Math.sin(ph)*ca,r*Math.sin(ph)*sa]);}
+   const e=P[P.length-1];P.push([e[0]+.3,e[1]*.7,e[2]*.7]);P.push([1.75,.12*ca,.12*sa]);
+   const cr=u=>{const n=P.length-1,f=u*n,i=Math.min(n-1,Math.floor(f)),t=f-i;return P[i].map((x,c)=>x+(P[i+1][c]-x)*t);};
+   add(tubo(cr,u=>.07*Math.sin(PI*(.08+.84*u)),60,10),T(0,0,0),"musculos");}
+  raios(A);
+ },
+ get foco(){const v={normal:[[-1,0,0],5.6,[0,.2,1]],miopia:[[-.3,0,0],3.2,[0,.2,1]],hipermetropia:[[-.3,0,0],3.2,[0,.2,1]]};return Object.assign(v,{esclera:[[0,0,0],3,[.3,.3,1]],cornea:[[-.9,0,0],1.6,[-.5,.2,1]],iris:[[-.78,0,0],1.6,[-.7,.2,.8]],cristalino:[[-.6,0,0],1.4,[0,.2,1]],musculos:[[.2,0,0],3.4,[.4,.5,1]],retina:[[.6,0,0],2,[0,.2,1]],fovea:[[.94,0,0],1.2,[0,.2,1]],nervo:[[1.2,-.2,0],1.6,[.3,.2,1]],humores:[[0,0,0],2.6,[0,.2,1]]});},
+ etiquetas:[{id:"cornea",p:[-1.1,.45,0],t:"Córnea"},{id:"cristalino",p:[-.6,-.5,0],t:"Cristalino"},{id:"retina",p:[.62,.82,0],t:"Retina"},{id:"nervo",p:[1.75,-.42,0],t:"Nervo óptico"},{id:"iris",p:[-.8,.62,0],t:"Íris"},{p:[OBJ,OH+.18,0],t:"Objeto"},{p:()=>[[.95,.55,1.35][E.st.k],-.3,0],t:"Foco",quando:()=>true}],
+});
+function raios(A){
+ const g={grupo:"raios"},k=E.st.k,FX=[.95,.55,1.35][k];  // onde os raios se cruzam
+ const o=(x)=>Object.assign({},g,x);
+ // objeto: seta vertical
+ A.seta([OBJ,0,0],[OBJ,OH,0],.025,"raios",o({c:[1,.84,.4],emi:.6}));
+ const ys=[.34,0,-.34],img=[FX,-OH*.14,0];
+ ys.forEach(y=>{const c=[-.9,y,0];A.linha([OBJ,OH,0],c,.009,"raios",o({c:[1,.92,.55],emi:.9}));
+  // dentro do olho: vai até o ponto de encontro e segue até a retina
+  const d=A.sub(img,c),L=Math.hypot(...d),u=d.map(v=>v/L);
+  const bb=A.dot(c,u),cc=A.dot(c,c)-.95*.95,t=-bb+Math.sqrt(Math.max(0,bb*bb-cc)),end=c.map((v,i)=>v+u[i]*t);
+  A.linha(c,end,.009,"raios",o({c:[1,.92,.55],emi:.9}));});
+ // lente corretiva na frente do olho
+ if(k===1)lente(A,-1.7,-1,o);if(k===2)lente(A,-1.7,1,o);
+ // imagem invertida na retina
+ if(k===0)A.add(A.esfera(.035,0,0,12),A.T(.94,-OH*.14,0),"raios",o({c:[1,.84,.4],emi:1}));
+}
+function lente(A,x,tipo,o){const PI=Math.PI;
+ // convergente: mais grossa no meio; divergente: mais grossa nas bordas
+ A.add(A.param(48,16,(u,v)=>{const th=u*2*PI,ph=v*PI,r=.55*Math.sin(ph),s=Math.cos(ph);const esp=tipo>0?.12*(1-(r/.55)**2)+.015:.02+.1*(r/.55)**2;return [x+esp*Math.sign(s)*Math.abs(s)**.2,r*Math.cos(th),r*Math.sin(th)];}),A.T(0,0,0),VIS[tipo>0?2:1],o({a:.4,c:[.75,.9,1]}));
+}
+
+</script></body></html>

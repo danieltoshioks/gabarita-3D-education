@@ -1,0 +1,60 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Neurônio · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// neurônio motor com axônio mielinizado; o impulso salta de um nódulo de Ranvier para o seguinte
+const SOMA=[-1.45,0,0],AX0=-1.12,AX1=1.55,SEG=.3,GAP=.07;
+const NOS=[];for(let x=AX0+.12;x+SEG<AX1-.1;x+=SEG+GAP)NOS.push(x+SEG+GAP/2);
+const axY=x=>.05*Math.sin(x*2.2);
+Modelo3D({
+ titulo:"Neurônio", area:"Biologia", voltar:"index.html#biologia", rotLista:"Partes", rotParte:"Parte",
+ geral:{t:"Neurônio e impulso nervoso",f:"Célula do sistema nervoso que recebe, conduz e transmite sinais elétricos. O sinal entra pelos dendritos, passa pelo corpo celular e segue pelo axônio até os terminais, onde é passado adiante por substâncias químicas (neurotransmissores). Os pontos de luz mostram o impulso saltando entre os nódulos de Ranvier.",
+  dl:[["Potencial de repouso","cerca de −70 mV (interior negativo)"],["Despolarização","entrada de Na⁺"],["Repolarização","saída de K⁺"],["Mantém o repouso","bomba de sódio e potássio (gasta ATP)"]],
+  pas:"Sentido do impulso (dendrito → corpo → axônio), papel do Na⁺ e do K⁺, condução saltatória nas fibras mielinizadas e a sinapse química."},
+ partes:[
+  {id:"corpo",n:"Corpo celular",c:[.80,.56,.62],f:"Parte do neurônio onde ficam o núcleo e a maior parte das organelas. Integra os sinais que chegam pelos dendritos.",pas:"Corpos celulares agrupados formam a substância cinzenta."},
+  {id:"nucleo",n:"Núcleo",c:[.52,.42,.66],f:"Guarda o DNA. Neurônios maduros, em geral, não se dividem mais.",pas:"Por isso lesões no sistema nervoso costumam ter recuperação limitada."},
+  {id:"dendritos",n:"Dendritos",c:[.86,.62,.66],f:"Ramificações curtas que recebem os estímulos de outros neurônios ou do ambiente e os levam ao corpo celular.",pas:"Dendrito recebe, axônio envia."},
+  {id:"axonio",n:"Axônio",c:[.90,.74,.62],f:"Prolongamento único e longo que conduz o impulso para longe do corpo celular. Pode ter mais de 1 metro em neurônios que vão da medula aos pés.",pas:"O impulso percorre o axônio em um só sentido."},
+  {id:"mielina",n:"Bainha de mielina",c:[.94,.92,.82],f:"Camadas de membrana rica em lipídios que envolvem o axônio como um isolante. No sistema nervoso periférico é feita pelas células de Schwann; no central, pelos oligodendrócitos.",pas:"Fibras mielinizadas formam a substância branca e conduzem o impulso muito mais rápido. Na esclerose múltipla a mielina é destruída."},
+  {id:"ranvier",n:"Nódulos de Ranvier",c:[1,.80,.36],f:"Pequenos trechos do axônio sem mielina, entre uma célula de Schwann e outra. É só neles que o impulso acontece: ele 'salta' de nódulo em nódulo.",pas:"Condução saltatória: mais rápida e mais econômica."},
+  {id:"terminais",n:"Terminais do axônio",c:[.98,.66,.48],f:"Ramificações finais do axônio com botões que guardam vesículas de neurotransmissores. Quando o impulso chega, as vesículas liberam o neurotransmissor na fenda sináptica.",dl:[["Exemplos","acetilcolina, dopamina, serotonina, noradrenalina"]],pas:"Na sinapse química o sinal só passa num sentido: do botão do axônio para o neurônio seguinte."},
+  {id:"impulso",n:"Impulso nervoso",c:[.55,.85,1],f:"Onda de inversão de cargas na membrana (potencial de ação). Canais de Na⁺ se abrem e o interior fica positivo; depois canais de K⁺ se abrem e o interior volta a ficar negativo.",pas:"Lei do tudo ou nada: abaixo do limiar não há impulso; acima, o impulso tem sempre a mesma intensidade."},
+ ],
+ casca:"corpo", cortaveis:["corpo"], citoplasma:[[.36,.20,.26],[.62,.40,.46]],
+ semApagar:["impulso"], detalhe:{corpo:8,axonio:20,mielina:10,dendritos:14}, relevo:{corpo:.06,mielina:.04}, brilho:{mielina:.4,terminais:.3},
+ aoRaio:0, fundo:["#1B1530","#0A0818"], dist:4.4, pitch:.3, yaw:.25, giro:.0012, alvo:[0,0,0], botoes:{corte:false},
+ constroi(A){
+  const {add,esfera,tubo,capsula,toro,T,M,Rz,Ry,PI}=A,R=A.rnd(11);
+  add(esfera(.34,.12,3,64),T(...SOMA),"corpo",{a:.85});
+  add(esfera(.13,.03,2,32),T(...SOMA),"nucleo");
+  add(esfera(.045,0,0,16),T(SOMA[0]+.03,SOMA[1]+.03,SOMA[2]),"nucleo",{c:[.32,.24,.40]});
+  // dendritos ramificados
+  const ramo=(p,d,r,n,prof)=>{const L=.22+R()*.18,q=[p[0]+d[0]*L,p[1]+d[1]*L,p[2]+d[2]*L],mid=p.map((v,i)=>(v+q[i])/2+(R()-.5)*.05);
+   add(tubo(u=>u<.5?p.map((v,i)=>v+(mid[i]-v)*u*2):mid.map((v,i)=>v+(q[i]-v)*(u-.5)*2),u=>r*(1-u*.45),20,8),T(0,0,0),"dendritos");
+   if(prof<3)for(let k=0;k<2;k++){const nd=A.norm(d.map(v=>v+(R()-.5)*1.1));ramo(q,nd,r*.62,n,prof+1);}};
+  for(let i=0;i<7;i++){const th=PI*.55+R()*PI*.9,ph=(R()-.5)*1.6;const d=[Math.cos(th)*Math.cos(ph),Math.sin(th)*Math.cos(ph)*.9+(R()-.5)*.6,Math.sin(ph)];const p=SOMA.map((v,k)=>v+d[k]*.3);ramo(p,A.norm(d),.05,0,0);}
+  // cone de implantação e axônio
+  add(tubo(u=>{const x=SOMA[0]+.25+u*(AX1-SOMA[0]-.25);return [x,axY(x),0];},u=>u<.04?.07-(.07-.032)*u/.04:.032,240,10),T(0,0,0),"axonio");
+  // bainha de mielina em segmentos e nódulos de Ranvier
+  for(let x=AX0+.12;x+SEG<AX1-.1;x+=SEG+GAP){const cx=x+SEG/2;add(capsula(.075,SEG-.14,28),M(T(cx,axY(cx),0),Rz(PI/2)),"mielina");}
+  NOS.forEach(x=>add(toro(.04,.008,0,2*PI,24),M(T(x,axY(x),0),Rz(PI/2)),"ranvier",{emi:.4}));
+  // terminais com botões sinápticos
+  for(let i=0;i<6;i++){const a=(i/5-.5)*1.5,b=(R()-.5)*.8,e=[AX1+.32*Math.cos(a),axY(AX1)+.32*Math.sin(a),.25*b];
+   add(tubo(u=>[AX1+(e[0]-AX1)*u,axY(AX1)+(e[1]-axY(AX1))*u,e[2]*u],.014,12,6),T(0,0,0),"terminais");add(esfera(.055,0,0,18),T(...e),"terminais");}
+  impulso(A,0);
+ },
+ anima(t,A){A.refaz("imp",()=>impulso(A,t));},
+ foco:{corpo:[SOMA,1.4,[.2,.3,1]],nucleo:[SOMA,.9,[.2,.3,1]],dendritos:[[-1.7,0,0],1.8,[-.3,.3,1]],axonio:[[0,0,0],2.4,[0,.3,1]],mielina:[[.2,0,0],1.4,[.2,.3,1]],ranvier:[[NOS[3],0,0],.9,[.3,.3,1]],terminais:[[AX1+.2,0,0],1.2,[.4,.3,1]],impulso:[[0,0,0],3,[0,.3,1]]},
+ etiquetas:[{id:"corpo",p:[SOMA[0],.48,0],t:"Corpo celular"},{id:"dendritos",p:[-2.0,.45,0],t:"Dendritos"},{id:"mielina",p:[-.2,.22,0],t:"Bainha de mielina"},{id:"ranvier",p:[NOS[4],-.2,0],t:"Nódulo de Ranvier"},{id:"terminais",p:[AX1+.38,.36,0],t:"Terminais"}],
+});
+function impulso(A,t){
+ const {add,esfera,T}=A,g={grupo:"imp"},n=NOS.length,f=(t*2.2)%(n+3);
+ NOS.forEach((x,i)=>{const d=f-i;if(d>=0&&d<1.2)add(esfera(.075*(1.1-d*.4),0,0,16),T(x,axY(x),0),"impulso",Object.assign({},g,{emi:1,a:.85,c:[.55,.85,1]}));});
+ if(f>n&&f<n+1.4)add(esfera(.09,0,0,16),T(AX1+.1,axY(AX1),0),"impulso",Object.assign({},g,{emi:1,a:.7,c:[.55,.85,1]}));
+}
+
+</script></body></html>

@@ -1,0 +1,60 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Célula vegetal · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+const NUC=[.74,.26,.16];
+// caixa de cantos arredondados (superelipsoide) para a parede celular
+const caixaR=(A,a,b,c,e,q)=>A.param(q||56,40,(u,v)=>{const th=u*2*Math.PI-Math.PI,ph=v*Math.PI-Math.PI/2;const sg=(x,p)=>Math.sign(x)*Math.pow(Math.abs(x),p);
+ return [a*sg(Math.cos(ph),e)*sg(Math.cos(th),e),b*sg(Math.sin(ph),e),c*sg(Math.cos(ph),e)*sg(Math.sin(th),e)];});
+Modelo3D({
+ titulo:"Célula vegetal", area:"Biologia", voltar:"index.html#biologia", rotLista:"Estruturas", rotParte:"Estrutura",
+ geral:{t:"Célula vegetal",f:"Também é eucarionte, mas tem estruturas que a célula animal não tem: parede celular, cloroplastos e um grande vacúolo central. Toque numa parte para ver de perto.",pas:"A comparação animal × vegetal é das mais cobradas: parede de celulose, cloroplastos, vacúolo central e ausência de centríolos nas plantas superiores."},
+ partes:[
+  {id:"parede",n:"Parede celular",c:[.62,.74,.46],f:"Camada rígida de celulose por fora da membrana. Dá forma e sustentação e impede que a célula estoure quando absorve muita água. Células vizinhas se comunicam pelos plasmodesmos.",pas:"Por causa da parede, a célula vegetal em meio hipotônico fica túrgida e não se rompe (diferente da hemácia)."},
+  {id:"membrana",n:"Membrana plasmática",c:[.84,.74,.58],f:"Fica logo abaixo da parede. Bicamada de fosfolipídios com proteínas que controla a entrada e a saída de substâncias.",pas:"Plasmólise: em meio hipertônico a célula perde água e a membrana se descola da parede."},
+  {id:"vacuolo",n:"Vacúolo central",c:[.50,.70,.95],f:"Grande bolsa cheia de água, sais, açúcares e pigmentos, envolvida pelo tonoplasto. Pode ocupar quase toda a célula e mantém a pressão de turgor.",pas:"Turgência, plasmólise e o papel do vacúolo no equilíbrio de água da planta."},
+  {id:"cloro",n:"Cloroplastos",c:[.30,.62,.30],f:"Fazem a fotossíntese. Dentro deles há pilhas de tilacoides (os grana), onde a clorofila capta a luz, e o estroma, onde ocorre o ciclo de Calvin. Têm DNA próprio.",pas:"Etapas da fotossíntese (fase fotoquímica ou clara nos tilacoides e fase química, antes chamada de escura, no estroma) e a origem endossimbiótica, como a das mitocôndrias."},
+  {id:"nucleo",n:"Núcleo",c:[.55,.48,.66],f:"Guarda o DNA e comanda a célula. Na célula vegetal adulta costuma ficar empurrado para a lateral pelo vacúolo.",pas:"Presente nas células eucariontes, com raras exceções, como os elementos de tubo crivado do floema e as hemácias maduras dos mamíferos."},
+  {id:"mito",n:"Mitocôndrias",c:[.84,.54,.38],f:"Fazem a respiração celular. A planta faz fotossíntese e também respira, dia e noite.",pas:"Pegadinha comum: planta também tem mitocôndria e respira."},
+  {id:"golgi",n:"Complexo golgiense",c:[.86,.70,.44],f:"Empacota e envia substâncias. Na célula vegetal costuma aparecer em várias unidades separadas, os dictiossomos, e ajuda a produzir os componentes da parede celular.",pas:"Formação da lamela média e da parede na divisão celular."},
+  {id:"rer",n:"Retículo endoplasmático",c:[.48,.58,.74],f:"Rede de membranas que produz e transporta proteínas e lipídios.",pas:"Mesma função que na célula animal."},
+ ],
+ casca:"membrana", cortaveis:["parede","membrana","nucleo"], planos:{nucleo:NUC},
+ abre:{cloro:[-.35,.1,.66]},
+ citoplasma:[[.20,.26,.18],[.42,.50,.36]],
+ detalhe:{parede:14,membrana:10,vacuolo:8,cloro:30,nucleo:30,mito:28},
+ relevo:{vacuolo:.04,parede:.12},
+ brilho:{vacuolo:.25,cloro:.16,mito:.14,golgi:.14,nucleo:.06,parede:.05},
+ textura:{parede:9,membrana:5,cloro:8,mito:5,golgi:5,nucleo:5,rer:5},
+ fundo:["#152A22","#0A1610"],
+ dist:3.6, aoRaio:1.2,
+ pontos:{n:1100,raio:1.3,cor:[.75,.9,.7],evita:p=>Math.abs(p[0])>1.04||Math.abs(p[1])>.7||Math.abs(p[2])>.7||Math.hypot((p[0]+.22)/1.2,(p[1]+.04)/.9,p[2]/.86)<.64},
+ constroi(A){
+  const {add,esfera,elipsoide,capsula,param,lamina,T,Rx,Ry,Rz,M,PI}=A,R=A.rnd(5);
+  add(caixaR(A,1.18,.86,.86,.28),T(0,0,0),"parede",{solido:1});
+  add(caixaR(A,1.12,.80,.80,.28),T(0,0,0),"membrana");
+  add(esfera(.6,.04,2,64),M(T(-.22,-.04,0),A.S(1.2,.9,.86)),"vacuolo",{a:.38,emi:.12});
+  add(esfera(.2,.02,5,56),T(...NUC),"nucleo");
+  add(esfera(.08,.06,3,24),T(NUC[0]+.03,NUC[1]+.03,NUC[2]),"nucleo",{c:[.38,.25,.40],cut:0});
+  // cloroplastos com grana (pilhas de tilacoides) por dentro
+  const cl=elipsoide(.13,.05,.08,32),disco=elipsoide(.024,.0035,.024,14);
+  // cloroplastos na faixa entre o vacúolo e a membrana (como na célula real)
+  const pos=[[-.35,.1,.66]];for(let i=0;pos.length<22&&i<600;i++){const th=R()*2*PI,ph=Math.acos(2*R()-1);const p=[.98*Math.sin(ph)*Math.cos(th),.66*Math.cos(ph),.66*Math.sin(ph)*Math.sin(th)];
+   if(Math.hypot(p[0]-NUC[0],p[1]-NUC[1],p[2]-NUC[2])<.36)continue;if(pos.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1],q[2]-p[2])<.27))continue;pos.push(p);}
+  pos.forEach((p,i)=>{const Mx=i===0?M(T(...p),Ry(.3)):M(T(...p),Ry(R()*PI),Rz((R()-.5)*1.2));add(cl,Mx,"cloro");
+   for(let g=0;g<5;g++){const gx=(g-2)*.045;for(let k=0;k<5;k++)add(disco,M(Mx,T(gx,(k-2)*.009,(g%2?.015:-.015))),"cloro",{c:[.12,.36,.16],nocut:1});}});
+  const poro=A.toro(.014,.005,0,2*PI,12);
+  for(let i=0;i<50;i++){const a=R()*2*PI,b=Math.acos(2*R()-1),rr=.202;add(poro,M(T(NUC[0]+rr*Math.sin(b)*Math.cos(a),NUC[1]+rr*Math.cos(b),NUC[2]+rr*Math.sin(b)*Math.sin(a)),Ry(-a),Rz(-b)),"nucleo",{c:[.66,.58,.78]});}
+  const mt=capsula(.045,.1);
+  [[.5,-.35,.55],[-.55,-.3,.42],[.3,.3,-.62],[-.2,.62,.2],[.95,-.3,-.1]].forEach(p=>add(mt,M(T(...p),Rz(R()*PI),Rx(R()*PI)),"mito"));
+  const cist=(a,b,esp)=>param(30,20,(u,v)=>{const th=u*2*PI,ph=v*PI,s=Math.sin(ph);return [a*s*Math.cos(th),esp*Math.cos(ph)+.025*s*s,b*s*Math.sin(th)];});
+  const GM=M(T(.05,.52,.42),Rz(-.6));for(let k=0;k<5;k++)add(cist(.13*(1-k*.06),.07,.009),M(GM,T(0,-k*.026,0)),"golgi");
+  for(let k=0;k<3;k++)add(lamina(.3+k*.04,.035,-.6,.9,.012),M(T(...NUC),Rx(.3-k*.2),Ry(2.2)),"rer");
+ },
+ foco:{parede:[[0,0,0],2.9,[0,0,1]],membrana:[[0,0,.8],1.1,[0,.2,1]],vacuolo:[[-.22,-.04,0],1.9,[0,.3,1]],cloro:[[-.35,.1,.66],.42,[0,.2,1]],nucleo:[NUC,.8],mito:[[.5,-.35,.55],.4],golgi:[[.05,.47,.42],.55,[1,.3,.5]],rer:[[NUC[0]-.1,NUC[1]-.1,NUC[2]-.2],.7]},
+});
+
+</script></body></html>

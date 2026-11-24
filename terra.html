@@ -1,0 +1,35 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Camadas da Terra · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// raios proporcionais aos reais (Terra = 6.371 km = 1); a crosta está exagerada para aparecer
+Modelo3D({
+ titulo:"Camadas da Terra", area:"Geografia", voltar:"index.html#geografia", rotLista:"Camadas", rotParte:"Camada",
+ geral:{t:"Estrutura interna da Terra",f:"A Terra é dividida em camadas pela composição e pelo estado físico. Ninguém nunca perfurou além da crosta: o interior é conhecido pelas ondas sísmicas dos terremotos, que mudam de velocidade e de direção em cada camada.",
+  dl:[["Raio da Terra","cerca de 6.371 km"],["Crosta","até ~70 km (exagerada no modelo)"],["Manto","até ~2.900 km"],["Núcleo externo","2.900 a 5.100 km"],["Núcleo interno","5.100 km até o centro"]],
+  pas:"Litosfera, astenosfera e a tectônica de placas, que explica terremotos, vulcões, dobramentos e a formação do relevo."},
+ partes:[
+  {id:"crosta",n:"Crosta",c:[.50,.46,.40],f:"Camada mais fina e rígida, de rochas. A crosta continental (granítica, mais espessa e menos densa) chega a ~70 km nas montanhas; a oceânica (basáltica, mais densa) tem cerca de 5 a 10 km.",dl:[["Espessura","5 a 70 km"],["Estado","sólido"]],pas:"Crosta e parte rígida do manto superior formam a litosfera, dividida em placas tectônicas."},
+  {id:"manto",n:"Manto",c:[.86,.42,.20],f:"A maior camada, com cerca de 84% do volume da Terra. É sólido, mas a rocha quente se deforma muito devagar e forma correntes de convecção, que movem as placas. A parte mais plástica, logo abaixo da litosfera, é a astenosfera.",dl:[["Profundidade","até ~2.900 km"],["Temperatura","de ~1.000 °C a ~3.700 °C"],["Estado","sólido plástico"]],pas:"Correntes de convecção do manto como motor da deriva continental e da tectônica de placas."},
+  {id:"externo",n:"Núcleo externo",c:[.98,.66,.18],f:"Camada líquida de ferro e níquel. O movimento desse metal líquido gera o campo magnético da Terra, que protege o planeta do vento solar.",dl:[["Profundidade","2.900 a 5.100 km"],["Estado","líquido"],["Composição","ferro e níquel"]],pas:"As ondas S não atravessam líquidos: é por isso que se sabe que o núcleo externo é líquido."},
+  {id:"interno",n:"Núcleo interno",c:[1,.88,.55],f:"Esfera sólida de ferro e níquel no centro. É a parte mais quente, perto de 5.400 °C, mas continua sólida por causa da pressão enorme.",dl:[["Profundidade","5.100 a 6.371 km"],["Temperatura","~5.400 °C"],["Estado","sólido"]],pas:"Relação entre pressão, temperatura e estado físico das camadas."},
+ ],
+ cortaveis:["crosta","manto","externo"], corteY:.5, corteAng:.8, giro:.0022,
+ detalhe:{crosta:7,manto:9,externo:12,interno:16}, relevo:{crosta:.16,manto:.05,externo:.03,interno:.03},
+ brilho:{crosta:.12},
+ aoRaio:0, fundo:["#0E1A3A","#070D20"], dist:3.2, pitch:.35,
+ constroi(A){
+  const {add,esfera,T}=A;
+  add(esfera(1,.006,1,96),T(0,0,0),"crosta",{solido:1});
+  add(esfera(.955,0,0,80),T(0,0,0),"manto",{solido:1});
+  add(esfera(.546,0,0,64),T(0,0,0),"externo",{solido:1,emi:.15});
+  add(esfera(.19,0,0,40),T(0,0,0),"interno",{emi:.35});
+ },
+ foco:{crosta:[[0,0,.9],1.4,[0,.3,1]],manto:[[0,0,.7],1.9,[0,.3,1]],externo:[[0,0,.35],1.4,[0,.3,1]],interno:[[0,0,0],.95,[0,.3,1]]},
+ etiquetas:[{p:[0,1.05,0],t:"Crosta",id:"crosta"},{p:[0,.78,0],t:"Manto",id:"manto"},{p:[0,.38,0],t:"Núcleo externo",id:"externo"},{p:[0,0,0],t:"Núcleo interno",id:"interno"}],
+});
+
+</script></body></html>

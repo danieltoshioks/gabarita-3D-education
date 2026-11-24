@@ -1,0 +1,160 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fotossíntese · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// fotossíntese completa: o cloroplasto por fora e, ampliada, a membrana do tilacoide (fase clara) com o ciclo de Calvin no estroma (fase escura)
+// titulo:"Fotossíntese"
+const ET=["cloroplasto","luz","fotolise","eletrons","atp","nadph","calvin","saldo"];
+const NE=["Onde acontece","Absorção de luz","Fotólise da água","Transporte de elétrons","Síntese de ATP","Formação de NADPH","Ciclo de Calvin","Saldo final"];
+const E=MV_ETAPAS(ET,NE,A=>estatico(A),"fs","Etapa");
+const OX=-9,OY=.4;                         // cloroplasto inteiro, longe da cena ampliada
+const P2=-1.8,CB=-.8,P1=.3,FNR=1.05,AS=1.95; // posições na membrana
+const CC=[.9,1.55,0],CR=.55;                // ciclo de Calvin
+const REL={luz:["ps2","ps1","foton","clorofila"],fotolise:["ps2","agua","o2","hmais"],eletrons:["ps2","pq","citb6f","pc","ps1","fd","eletron","hmais"],
+ atp:["atpsintase","hmais","atpmol"],nadph:["ps1","fd","nadph","eletron"],calvin:["ciclo","rubisco","co2","atpmol","nadph","glicose"]};
+const vis=id=>{const k=ET[E.st.k];return k==="cloroplasto"||k==="saldo"||(REL[k]||[]).includes(id)||["tilacoide","lumen"].includes(id);};
+const al=(id,a)=>vis(id)?(a===undefined?1:a):.12;
+const ang=a=>[CC[0]+CR*Math.cos(a),CC[1]+CR*Math.sin(a),0];
+let TT=0;
+const pela=(P,u)=>{const L=[0];for(let i=1;i<P.length;i++)L.push(L[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1],P[i][2]-P[i-1][2]));const s=(u%1)*L[L.length-1];let i=1;while(i<P.length-1&&L[i]<s)i++;const f=(s-L[i-1])/((L[i]-L[i-1])||1);return P[i-1].map((v,k)=>v+(P[i][k]-v)*f);};
+const EL=[[P2,.15,0],[P2+.3,0,0],[CB,0,0],[CB,-.3,0],[P1,-.3,0],[P1,.25,0],[.68,.27,0],[FNR,.3,0]];
+let SF=null;
+Modelo3D({
+ titulo:"Fotossíntese", area:"Biologia", voltar:"index.html#biologia", rotLista:"Etapas e estruturas", rotParte:"Fotossíntese",
+ geral:{t:"Luz vira energia química",f:"A fotossíntese acontece nos cloroplastos e tem duas fases ligadas. Na fase clara (fotoquímica), nas membranas dos tilacoides, a luz quebra a água, libera O₂ e produz ATP e NADPH. Na fase escura (química), no estroma, o ciclo de Calvin usa esse ATP e esse NADPH para transformar CO₂ em açúcar. Avance as etapas no controle.",
+  dl:[["Equação geral","6 CO₂ + 12 H₂O → C₆H₁₂O₆ + 6 O₂ + 6 H₂O (com luz e clorofila)"],["Fase clara","tilacoides: luz, fotólise, ATP e NADPH"],["Fase escura","estroma: ciclo de Calvin, fixa o CO₂"],["Origem do O₂","da água, não do CO₂"]],
+  pas:"Saber onde ocorre cada fase, de onde vem o O₂ liberado, o papel do ATP e do NADPH, os fatores limitantes (luz, CO₂, temperatura) e comparar com a respiração celular."},
+ partes:[
+  {id:"cloroplasto",n:"1. Onde acontece",c:[.40,.74,.42],f:"O cloroplasto tem duas membranas (envoltório), um líquido interno (estroma) e pilhas de sacos achatados, os tilacoides. Cada pilha é um granum. A fase clara ocorre na membrana dos tilacoides; a fase escura, no estroma.",dl:[["Pigmento","clorofila, nos tilacoides"],["Origem","endossimbiose: tem DNA e ribossomos próprios"]],pas:"Fase clara nos tilacoides (grana), fase escura no estroma."},
+  {id:"luz",n:"2. Absorção de luz",c:[1,.86,.40],f:"A clorofila dos fotossistemas absorve luz, principalmente azul e vermelha (o verde é refletido, por isso a folha é verde). A energia excita elétrons do centro de reação, que saem com muita energia.",dl:[["Fotossistema II","P680"],["Fotossistema I","P700"]],pas:"Espectro de absorção: pouca fotossíntese na luz verde."},
+  {id:"fotolise",n:"3. Fotólise da água",c:[.50,.74,1],f:"Para repor os elétrons que perdeu, o fotossistema II quebra moléculas de água: 2 H₂O → 4 H⁺ + 4 e⁻ + O₂. O oxigênio sai da folha; os H⁺ ficam no lúmen do tilacoide.",dl:[["Reação","2 H₂O → O₂ + 4 H⁺ + 4 e⁻"]],pas:"Todo o O₂ liberado vem da água (experimento com oxigênio marcado, ¹⁸O)."},
+  {id:"eletrons",n:"4. Transporte de elétrons",c:[1,.90,.44],f:"Os elétrons passam do fotossistema II para a plastoquinona, o citocromo b6f, a plastocianina e o fotossistema I, onde recebem nova energia da luz. No caminho, o citocromo bombeia H⁺ do estroma para dentro do tilacoide.",pas:"A cadeia transportadora gera o gradiente de H⁺ que vai produzir ATP."},
+  {id:"atp",n:"5. Síntese de ATP",c:[.96,.66,.36],f:"Os H⁺ acumulados no lúmen voltam para o estroma pela ATP sintase. Esse fluxo faz a enzima girar e juntar ADP + fosfato em ATP. É a fotofosforilação, explicada pela teoria quimiosmótica.",dl:[["Nome","fotofosforilação"],["Motor","gradiente de H⁺"]],pas:"Mesmo princípio da ATP sintase da mitocôndria."},
+  {id:"nadph",n:"6. Formação de NADPH",c:[.74,.60,.96],f:"No fim da cadeia, a ferredoxina passa os elétrons para a enzima NADP⁺ redutase, que forma NADPH. O NADPH leva elétrons e hidrogênio para o ciclo de Calvin.",pas:"ATP e NADPH são os produtos da fase clara usados na fase escura."},
+  {id:"calvin",n:"7. Ciclo de Calvin",c:[.46,.86,.56],f:"No estroma, a enzima rubisco prende o CO₂ a uma molécula de 5 carbonos (RuBP). Com o ATP e o NADPH, o composto é reduzido a gliceraldeído-3-fosfato (G3P). Parte do G3P forma glicose; o resto regenera a RuBP para o ciclo continuar.",dl:[["Etapas","fixação, redução, regeneração"],["Por 1 glicose","6 voltas: 6 CO₂, 18 ATP, 12 NADPH"]],pas:"Chamada de fase escura porque não usa luz diretamente, mas acontece de dia, enquanto há ATP e NADPH."},
+  {id:"saldo",n:"8. Saldo final",c:[.86,.90,.96],f:"Entram CO₂, água e luz; saem glicose e O₂. A glicose vira amido para reserva ou sacarose para ser levada pelo floema. A fotossíntese é praticamente o inverso da respiração celular.",dl:[["Entra","6 CO₂ + 12 H₂O + luz"],["Sai","C₆H₁₂O₆ + 6 O₂ + 6 H₂O"]],pas:"Fotossíntese × respiração; ponto de compensação fótico."},
+  {id:"envoltorio",n:"Envoltório",c:[.62,.86,.56],f:"Duas membranas que envolvem o cloroplasto.",pas:"Dupla membrana, como na mitocôndria: pista da endossimbiose."},
+  {id:"granum",n:"Granum",c:[.24,.62,.30],f:"Pilha de tilacoides, como uma pilha de moedas. Os grana se ligam por lamelas.",pas:"Grana = conjunto de pilhas."},
+  {id:"estroma",n:"Estroma",c:[.70,.90,.66],f:"Líquido do cloroplasto, com enzimas (como a rubisco), DNA e ribossomos. É onde roda o ciclo de Calvin.",pas:"Fase escura no estroma."},
+  {id:"tilacoide",n:"Membrana do tilacoide",c:[.86,.82,.56],f:"Bicamada de lipídios onde ficam os fotossistemas, a cadeia de elétrons e a ATP sintase.",pas:"Fase clara na membrana do tilacoide."},
+  {id:"lumen",n:"Lúmen",c:[.50,.70,.96],f:"Espaço dentro do tilacoide. Acumula H⁺, por isso fica bem mais ácido que o estroma.",pas:"Gradiente de H⁺: lúmen ácido."},
+  {id:"ps2",n:"Fotossistema II",c:[.30,.70,.38],f:"Complexo de proteínas e clorofila (P680) que capta luz e quebra a água. Apesar do número, vem primeiro na sequência (foi descoberto depois).",pas:"PSII: fotólise da água."},
+  {id:"ps1",n:"Fotossistema I",c:[.22,.62,.62],f:"Segundo fotossistema (P700). Recebe os elétrons da cadeia e os reenergiza com luz para formar NADPH.",pas:"PSI: leva ao NADPH."},
+  {id:"clorofila",n:"Clorofila (antena)",c:[.36,.84,.40],f:"Pigmentos ao redor dos fotossistemas que captam luz e passam a energia para o centro de reação.",pas:"Clorofila a é o pigmento principal; carotenoides ajudam."},
+  {id:"pq",n:"Plastoquinona",c:[.96,.90,.56],f:"Molécula móvel dentro da membrana que leva elétrons do PSII ao citocromo b6f.",oculto:true},
+  {id:"citb6f",n:"Citocromo b6f",c:[.90,.58,.32],f:"Complexo que passa os elétrons adiante e bombeia H⁺ do estroma para o lúmen.",pas:"Bomba de prótons da fase clara."},
+  {id:"pc",n:"Plastocianina",c:[.40,.70,1],f:"Proteína com cobre que leva elétrons do citocromo ao PSI, pelo lado do lúmen.",oculto:true},
+  {id:"fd",n:"Ferredoxina e NADP⁺ redutase",c:[.74,.60,.96],f:"A ferredoxina recebe os elétrons do PSI e a enzima NADP⁺ redutase os usa para formar NADPH.",pas:"NADP⁺ + 2 e⁻ + H⁺ → NADPH."},
+  {id:"atpsintase",n:"ATP sintase",c:[.94,.80,.40],f:"Enzima que funciona como uma turbina: os H⁺ passam por ela, a parte de cima gira e forma ATP.",pas:"Fotofosforilação."},
+  {id:"ciclo",n:"Ciclo de Calvin",c:[.46,.86,.56],f:"Sequência de reações que se fecha em círculo: fixação do CO₂, redução e regeneração da RuBP.",oculto:true},
+  {id:"rubisco",n:"Rubisco",c:[.40,.80,.60],f:"Enzima que fixa o CO₂ na RuBP. É considerada a proteína mais abundante do planeta.",pas:"Rubisco: fixação do carbono."},
+  {id:"foton",n:"Luz (fótons)",c:[1,.88,.40],f:"Energia luminosa que chega aos fotossistemas.",oculto:true},
+  {id:"agua",n:"Água (H₂O)",c:[.50,.74,1],f:"Chega à folha pelo xilema e é quebrada no PSII.",oculto:true},
+  {id:"o2",n:"Oxigênio (O₂)",c:[.95,.40,.36],f:"Subproduto da fotólise. Sai pelos estômatos.",oculto:true},
+  {id:"hmais",n:"Íons H⁺",c:[1,.56,.62],f:"Prótons acumulados no lúmen.",oculto:true},
+  {id:"eletron",n:"Elétrons",c:[1,.92,.40],f:"Elétrons energizados pela luz.",oculto:true},
+  {id:"atpmol",n:"ATP",c:[.96,.66,.36],f:"Moeda de energia da célula.",oculto:true},
+  {id:"nadph",n:"NADPH",c:[.74,.60,.96],f:"Carregador de elétrons e hidrogênio.",oculto:true},
+  {id:"co2",n:"CO₂",c:[.40,.42,.46],f:"Entra na folha pelos estômatos.",oculto:true},
+  {id:"glicose",n:"Glicose",c:[.98,.80,.50],f:"Açúcar de 6 carbonos (C₆H₁₂O₆) formado a partir do G3P.",pas:"Reserva como amido; transporte como sacarose."},
+ ],
+ slider:E.slider, aoFocar:E.aoFocar,
+ semApagar:["envoltorio","granum","estroma","tilacoide","lumen","ps2","ps1","clorofila","pq","citb6f","pc","fd","atpsintase","ciclo","rubisco","foton","agua","o2","hmais","eletron","atpmol","nadph","co2","glicose"],
+ brilho:{eletron:.6,hmais:.4,foton:.7,tilacoide:.18,granum:.18,envoltorio:.2,ps1:.15,ps2:.15,citb6f:.15,atpsintase:.2},
+ textura:{tilacoide:8,granum:8,envoltorio:5,estroma:5,ps1:5,ps2:5,citb6f:5,atpsintase:5}, relevo:{ps1:.22,ps2:.22,citb6f:.22,atpsintase:.18,tilacoide:.06}, detalhe:{ps1:14,ps2:14,citb6f:14,atpsintase:16,tilacoide:22,granum:22}, aoRaio:.3, fundo:["#10261A","#06120B"], dist:4.6, pitch:.3, yaw:.35, giro:0, alvo:[OX,OY,0], botoes:{corte:false}, distMax:16,
+ constroi(A){estatico(A);anim(A,0);},
+ anima(t,A){TT=t;A.refaz("an",()=>anim(A,t));},
+ foco:{cloroplasto:[[OX,OY,0],4.6,[.3,.35,1]],luz:[[-.8,.9,0],4.8,[.1,.15,1]],fotolise:[[P2+.1,-.2,0],2.6,[.2,.15,1]],eletrons:[[-.6,0,0],3.6,[.15,.2,1]],
+  atp:[[AS-.3,.2,0],3.4,[.25,.2,1]],nadph:[[.75,.3,0],2.6,[.2,.2,1]],calvin:[[.7,1.6,0],3.2,[.1,.1,1]],saldo:[[0,.7,0],6.4,[.15,.2,1]],
+  ps2:[[P2,0,0],1.8,[.3,.2,1]],ps1:[[P1,0,0],1.8,[.3,.2,1]],citb6f:[[CB,0,0],1.8,[.3,.2,1]],atpsintase:[[AS,.3,0],1.8,[.3,.2,1]],fd:[[.85,.3,0],1.4,[.3,.2,1]],rubisco:[[CC[0],CC[1]+CR,0],1.4,[.2,.2,1]],glicose:[[-.35,2.15,0],1.4,[.2,.2,1]],
+  envoltorio:[[OX,OY,0],4.6,[.3,.35,1]],granum:[[OX+.5,OY,0],2,[.3,.35,1]],estroma:[[OX,OY,0],4.6,[.3,.35,1]],tilacoide:[[0,0,0],4,[.2,.3,1]],lumen:[[0,-.5,0],3.6,[.2,.1,1]],clorofila:[[P2,0,0],1.8,[.3,.5,1]]},
+ etiquetas:[
+  {p:[OX,OY+.86,0],t:"Envoltório (2 membranas)",quando:()=>E.st.k===0},{p:[OX+.55,OY+.42,.3],t:"Granum",quando:()=>E.st.k===0},
+  {p:[OX-.9,OY-.42,.4],t:"Estroma",quando:()=>E.st.k===0},{p:[OX-.25,OY+.12,.55],t:"Tilacoide",quando:()=>E.st.k===0},
+  {p:[-2.4,.85,0],t:"Estroma",quando:()=>E.st.k>0},{p:[-2.3,-.7,0],t:"Lúmen do tilacoide",quando:()=>E.st.k>0},
+  {p:[P2,.55,0],t:"Fotossistema II",quando:()=>[1,2,3,7].includes(E.st.k)},{p:[P1,.55,0],t:"Fotossistema I",quando:()=>[1,3,5,7].includes(E.st.k)},
+  {p:[CB,.5,0],t:"Citocromo b6f",quando:()=>E.st.k===3},{p:[AS-.5,.8,0],t:"ATP sintase",quando:()=>[4,7].includes(E.st.k)},
+  {p:[FNR+.15,.58,0],t:"NADP⁺ redutase",quando:()=>E.st.k===5},{p:[-2.1,1.9,0],t:"Luz",quando:()=>[1,7].includes(E.st.k)},
+  {p:[P2-.05,-.86,0],t:"2 H₂O",quando:()=>E.st.k===2},{p:[P2-.75,-.62,0],t:"O₂",quando:()=>[2,7].includes(E.st.k)},
+  {p:[-.2,-.62,0],t:"H⁺ acumulado",quando:()=>[2,3,4].includes(E.st.k)},{p:[-1.25,.22,0],t:"e⁻",quando:()=>[3,5].includes(E.st.k)},
+  {p:[AS+.32,.66,0],t:"ADP + P → ATP",quando:()=>E.st.k===4},{p:[FNR+.2,.82,0],t:"NADPH",quando:()=>[5,6].includes(E.st.k)},
+  {p:[CC[0],CC[1],0],t:"Ciclo de Calvin",quando:()=>[6,7].includes(E.st.k)},{p:[CC[0]-.1,CC[1]+CR+.25,0],t:"Fixação (rubisco)",quando:()=>E.st.k===6},
+  {p:[CC[0]+CR+.32,CC[1]-.35,0],t:"Redução",quando:()=>E.st.k===6},{p:[CC[0]-CR+.05,CC[1]-.5,0],t:"Regeneração da RuBP",quando:()=>E.st.k===6},
+  {p:[2.1,2.5,0],t:"CO₂",quando:()=>[6,7].includes(E.st.k)},{p:[-.35,2.5,0],t:"Glicose",quando:()=>[6,7].includes(E.st.k)},
+  {p:[1.75,1.05,0],t:"ATP",quando:()=>E.st.k===6}],
+});
+function molAgua(A,p,id,o){A.add(A.esfera(.06,0,0,14),A.T(...p),id,o({c:[.92,.32,.30]}));for(const s of [-1,1])A.add(A.esfera(.035,0,0,10),A.T(p[0]+s*.06,p[1]-.04,p[2]),id,o({c:[.94,.95,.98]}));}
+function estatico(A){
+ const {add,esfera,elipsoide,cilindro,caixa,toro,T,M,Rx,Rz,S,PI}=A,g={grupo:"fs"},o=x=>Object.assign({},g,x||{});
+ // ---- cloroplasto inteiro ----
+ add(elipsoide(1.7,.8,.95,56),T(OX,OY,0),"envoltorio",o({a:.16}));add(elipsoide(1.62,.73,.87,56),T(OX,OY,0),"envoltorio",o({a:.12}));
+ add(elipsoide(1.56,.68,.82,40),T(OX,OY,0),"estroma",o({a:.10}));
+ // grana: pilhas de tilacoides em forma de moeda de borda arredondada, de alturas variadas, ligadas por lamelas do estroma
+ const GR=[[-1,0,-.25],[-.45,.05,.3],[0,-.08,-.3],[.5,.04,.25],[1,-.02,-.15],[-.2,.1,.05],[-1.15,.05,.35],[-.7,-.1,-.05],[.25,.1,-.05],[.85,.05,.4],[1.2,0,.2],[-.05,-.05,.5],[.6,-.08,-.4],[-.55,0,-.5]];
+ const disco=A.param(30,10,(u,v)=>{const th=u*2*PI,ph=v*PI,r=.19*(Math.sin(ph)>.35?1:Math.sin(ph)/.35);return [ (.19-.012*(1-Math.sin(ph)))*Math.min(1,Math.sin(ph)*3)*Math.cos(th),.025*Math.cos(ph),(.19-.012*(1-Math.sin(ph)))*Math.min(1,Math.sin(ph)*3)*Math.sin(th)];});
+ GR.forEach(([x,y,z],i)=>{const r=A.rnd(i+40),n=4+Math.floor(r()*6),sc=.75+.35*r();for(let k=0;k<n;k++)add(disco,M(T(OX+x+(r()-.5)*.015,OY+y-.03*n+k*.062,z),S(sc,1,sc)),i===3?"granum":"tilacoide",o({c:i===3?[.24,.66,.32]:[.2,.54,.27]}));});
+ for(let i=0;i<GR.length;i++){const a=GR[i],b=GR[(i+3)%GR.length],c=[(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2],d=[b[0]-a[0],b[2]-a[2]],L=Math.hypot(...d);if(L>1.1)continue;
+  add(A.param(20,4,(u,v)=>[a[0]+(b[0]-a[0])*u+(v-.5)*.12*(-d[1]/L),a[1]+(b[1]-a[1])*u+.03*Math.sin(u*PI),a[2]+(b[2]-a[2])*u+(v-.5)*.12*(d[0]/L)]),T(OX,OY,0),"tilacoide",o({c:[.3,.6,.32],a:.85}));}
+ for(let i=0;i<40;i++){const r=A.rnd(i+5),p=[OX+(r()-.5)*2.4,OY+(r()-.5)*.8,(r()-.5)*1.2];add(esfera(.02,0,0,8),T(...p),"estroma",o({c:[.86,.84,.70]}));}
+ // plastoglóbulos (gotas de lipídio) e grãos de amido no estroma
+ for(let i=0;i<10;i++){const r=A.rnd(i+90),p=[OX+(r()-.5)*2.6,OY+(r()-.5)*.7,(r()-.5)*1.1];add(esfera(.045,0,0,12),T(...p),"estroma",o({c:[.9,.78,.36]}));}
+ for(const [x,z] of [[-.75,.2],[.7,-.05]])add(elipsoide(.17,.08,.12,24),T(OX+x,OY-.35,z),"estroma",o({c:[.92,.9,.82]}));
+ // ---- membrana do tilacoide ampliada ----
+ for(const y of [.075,-.075])add(A.param(90,24,(u,v)=>[(u-.5)*5.4,.012*Math.sin(u*37+v*5)*Math.sin(v*PI),(v-.5)*1.3]),T(0,y,0),"tilacoide",o({a:.6}));
+ // cabeças dos fosfolipídios nas duas faces da bicamada
+ {const hd=esfera(.03,0,0,8),r=A.rnd(77),CX=[P2,CB,P1,AS,FNR];for(let x=-2.64;x<2.7;x+=.1)for(let z=-.6;z<.62;z+=.1)for(const y of [.105,-.105]){if(CX.some(c=>Math.hypot(x-c,z)<.36))continue;add(hd,T(x+(r()-.5)*.03,y,z+(r()-.5)*.03),"tilacoide",o({c:[.82,.74,.6]}));}}
+ add(caixa(5.4,.04,1.3),T(0,-1,0),"tilacoide",o({a:.3}));
+ add(caixa(5.4,.86,1.3),T(0,-.55,0),"lumen",o({a:.06}));
+ // complexos
+ add(elipsoide(.3,.4,.32,40),T(P2,0,0),"ps2",o({a:al("ps2")}));
+ for(let i=0;i<8;i++){const a=i/8*2*PI;add(cilindro(.07,.035,18),T(P2+.46*Math.cos(a),.04,.46*Math.sin(a)),"clorofila",o({a:al("clorofila",.9)}));}
+ add(elipsoide(.25,.38,.28,36),T(CB,0,0),"citb6f",o({a:al("citb6f")}));
+ add(elipsoide(.3,.38,.32,40),T(P1,0,0),"ps1",o({a:al("ps1")}));
+ for(let i=0;i<8;i++){const a=i/8*2*PI+.3;add(cilindro(.07,.035,18),T(P1+.46*Math.cos(a),.04,.46*Math.sin(a)),"clorofila",o({a:al("clorofila",.9)}));}
+ add(esfera(.08,0,0,16),T(.68,.27,0),"fd",o({a:al("fd")}));add(elipsoide(.17,.13,.17,24),T(FNR,.3,0),"fd",o({a:al("fd"),c:[.62,.50,.88]}));
+ add(cilindro(.21,.24,32),T(AS,0,0),"atpsintase",o({a:al("atpsintase")}));add(cilindro(.05,.36,12),T(AS,.3,0),"atpsintase",o({a:al("atpsintase"),c:[.80,.70,.40]}));
+ // luz
+ for(const [x0,x1] of [[-2.6,P2],[-.8,P1]])A.seta([x0,2.4,0],[x1,.5,0],.012,"foton",o({a:al("foton",.5),emi:.6}));
+ // água e glicose
+ molAgua(A,[P2-.1,-.62,0],"agua",o);molAgua(A,[P2+.12,-.7,.1],"agua",o);
+ const GC=[-.35,2.15,0];for(let i=0;i<6;i++){const a=i/6*2*PI,b=(i+1)/6*2*PI,p=[GC[0]+.17*Math.cos(a),GC[1]+.17*Math.sin(a),0],q=[GC[0]+.17*Math.cos(b),GC[1]+.17*Math.sin(b),0];
+  add(esfera(.045,0,0,12),T(...p),"glicose",o({c:i===5?[.92,.32,.30]:[.26,.27,.30],a:al("glicose")}));A.linha(p,q,.014,"glicose",o({c:[.90,.86,.76],a:al("glicose")}));}
+ // ciclo de Calvin
+ add(toro(CR,.025,0,2*PI,72),M(T(...CC),Rx(PI/2)),"ciclo",o({a:al("ciclo",.7),emi:.2}));
+ add(esfera(.15,.12,3,24),T(CC[0],CC[1]+CR+.04,0),"rubisco",o({a:al("rubisco")}));
+ A.seta(ang(PI),[GC[0]+.25,GC[1]-.1,0],.012,"glicose",o({a:al("glicose",.7),c:[.98,.80,.50]}));
+ A.seta([2.2,2.4,0],[CC[0]+.2,CC[1]+CR+.12,0],.012,"co2",o({a:al("co2",.5)}));
+ A.seta([AS,.95,0],[...ang(-.5)].map((v,i)=>v+[.08,-.04,0][i]),.012,"atpmol",o({a:al("atpmol",.5)}));
+ A.seta([FNR,.48,0],ang(-.75),.012,"nadph",o({a:al("nadph",.5)}));
+}
+function anim(A,t){
+ const g={grupo:"an"},o=x=>Object.assign({},g,x||{}),{add,T,M,Ry,PI}=A;
+ if(!SF)SF={s4:A.esfera(.04,0,0,10),s5:A.esfera(.05,0,0,12),s7:A.esfera(.07,0,0,14),s11:A.esfera(.11,0,0,16)};
+ const {s4,s5,s7,s11}=SF,fr=x=>x-Math.floor(x);
+ // fótons
+ for(const [x0,x1] of [[-2.6,P2],[-.8,P1]])for(let i=0;i<3;i++){const u=fr(t*.45+i/3);add(s5,T(x0+(x1-x0)*u,2.4+(.5-2.4)*u,0),"foton",o({a:al("foton"),emi:1}));}
+ // elétrons na cadeia
+ for(let i=0;i<5;i++)add(s4,T(...pela(EL,t*.18+i/5)),"eletron",o({a:al("eletron"),emi:1}));
+ add(s7,T(P2+.3+.5*(.5+.5*Math.sin(t*1.2)),0,.25),"pq",o({a:al("pq")}));
+ add(s7,T(CB+1.1*(.5+.5*Math.sin(t*1.2+1)),-.3,-.25),"pc",o({a:al("pc")}));
+ // O₂ saindo e H⁺ da água
+ for(let i=0;i<2;i++){const u=fr(t*.3+i/2);add(s5,T(P2-.2-.7*u,-.62-.15*u+.03*Math.sin(t*4+i),.1),"o2",o({a:al("o2"),c:[.92,.32,.30]}));add(s5,T(P2-.14-.7*u,-.62-.15*u+.03*Math.sin(t*4+i),.1),"o2",o({a:al("o2"),c:[.92,.32,.30]}));}
+ // H⁺ no lúmen
+ const R=A.rnd(11);for(let i=0;i<46;i++){const x=(R()-.5)*4.8,y=-.25-R()*.65,z=(R()-.5)*1.1;add(s4,T(x+.03*Math.sin(t*2+i),y+.03*Math.cos(t*2.3+i),z),"hmais",o({a:al("hmais",.85),emi:.3}));}
+ for(let i=0;i<3;i++){const u=fr(t*.4+i/3);add(s4,T(CB+.12,.6-1.1*u,.2),"hmais",o({a:al("hmais"),emi:.5}));add(s4,T(AS,-.5+1.1*u,.12),"hmais",o({a:al("hmais"),emi:.5}));}
+ // cabeça da ATP sintase girando
+ for(let i=0;i<6;i++){const a=i/6*2*PI+t*2.2;add(s11,T(AS+.15*Math.cos(a),.62,.15*Math.sin(a)),"atpsintase",o({a:al("atpsintase"),c:i%2?[.94,.80,.40]:[.86,.62,.30]}));}
+ // ATP e NADPH subindo para o ciclo
+ const atpEm=(p,a)=>{add(s7,T(...p),"atpmol",o({a,c:[.96,.66,.36]}));for(let k=1;k<=3;k++)add(s4,T(p[0]+.09+k*.06,p[1],p[2]),"atpmol",o({a,c:[.98,.86,.40],emi:.4}));};
+ const ad=ang(-.5);for(let i=0;i<2;i++){const u=fr(t*.25+i/2);atpEm([AS+(ad[0]-AS)*u,.95+(ad[1]-.95)*u,0],al("atpmol"));}
+ const an=ang(-.75);for(let i=0;i<2;i++){const u=fr(t*.25+i/2+.25),p=[FNR+(an[0]-FNR)*u,.48+(an[1]-.48)*u,0];add(s7,T(...p),"nadph",o({a:al("nadph"),c:[.74,.60,.96],emi:.3}));add(s4,T(p[0]+.08,p[1]+.05,0),"nadph",o({a:al("nadph"),c:[.94,.95,.98]}));}
+ // CO₂ entrando
+ for(let i=0;i<2;i++){const u=fr(t*.3+i/2),p=[2.2+(CC[0]+.2-2.2)*u,2.4+(CC[1]+CR+.12-2.4)*u,0];add(s5,T(...p),"co2",o({a:al("co2"),c:[.26,.27,.30]}));for(const s of [-1,1])add(s5,T(p[0]+s*.09,p[1],0),"co2",o({a:al("co2"),c:[.92,.32,.30]}));}
+ // moléculas girando no ciclo
+ for(let i=0;i<8;i++){const a=PI/2-(t*.5+i/8*2*PI),q=ang(a),f=fr((PI/2-a)/(2*PI));add(s7,T(...q),"ciclo",o({a:al("ciclo"),c:f<.33?[.40,.80,.60]:f<.66?[.96,.80,.42]:[.60,.80,.96],emi:.2}));}
+}
+
+</script></body></html>

@@ -1,0 +1,43 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Estações do ano · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// estações do ano: Terra com eixo inclinado 23,4° (sempre para o mesmo lado) girando em volta do Sol
+const MES=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],RO=1.9,INC=23.4*Math.PI/180;
+let mes=11;
+const posT=m=>{const a=Math.PI+(m+.67-5.67)*Math.PI/6;return [RO*Math.cos(a),0,RO*Math.sin(a)];};
+const estacao=m=>{const k=Math.round(m);return k===11?"21/12 · solstício: verão no Sul":k===5?"21/6 · solstício: inverno no Sul":k===2?"20/3 · equinócio: outono no Sul":k===8?"22/9 · equinócio: primavera no Sul":k<2?"verão no Sul":k<5?"outono no Sul":k<8?"inverno no Sul":k<11?"primavera no Sul":"";};
+Modelo3D({
+ titulo:"Estações do ano", area:"Geografia", voltar:"index.html#geografia", rotLista:"Elementos", rotParte:"Elemento",
+ geral:{t:"Por que existem estações",f:"Não é a distância até o Sol. O eixo da Terra é inclinado cerca de 23,4° e aponta sempre para o mesmo lado enquanto ela dá a volta no Sol. Por isso, ao longo do ano, cada hemisfério recebe a luz mais direta (verão) ou mais inclinada (inverno). Mude o mês no controle.",
+  dl:[["Inclinação do eixo","~23,4°"],["Volta em torno do Sol","~365 dias (translação)"],["Volta em torno do eixo","~24 h (rotação)"]],
+  pas:"Solstícios e equinócios, por que as estações são opostas nos dois hemisférios e a variação da duração do dia ao longo do ano."},
+ partes:[
+  {id:"sol",n:"Sol",c:[1,.80,.42],f:"Estrela que ilumina e aquece a Terra. A órbita da Terra é quase circular: a Terra fica até um pouco mais perto do Sol em janeiro, que é verão no Sul e inverno no Norte.",pas:"Pegadinha: a distância Terra-Sol não explica as estações."},
+  {id:"terra",n:"Terra",c:[.30,.48,.72],f:"Metade fica iluminada (dia) e metade no escuro (noite). Observe qual hemisfério recebe mais luz em cada mês.",pas:"No solstício de dezembro o Sol fica a pino no Trópico de Capricórnio; em junho, no de Câncer."},
+  {id:"eixo",n:"Eixo de rotação",c:[.92,.92,.96],f:"Linha imaginária entre os polos. Fica inclinado cerca de 23,4° em relação à perpendicular da órbita e aponta sempre para a mesma direção no espaço.",pas:"Sem a inclinação não haveria estações bem definidas."},
+  {id:"linhas",n:"Equador e trópicos",c:[1,.84,.40],f:"O Equador divide os hemisférios. Os trópicos de Câncer (23,4° N) e de Capricórnio (23,4° S) marcam até onde o Sol chega a ficar a pino ao meio-dia.",pas:"Zonas térmicas da Terra: tropical, temperadas e polares."},
+  {id:"orbita",n:"Órbita (translação)",c:[.55,.62,.80],f:"Caminho da Terra em volta do Sol, percorrido em cerca de 365 dias e 6 horas. Por isso a cada 4 anos há um ano bissexto.",pas:"Diferença entre rotação (dia e noite) e translação (ano e estações)."},
+ ],
+ detalhe:{terra:7,sol:4}, relevo:{terra:.05,sol:.22}, brilho:{terra:.35},
+ aoRaio:0, fundo:["#0B1430","#04070F"], dist:5.4, pitch:.5, yaw:.15, giro:0, botoes:{corte:false,gira:false}, luzPonto:[0,0,0], distMax:9,
+ slider:{rot:"Mês",min:0,max:11,passo:1,valor:11,fmt:v=>MES[v]+" · "+estacao(v),muda(v,A){mes=v;A.refaz("terra",()=>terra(A));}},
+ constroi(A){
+  const {add,esfera,toro,T,PI}=A;
+  add(esfera(.42,0,0,56),T(0,0,0),"sol",{emi:.85});
+  add(toro(RO,.006,0,2*PI,160),T(0,0,0),"orbita",{emi:.5,a:.6});
+  terra(A);
+ },
+ get foco(){const p=posT(mes);return {sol:[[0,0,0],2.2,[0,.4,1]],terra:[p,1.35,[-p[2]*.9-p[0]*.25,.25,p[0]*.9-p[2]*.25]],eixo:[p,1.1,[0,.2,1]],linhas:[p,1.0,[-p[0],.15,-p[2]]],orbita:[[0,0,0],7,[0,1.6,1]]};},
+});
+function terra(A){
+ const {add,esfera,toro,cilindro,T,Rz,M,PI}=A,p=posT(mes),Mt=M(T(...p),Rz(-INC));
+ add(esfera(.3,0,0,64),Mt,"terra",{grupo:"terra"});
+ add(cilindro(.009,.86,10),Mt,"eixo",{grupo:"terra",emi:.4});
+ [0,1,-1].forEach(k=>{const lat=k*INC,r=.302*Math.cos(lat);add(toro(r,.0035,0,2*PI,90),M(Mt,T(0,.302*Math.sin(lat),0)),"linhas",{grupo:"terra",emi:.5,c:k?[1,.84,.40]:[1,.55,.35]});});
+}
+
+</script></body></html>

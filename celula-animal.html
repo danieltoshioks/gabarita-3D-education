@@ -1,0 +1,72 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Célula animal · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+const NUC=[-.12,.02,0],GO=[.46,.14,-.06],CE=[.2,.5,.05];
+let GM;
+Modelo3D({
+ titulo:"Célula animal", area:"Biologia", voltar:"index.html#biologia", rotLista:"Organelas", rotParte:"Organela",
+ geral:{t:"Célula animal",f:"Célula eucarionte: tem núcleo organizado e organelas envolvidas por membrana. Toque numa parte do modelo, ou escolha na lista, para ver de perto o que ela faz.",pas:"Questões costumam relacionar a forma de cada organela com a função dela e comparar a célula animal com a vegetal e com a bacteriana."},
+ partes:[
+  {id:"membrana",n:"Membrana plasmática",c:[.86,.68,.64],f:"Envolve a célula. É uma bicamada de fosfolipídios com proteínas espalhadas, o modelo do mosaico fluido. Controla o que entra e o que sai (permeabilidade seletiva).",pas:"Difusão, osmose e transporte ativo (bomba de sódio e potássio). Atenção a células em soluções hipo e hipertônicas."},
+  {id:"nucleo",n:"Núcleo",c:[.55,.48,.66],f:"Guarda o DNA, na forma de cromatina. É envolvido pela carioteca, uma membrana dupla com poros por onde passam os RNAs. Comanda a célula: é onde o DNA se duplica e é transcrito.",pas:"Diferença entre célula eucarionte e procarionte (que não tem núcleo organizado). Duplicação, transcrição e o caminho do RNA até o ribossomo."},
+  {id:"nucleolo",n:"Nucléolo",c:[.38,.25,.40],f:"Região densa dentro do núcleo. Produz o RNA ribossômico e monta as subunidades dos ribossomos.",pas:"Ligação entre nucléolo, RNAr e síntese de proteínas."},
+  {id:"rer",n:"Retículo endoplasmático rugoso",c:[.48,.58,.74],f:"Rede de membranas ligada ao núcleo, com ribossomos grudados na superfície. Fabrica proteínas que vão ser exportadas ou ficar nas membranas.",pas:"Células que secretam muita proteína, como as do pâncreas, têm RER e complexo golgiense muito desenvolvidos."},
+  {id:"rel",n:"Retículo endoplasmático liso",c:[.44,.64,.66],f:"Tubos de membrana sem ribossomos. Produz lipídios, como os hormônios esteroides, ajuda a desintoxicar a célula (muito presente no fígado) e guarda cálcio nas células musculares.",pas:"Comparação com o RER: o que muda é a presença de ribossomos e, por isso, a função."},
+  {id:"golgi",n:"Complexo golgiense",c:[.86,.70,.44],f:"Pilha de sacos achatados. Recebe proteínas do RER, modifica, empacota em vesículas e manda para o destino certo. Também forma os lisossomos e o acrossomo do espermatozoide.",pas:"O caminho da secreção: RER, vesícula, complexo golgiense, vesícula de secreção, membrana."},
+  {id:"mito",n:"Mitocôndria",c:[.84,.54,.38],f:"Faz a respiração celular e produz a maior parte do ATP. O ciclo de Krebs acontece na matriz e a cadeia respiratória, nas cristas. Tem DNA e ribossomos próprios.",pas:"Origem endossimbiótica, respiração aeróbia e herança materna do DNA mitocondrial."},
+  {id:"liso",n:"Lisossomo",c:[.52,.68,.48],f:"Vesícula cheia de enzimas digestivas. Faz a digestão intracelular do que a célula englobou e a autofagia, que recicla organelas velhas.",pas:"Fagocitose, autofagia e doenças de acúmulo quando falta uma enzima lisossômica."},
+  {id:"ribo",n:"Ribossomos",c:[.84,.80,.72],f:"Pequenos grãos de RNA ribossômico e proteínas, livres no citoplasma ou presos ao RER. Fazem a tradução: leem o RNA mensageiro e montam a proteína.",pas:"Estão presentes em praticamente todas as células, inclusive nas bactérias (as hemácias maduras dos mamíferos são uma exceção). Ponto clássico de comparação entre procariontes e eucariontes."},
+  {id:"centro",n:"Centríolos",c:[.78,.46,.48],f:"Dois cilindros de microtúbulos, um perpendicular ao outro, no centrossomo. Organizam o fuso na divisão celular e dão origem a cílios e flagelos.",pas:"Ausentes nas células de plantas superiores. Papel na mitose e na meiose."},
+  {id:"cito",n:"Citoesqueleto",c:[.80,.84,.92],f:"Rede de filamentos de proteína que dá forma à célula e serve de trilho para as vesículas e organelas se moverem. Os microtúbulos saem do centrossomo, perto dos centríolos, e se espalham até a membrana.",pas:"Microtúbulos também formam o fuso na divisão celular, os cílios e os flagelos."},
+ ],
+ casca:"membrana", cortaveis:["membrana","nucleo"], planos:{nucleo:NUC},
+ abre:{mito:[.35,-.45,.2],nucleo:NUC},
+ detalhe:{membrana:9,nucleo:30,nucleolo:40,rer:26,rel:30,golgi:24,mito:28,liso:36,ribo:90,centro:60},
+ brilho:{ribo:.03,nucleo:.06,mito:.14,golgi:.14,rer:.12,liso:.16,cito:.1},
+ textura:{membrana:5,nucleo:5,mito:5,rer:5,rel:5,golgi:5,liso:5},
+ pontos:{n:1400,raio:.93,evita:p=>Math.hypot(p[0]-NUC[0],p[1]-NUC[1],p[2]-NUC[2])<.38},
+ constroi(A){
+  const {add,esfera,capsula,lamina,toro,cilindro,param,T,Rx,Ry,Rz,M,PI}=A,R=A.rnd(9);
+  add(param(96,64,(u,v)=>{const th=u*2*PI,ph=v*PI,sp=Math.sin(ph),rr=1+.025*sp*sp*(Math.sin(th*5+2)*Math.sin(ph*4+3.4)*.6+Math.sin(th*11+ph*7+2)*.4);return [rr*sp*Math.cos(th),rr*Math.cos(ph),rr*sp*Math.sin(th)];}),T(0,0,0),"membrana");
+  add(esfera(.355,.02,5,72),T(...NUC),"nucleo");
+  add(esfera(.13,.08,3),T(NUC[0]+.05,NUC[1]+.06,NUC[2]-.04),"nucleolo",{cut:0});
+  const gr=esfera(.011,0,0,8);
+  for(let i=0;i<260;i++){const r=.06+R()*.27,a=R()*2*PI,b=Math.acos(2*R()-1);add(gr,T(NUC[0]+r*Math.sin(b)*Math.cos(a),NUC[1]+r*Math.cos(b),NUC[2]+r*Math.sin(b)*Math.sin(a)),"nucleo",{c:[.42,.34,.52],cut:0});}
+  const ribo=esfera(.0095,0,0,8);
+  for(let k=0;k<4;k++){const Rr=.43+k*.055,a0=-.55+k*.12,a1=1.25-k*.1;const Mx=M(T(...NUC),Rx(.25-k*.18),Ry(PI*.95));
+   add(lamina(Rr,.05,a0,a1,.016),Mx,"rer");
+   for(let i=0;i<34;i++){const a=a0+(a1-a0)*R(),s=R()<.5?1:-1;add(ribo,M(Mx,T((Rr+.03*(R()-.5))*Math.cos(a),s*.024,(Rr+.03*(R()-.5))*Math.sin(a))),"ribo");}}
+  for(let k=0;k<5;k++)add(toro(.12+R()*.08,.018,0,PI*(.8+R()*.6)),M(T(-.45+R()*.2,-.28+R()*.3,.25+R()*.25),Ry(R()*PI*2),Rx(R()*.8)),"rel");
+  // complexo golgiense: cisternas achatadas empilhadas, levemente curvas
+  const cist=(a,b,curv,esp)=>param(36,24,(u,v)=>{const th=u*2*PI,ph=v*PI,s=Math.sin(ph);return [a*s*Math.cos(th),esp*Math.cos(ph)+curv*s*s,b*s*Math.sin(th)];});
+  GM=M(T(...GO),Rz(-.9),Ry(.4));
+  for(let k=0;k<6;k++){const s=1-k*.06;add(cist(.2*s,.11*s,.03,.011),M(GM,T(0,-k*.03,0)),"golgi",{c:k%2?[.86,.70,.44]:[.80,.63,.38]});}
+  const ves=esfera(.024,0,0,12);
+  for(let i=0;i<10;i++){const a=R()*2*PI;add(ves,M(GM,T(.24*Math.cos(a),-.05-R()*.12,.14*Math.sin(a))),"golgi",{c:[.90,.78,.52]});}
+  const mt=capsula(.06,.16);
+  const crista=param(16,6,(u,v)=>{const a=u*2*PI;const r=.052*(.15+.85*v);return [r*Math.cos(a)*.98,.006*Math.sin(u*6*PI),r*Math.sin(a)];});
+  [[.35,-.45,.2],[.55,-.15,.35],[-.5,.45,.15],[.1,.6,-.35],[-.55,-.35,-.3],[.3,.35,.45],[-.15,-.62,.15],[.62,.2,-.35]].forEach((p,i)=>{const Mx=i===0?M(T(...p),Rz(PI/2.4)):M(T(...p),Rz(R()*PI),Rx(R()*PI));add(mt,Mx,"mito");
+   for(let k=-3;k<=3;k++)add(crista,M(Mx,T(0,k*.034,0),Rz(.35*(k%2?1:-1))),"mito",{c:[.62,.33,.24],nocut:1});});
+  const ls=esfera(.045,.05,1);
+  [[.2,-.2,.55],[-.35,.6,-.2],[.65,-.35,-.1],[-.7,.05,.3],[.05,-.35,-.6]].forEach(p=>add(ls,T(...p),"liso"));
+  for(let i=0;i<110;i++){const r=.45+R()*.48,a=R()*2*PI,b=Math.acos(2*R()-1);add(ribo,T(r*Math.sin(b)*Math.cos(a),r*Math.cos(b),r*Math.sin(b)*Math.sin(a)),"ribo",{c:[.80,.76,.70]});}
+  // proteínas da membrana (grãos salientes) e poros da carioteca
+  const prot=esfera(.017,.12,3,10);
+  for(let i=0;i<170;i++){const a=R()*2*PI,b=Math.acos(2*R()-1),rr=1.0+.004*R();add(prot,M(T(rr*Math.sin(b)*Math.cos(a),rr*Math.cos(b),rr*Math.sin(b)*Math.sin(a))),"membrana");}
+  const poro=toro(.02,.0075,0,2*PI,14);
+  for(let i=0;i<90;i++){const a=R()*2*PI,b=Math.acos(2*R()-1),rr=.358;add(poro,M(T(NUC[0]+rr*Math.sin(b)*Math.cos(a),NUC[1]+rr*Math.cos(b),NUC[2]+rr*Math.sin(b)*Math.sin(a)),Ry(-a),Rz(-b)),"nucleo",{c:[.66,.58,.78]});}
+  // citoesqueleto: microtúbulos saindo do centrossomo até perto da membrana
+  for(let i=0;i<34;i++){const a=R()*2*PI,b=Math.acos(2*R()-1),d=[Math.sin(b)*Math.cos(a),Math.cos(b),Math.sin(b)*Math.sin(a)],w1=R()*6,w2=R()*6;
+   add(A.tubo(u=>{const L=.12+u*.8;let q=[CE[0]+d[0]*L,CE[1]+d[1]*L,CE[2]+d[2]*L];q=[q[0]+.03*Math.sin(u*7+w1),q[1]+.03*Math.sin(u*6+w2),q[2]+.03*Math.cos(u*8+w1)];const l=Math.hypot(...q);return l>.94?q.map(x=>x*.94/l):q;},.0028,60,6),T(0,0,0),"cito",{cut:0,a:.55});}
+  const tub=cilindro(.006,.15,10);
+  const centriolo=Mx=>{for(let i=0;i<9;i++){const a=i/9*2*PI;for(let j=0;j<3;j++){const aa=a+j*.11;add(tub,M(Mx,T(.03*Math.cos(aa)+j*.004*Math.cos(a+PI/2),0,.03*Math.sin(aa)+j*.004*Math.sin(a+PI/2))),"centro");}}};
+  centriolo(T(...CE));centriolo(M(T(CE[0]+.06,CE[1]+.03,CE[2]),Rz(PI/2)));
+ },
+ get foco(){return {membrana:[[0,0,0],2.4,[0,0,1]],nucleo:[NUC,.75],nucleolo:[[NUC[0]+.05,NUC[1]+.06,NUC[2]-.04],.5],rer:[[NUC[0]-.25,NUC[1],NUC[2]-.35],.65],rel:[[-.35,-.15,.38],.6],golgi:[[GO[0],GO[1]-.08,GO[2]],.7,[GM[4]+GM[8],GM[5]+GM[9],GM[6]+GM[10]]],mito:[[.35,-.45,.2],.42],liso:[[.2,-.2,.55],.32],ribo:[[NUC[0]-.3,NUC[1]+.05,NUC[2]-.35],.32],centro:[[CE[0]+.03,CE[1]+.02,CE[2]],.36],cito:[CE,1.3]};},
+});
+
+</script></body></html>

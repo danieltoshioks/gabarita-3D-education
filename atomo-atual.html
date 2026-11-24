@@ -1,0 +1,39 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Modelo atual · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// modelo atual (quântico): o elétron não tem trajetória definida; há regiões de maior probabilidade (orbitais)
+Modelo3D({
+ titulo:"Modelo atual", area:"Química", voltar:"index.html#quimica", rotLista:"Partes", rotParte:"Parte",
+ geral:{t:"Modelo atual: nuvem eletrônica",f:"Pela mecânica quântica (Schrödinger, Heisenberg, De Broglie), não dá para saber ao mesmo tempo a posição e a velocidade exata de um elétron. Então não existe órbita: existem orbitais, regiões em volta do núcleo onde a chance de encontrar o elétron é maior. Quanto mais densa a nuvem, maior a probabilidade.",
+  dl:[["Quando","a partir de 1926"],["Ideias-chave","dualidade onda-partícula e princípio da incerteza"],["Orbital","região de maior probabilidade do elétron"],["Subníveis","s, p, d, f"]],
+  pas:"Diagrama de Pauling, subníveis s, p, d, f e distribuição eletrônica. O modelo mostra o orbital 1s (esfera) e os três orbitais 2p (halteres em x, y e z)."},
+ partes:[
+  {id:"nucleo",n:"Núcleo",c:[.90,.38,.30],f:"Prótons e nêutrons no centro. Muito aumentado no modelo.",pas:"O núcleo continua como no modelo de Rutherford."},
+  {id:"s",n:"Orbital s",c:[.45,.72,1],f:"Forma esférica em volta do núcleo. Cada orbital comporta no máximo 2 elétrons, com spins opostos.",pas:"Subnível s: 1 orbital, até 2 elétrons."},
+  {id:"px",n:"Orbital 2pₓ",c:[1,.62,.40],f:"Forma de halter, com dois lobos ao longo do eixo x e o núcleo no meio.",pas:"Subnível p: 3 orbitais (pₓ, p_y, p_z), até 6 elétrons."},
+  {id:"py",n:"Orbital 2p_y",c:[.55,.88,.55],f:"Mesmo formato do pₓ, orientado no eixo y.",pas:"Os três orbitais p têm a mesma energia e são perpendiculares entre si."},
+  {id:"pz",n:"Orbital 2p_z",c:[.85,.60,1],f:"Mesmo formato, orientado no eixo z.",pas:"Regra de Hund: os elétrons ocupam um orbital p de cada vez antes de formar pares."},
+ ],
+ detalhe:{nucleo:30}, relevo:{nucleo:.05}, brilho:{s:.6,px:.6,py:.6,pz:.6},
+ aoRaio:0, fundo:["#0D1530","#050914"], dist:4.4, pitch:.5, yaw:.6, giro:.002, botoes:{corte:false},
+ // nuvem de probabilidade: mais pontos onde a chance de achar o elétron é maior
+ pontos:{n:5200,raio:1.7,cor:[.85,.92,1],tam:2.2,evita:p=>{const r=Math.hypot(...p),s=Math.exp(-r/.22),pp=Math.max(p[0]*p[0],p[1]*p[1],p[2]*p[2])/(r*r+1e-6)*Math.exp(-r/.42)*(r/.6);return Math.random()>Math.min(1,(s*1.4+pp*1.1)*1.3);}},
+ constroi(A){
+  const {add,esfera,param,T,Rz,Rx,M,PI}=A;
+  add(esfera(.06,0,0,24),T(0,0,0),"nucleo",{emi:.4});
+  add(esfera(.5,0,0,48),T(0,0,0),"s",{a:.12,emi:.1});
+  // lobo do orbital p: superfície r = k·cos²θ (halter), ao longo do eixo y antes de girar
+  const lobo=param(56,40,(u,v)=>{const th=v*PI,ph=u*2*PI,c=Math.cos(th),r=1.25*c*c;return [r*Math.sin(th)*Math.cos(ph)*.62,r*c,r*Math.sin(th)*Math.sin(ph)*.62];});
+  add(lobo,M(T(0,0,0),Rz(-PI/2)),"px",{a:.15,emi:.1});
+  add(lobo,T(0,0,0),"py",{a:.15,emi:.1});
+  add(lobo,M(T(0,0,0),Rx(PI/2)),"pz",{a:.15,emi:.1});
+ },
+ foco:{nucleo:[[0,0,0],1.0,[0,.3,1]],s:[[0,0,0],1.9,[0,.3,1]],px:[[0,0,0],3.4,[0,.4,1]],py:[[0,0,0],3.4,[1,.15,.6]],pz:[[0,0,0],3.4,[1,.4,0]]},
+ etiquetas:[{id:"px",p:[1.3,0,0],t:"2pₓ"},{id:"py",p:[0,1.32,0],t:"2p_y"},{id:"pz",p:[0,0,1.3],t:"2p_z"},{id:"s",p:[.36,.36,0],t:"1s"}],
+});
+
+</script></body></html>

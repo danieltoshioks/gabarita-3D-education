@@ -1,0 +1,520 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Corpo humano · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// titulo:"Corpo humano"
+// Corpo humano: visão geral + 12 sistemas. O corpo está de frente (+z); o lado direito do corpo fica à esquerda de quem olha (−x).
+const PI=Math.PI;
+const SIS=[
+ ["geral","Corpo inteiro",[.80,.80,.86]],
+ ["esqueletico","Sistema esquelético",[.92,.88,.78]],["muscular","Sistema muscular",[.78,.30,.28]],["nervoso","Sistema nervoso",[.96,.80,.40]],
+ ["circulatorio","Sistema circulatório",[.86,.24,.22]],["respiratorio","Sistema respiratório",[.92,.62,.66]],["digestorio","Sistema digestório",[.94,.66,.46]],
+ ["urinario","Sistema urinário",[.66,.36,.34]],["endocrino","Sistema endócrino",[.66,.56,.92]],["linfatico","Sistema linfático e imune",[.48,.80,.58]],
+ ["masculino","Sistema genital masculino",[.52,.64,.92]],["feminino","Sistema genital feminino",[.94,.56,.72]],["tegumentar","Pele (sistema tegumentar)",[.94,.78,.66]],
+];
+const S=(()=>{const h=location.hash.slice(1).split("-").filter(x=>x&&x!=="teste");return SIS.some(s=>s[0]===h[0])?h[0]:"geral";})();
+const IDX=SIS.findIndex(s=>s[0]===S);
+const vai=id=>{location.hash=id;location.reload();};
+// ---------- referências do corpo ----------
+const tab=(T,y)=>{if(y>=T[0][0])return T[0][1];for(let i=1;i<T.length;i++)if(y>=T[i][0]){const f=(y-T[i][0])/(T[i-1][0]-T[i][0]);return T[i][1]+(T[i-1][1]-T[i][1])*f;}return T[T.length-1][1];};
+const SZ=[[1.28,-.04],[1.05,-.08],[.8,-.15],[.5,-.14],[.25,-.08],[.05,-.09],[-.12,-.14],[-.25,-.12]]; // curvaturas da coluna
+const sz=y=>tab(SZ,y);
+const Sh=s=>[s*.4,1.03,-.02],El=s=>[s*.47,.47,-.04],Wr=s=>[s*.52,-.03,.03],Hd=s=>[s*.54,-.27,.05];
+const Hp=s=>[s*.17,-.14,0],Kn=s=>[s*.19,-.92,.02],An=s=>[s*.2,-1.58,-.03];
+const lerp=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+const mid=(a,b)=>lerp(a,b,.5);
+function lim(A,a,b,r,id,o){const d=A.sub(b,a),L=Math.hypot(...d);A.add(A.capsula(r,Math.max(.001,L-2*r),18),A.M(A.T(...mid(a,b)),A.alinha(d)),id,o);}
+function osso(A,a,b,r,id){lim(A,a,b,r,id);A.add(A.esfera(r*1.45,0,0,18),A.T(...a),id);A.add(A.esfera(r*1.45,0,0,18),A.T(...b),id);}
+function elip(A,c,r,id,o,R){A.add(A.elipsoide(r[0],r[1],r[2],30),R?A.M(A.T(...c),R):A.T(...c),id,o);}
+// silhueta translúcida do corpo
+function pele(A,a){
+ const o={a:a===undefined?.1:a,c:[.94,.80,.70],mat:{tx:5,rel:.02,det:30,esp:.12}};
+ // membro afinando, com o volume do músculo (bulge em t0, largura w) por cima do raio base
+ const membro=(p,q,r0,r1,bul,t0,w,n)=>A.add(A.tubo(u=>lerp(p,q,u),u=>{const b=bul*Math.exp(-Math.pow((u-t0)/w,2));return r0+(r1-r0)*u+b;},n||36,20),A.T(0,0,0),"pele",o);
+ // cabeça: crânio arredondado, rosto um pouco mais estreito e queixo
+ A.add(A.param(40,30,(u,v)=>{const th=u*2*PI,ph=v*PI,y=Math.cos(ph),f=y<-.2?1-.28*Math.pow((-.2-y)/.8,1.4):1,fr=Math.sin(th)>0?1+.06*Math.sin(th):1;return [.15*Math.sin(ph)*Math.cos(th)*f,.205*y,.175*Math.sin(ph)*Math.sin(th)*f*fr];}),A.T(0,1.45,.01),"pele",o);
+ for(const s of [-1,1])A.add(A.elipsoide(.018,.04,.025,14),A.T(s*.15,1.45,-.005),"pele",o);              // orelhas
+ membro([0,1.3,-.01],[0,1.06,-.015],.062,.085,0,.5,.1,16);                                                 // pescoço
+ const W=[[1.2,.075],[1.17,.2],[1.13,.33],[1.05,.39],[.95,.37],[.75,.31],[.5,.26],[.3,.24],[.12,.27],[.0,.31],[-.15,.33],[-.28,.28]],D=[[1.2,.065],[1.16,.1],[1.12,.12],[.95,.16],[.75,.19],[.6,.18],[.45,.16],[.25,.14],[.05,.15],[-.15,.17],[-.28,.14]];
+ A.add(A.param(64,48,(u,v)=>{const y=1.2-v*1.48,th=u*2*PI,c=Math.cos(th),sn=Math.sin(th),e=.7,peito=sn>0&&y>.7&&y<.95?.025*Math.sin((y-.7)/.25*PI)*Math.pow(Math.abs(c),.3):0,gl=sn<0&&y<0&&y>-.28?.03*Math.sin(-y/.28*PI):0;
+  return [tab(W,y)*Math.sign(c)*Math.abs(c)**e,y,(tab(D,y)+peito+gl)*Math.sign(sn)*Math.abs(sn)**e+.01];}),A.T(0,0,0),"pele",o);
+ for(const s of [-1,1]){
+  A.add(A.esfera(.07,0,0,18),A.T(...Sh(s)),"pele",o);
+  membro(Sh(s),El(s),.066,.047,.012,.45,.25);                                   // braço com bíceps
+  membro(El(s),Wr(s),.047,.033,.012,.22,.22);                                   // antebraço afinando para o punho
+  elip(A,mid(Wr(s),Hd(s)),[.03,.085,.052],"pele",o);                            // palma
+  for(let k=0;k<4;k++){const x=Hd(s)[0],z=.079-.026*k,c=mid(Wr(s),Hd(s));membro([x,c[1]-.07,c[2]-.04+z],[x+s*.006,c[1]-.16-.012*(1.5-Math.abs(k-1.5)),c[2]-.04+z],.0105,.0075,0,.5,.1,10);}
+  membro([Wr(s)[0]+s*.0,Wr(s)[1]-.08,Wr(s)[2]+.06],[Wr(s)[0]+s*.02,Wr(s)[1]-.16,Wr(s)[2]+.09],.013,.009,0,.5,.1,10);   // polegar
+  A.add(A.esfera(.115,0,0,18),A.T(...Hp(s)),"pele",o);
+  membro(Hp(s),Kn(s),.118,.062,.012,.3,.3);                                     // coxa afinando para o joelho
+  membro(Kn(s),An(s),.062,.036,.022,.28,.2);                                    // perna com a panturrilha
+  A.add(A.param(30,20,(u,v)=>{const th=u*2*PI,ph=v*PI,z=Math.cos(ph),w=z>0?1-.25*z:1;return [.045*Math.sin(ph)*Math.cos(th)*w,.032*Math.sin(ph)*Math.sin(th)*(z>.2?.7:1),.13*z];}),A.T(s*.2,-1.63,.06),"pele",o);  // pé
+ }
+}
+// ---------- sistemas ----------
+const SYS={};
+SYS.geral={t:"O corpo humano",f:"Os órgãos trabalham em conjunto, organizados em sistemas. Cada cor desta visão mostra um sistema. Toque num sistema da lista (ou use o controle de baixo) para abrir o sistema com todas as suas estruturas explicadas.",
+ dl:[["Níveis de organização","células → tecidos → órgãos → sistemas → organismo"],["Ossos no adulto","206"],["Músculos","mais de 600"]],
+ pas:"Integração entre sistemas: o oxigênio entra pelo respiratório, é levado pelo circulatório e usado na respiração celular; os nutrientes vêm do digestório; os resíduos saem pelo urinário. Nervoso e endócrino coordenam tudo.",
+ cam:[[0,-.05,0],6.4,.12],
+ monta(A){
+  pele(A,.12);
+  esqueleto(A,{a:.25,c:[.92,.88,.78]},"esqueletico",true);
+  cerebro(A,"nervoso");A.poli(colunaPts(1.3,.3,.03),.014,"nervoso",{c:[.96,.82,.46]});
+  coracao(A,"circulatorio");A.poli(AORTA,.022,"circulatorio",{c:[.86,.24,.22]});
+  pulmoes(A,"respiratorio",.85);
+  figado(A,"digestorio");estomago(A,"digestorio");intestinos(A,"digestorio");
+  rins(A,"urinario");A.add(A.esfera(.065,0,0,24),A.T(0,-.17,.08),"urinario",{c:[.86,.72,.36]});
+  A.add(A.elipsoide(.03,.02,.015,20),A.T(0,1.12,.08),"endocrino");elip(A,[.15,.36,-.06],[.035,.06,.03],"linfatico");
+  for(const s of [-1,1])lim(A,mid(Sh(s),El(s)).map((v,i)=>v+[s*.03,0,.03][i]),El(s),.04,"muscular",{c:[.78,.30,.28]});
+  elip(A,[0,-.12,.03],[.045,.06,.035],"feminino");elip(A,[.0,-.4,.07],[.04,.05,.04],"masculino",{a:0});
+ },
+ etq:[],
+};
+// ---- esquelético
+const COSTELAS=[];
+function colunaPts(y0,y1,dz){const P=[];for(let y=y0;y>=y1;y-=.02)P.push([0,y,sz(y)+(dz||0)]);return P;}
+function esqueleto(A,o,id,simples){
+ const add=(g,m,i,x)=>A.add(g,m,simples?id:i,Object.assign({},o||{},x||{}));
+ const P=(i)=>simples?id:i;
+ // crânio e mandíbula
+ add(A.elipsoide(.15,.17,.18,40),A.T(0,1.5,-.01),"cranio");
+ add(A.param(30,8,(u,v)=>{const a=-PI*.75+u*PI*1.5,r=.11+.01*v;return [r*Math.sin(a),1.33+.03*v-.04*Math.cos(a)*0,.03+r*Math.cos(a)*.95];}),A.T(0,0,0),"cranio");
+ if(!simples)for(const s of [-1,1])A.add(A.esfera(.035,0,0,16),A.T(s*.06,1.48,.15),"cranio",{c:[.15,.12,.12]});
+ // coluna
+ for(let y=1.28;y>=-.02;y-=.052){const r=y>1.05?.026:y>.45?.03:.038;add(A.cilindro(r,.032,14),A.T(0,y,sz(y)),"coluna");if(!simples)A.add(A.cilindro(r*.95,.012,14),A.T(0,y-.026,sz(y)),"coluna",{c:[.70,.78,.86]});
+  if(!simples)add(A.cone(.015,.05,8),A.M(A.T(0,y,sz(y)-.04),A.Rx(-PI/2)),"coluna");}
+ add(A.cone(.06,.16,16),A.M(A.T(0,-.12,sz(-.12)),A.Rx(PI)),"coluna");
+ // costelas e esterno
+ for(let k=0;k<12;k++){const y=.98-k*.048,rx=.12+.13*Math.sin((k+2)/14*PI),rz=.15+.05*Math.sin((k+1)/13*PI),tm=k<7?1:k<10?.9:.55,zc=sz(y)+rz;
+  for(const s of [-1,1]){const pts=[];for(let i=0;i<=24;i++){const th=i/24*PI*tm;pts.push([s*rx*Math.sin(th),y-.12*(th/PI)**1.5,zc-rz*Math.cos(th)]);}
+   if(!simples||k%2===0)A.poli(pts,simples?.006:.009,P("costelas"),Object.assign({},o||{}));}}
+ add(A.caixa(.05,.3,.025),A.T(0,.8,.19),"costelas");
+ // cintura escapular e membros superiores
+ for(const s of [-1,1]){
+  if(!simples){A.poli([[s*.03,1.04,.16],[s*.18,1.07,.12],[s*.36,1.06,.02]],.014,"cintura");A.add(A.faces([[[s*.12,.97,-.2],[s*.34,1.0,-.16],[s*.18,.75,-.2]]]),A.T(0,0,0),"cintura");
+   A.add(A.faces([[[s*.12,.97,-.2],[s*.18,.75,-.2],[s*.34,1.0,-.16]]]),A.T(0,0,0),"cintura");}
+  if(simples){lim(A,Sh(s),El(s),.022,id,o);lim(A,El(s),Wr(s),.018,id,o);lim(A,Hp(s),Kn(s),.03,id,o);lim(A,Kn(s),An(s),.025,id,o);continue;}
+  osso(A,Sh(s),El(s),.026,"umero");
+  osso(A,El(s).map((v,i)=>v+[s*.012,0,.01][i]),Wr(s).map((v,i)=>v+[s*.012,0,.012][i]),.013,"antebraco");
+  osso(A,El(s).map((v,i)=>v+[-s*.01,0,-.012][i]),Wr(s).map((v,i)=>v+[-s*.01,0,-.01][i]),.012,"antebraco");
+  const w=Wr(s);for(let i=0;i<8;i++)A.add(A.esfera(.012,0,0,8),A.T(w[0]+s*(i%4-1.5)*.012,w[1]-.03-Math.floor(i/4)*.02,w[2]),"maos");
+  for(let f=0;f<5;f++){const a=w.map((v,i)=>v+[s*(f-2)*.016,-.055,0][i]),L=f===0?.1:.17,b=a.map((v,i)=>v+[s*(f-2)*.01-(f===0?s*.03:0),-L,.01][i]);A.poli([a,lerp(a,b,.45),lerp(a,b,.72),b],.006,"maos");}
+  // pelve, membros inferiores
+  A.add(A.param(30,20,(u,v)=>{const a=u*PI*1.1-PI*.05,b=v*PI;return [s*(.06+.13*Math.sin(b)*Math.cos(a*.5)),-.02+.12*Math.cos(b),-.03+.1*Math.sin(b)*Math.sin(a)*.6];}),A.T(0,0,0),"pelve");
+  A.poli([[s*.17,-.12,.0],[s*.12,-.2,.08],[s*.02,-.22,.1]],.022,"pelve");
+  A.add(A.esfera(.04,0,0,16),A.T(...Hp(s)),"femur");A.poli([Hp(s),[s*.22,-.17,0]],.024,"femur");osso(A,[s*.22,-.17,0],Kn(s),.028,"femur");
+  A.add(A.elipsoide(.03,.035,.015,16),A.T(Kn(s)[0],Kn(s)[1],.08),"patela");
+  osso(A,Kn(s),An(s),.026,"perna");osso(A,Kn(s).map((v,i)=>v+[s*.035,-.04,-.02][i]),An(s).map((v,i)=>v+[s*.03,.02,-.02][i]),.011,"perna");
+  const a=An(s);A.add(A.elipsoide(.035,.03,.05,16),A.T(a[0],a[1]-.04,a[2]-.02),"pes");for(let f=0;f<5;f++)A.poli([[a[0]+s*(f-2)*.014,a[1]-.06,a[2]+.02],[a[0]+s*(f-2)*.02,a[1]-.09,a[2]+.17]],.007,"pes");
+ }
+}
+SYS.esqueletico={t:"Sistema esquelético",f:"Conjunto de ossos, cartilagens e articulações. Sustenta o corpo, protege órgãos (crânio protege o encéfalo; costelas, coração e pulmões), serve de alavanca para os músculos, guarda cálcio e fósforo e produz células do sangue na medula óssea vermelha.",
+ dl:[["Ossos no adulto","206 (o bebê nasce com cerca de 300, que se fundem)"],["Esqueleto axial","crânio, coluna, costelas e esterno"],["Esqueleto apendicular","membros e cinturas"],["Tecido","ósseo: matriz de colágeno + fosfato de cálcio"]],
+ pas:"Funções do esqueleto, tipos de articulação, células ósseas (osteoblastos formam, osteoclastos reabsorvem) e a relação com cálcio e vitamina D (raquitismo, osteoporose).",
+ cam:[[0,-.05,0],6.4,.1],
+ partes:[["cranio","Crânio",[.92,.88,.80],"Caixa óssea formada por ossos unidos por suturas (articulações imóveis). Protege o encéfalo. A mandíbula é o único osso móvel da cabeça.","Moleira do bebê: os ossos ainda não se fundiram (fontanelas)."],
+  ["coluna","Coluna vertebral",[.90,.86,.76],"33 vértebras (7 cervicais, 12 torácicas, 5 lombares, sacro e cóccix) com discos de cartilagem entre elas, que amortecem. Protege a medula espinal, que passa por dentro.","As curvaturas naturais (lordoses e cifose) distribuem o peso; desvios laterais são escoliose."],
+  ["costelas","Costelas e esterno (caixa torácica)",[.94,.90,.82],"12 pares de costelas presas à coluna. As 7 primeiras ligam-se direto ao esterno (verdadeiras), as 3 seguintes por cartilagem (falsas) e as 2 últimas ficam soltas na frente (flutuantes). Protegem coração e pulmões e participam da respiração.","Na inspiração, os músculos intercostais elevam as costelas e aumentam o volume do tórax."],
+  ["cintura","Clavículas e escápulas",[.90,.84,.74],"Formam a cintura escapular, que prende os braços ao tronco. A clavícula liga o esterno ao ombro; a escápula (omoplata) fica nas costas.","Fratura de clavícula é uma das mais comuns."],
+  ["umero","Úmero",[.92,.88,.78],"Osso do braço, entre o ombro e o cotovelo.","Ossos longos: medula amarela (gordura) no canal central e vermelha nas pontas."],
+  ["antebraco","Rádio e ulna",[.92,.88,.78],"Ossos do antebraço. O rádio fica do lado do polegar e gira em volta da ulna para virar a palma da mão.","Articulação do cotovelo: tipo dobradiça."],
+  ["maos","Mãos",[.92,.88,.78],"27 ossos em cada mão: carpos (punho), metacarpos (palma) e falanges (dedos).","O polegar opositor permite a pinça fina."],
+  ["pelve","Pelve (quadril)",[.90,.86,.76],"Ossos do quadril unidos ao sacro. Sustentam o peso do tronco e protegem órgãos do baixo abdome. Na mulher é mais larga, adaptada ao parto.","Diferença da pelve masculina e feminina."],
+  ["femur","Fêmur",[.94,.90,.80],"Osso da coxa, o maior e mais resistente do corpo. A cabeça do fêmur encaixa na pelve (articulação do quadril, tipo esfera).","Maior osso do corpo humano."],
+  ["patela","Patela",[.94,.90,.82],"Pequeno osso na frente do joelho, dentro do tendão do quadríceps. Protege a articulação e melhora a alavanca da perna.","Antigo nome: rótula."],
+  ["perna","Tíbia e fíbula",[.92,.88,.78],"Ossos da perna. A tíbia (canela) sustenta o peso; a fíbula, mais fina, fica do lado de fora.","A tíbia fica logo abaixo da pele, por isso pancadas na canela doem tanto."],
+  ["pes","Pés",[.92,.88,.78],"26 ossos em cada pé: tarsos (incluindo o calcanhar), metatarsos e falanges. Formam arcos que amortecem o impacto.","Pé chato: arco plantar rebaixado."]],
+ monta(A){pele(A,.07);esqueleto(A);},
+ etq:[["cranio",[0,1.72,0],"Crânio"],["coluna",[.08,.2,-.1],"Coluna"],["costelas",[-.33,.72,.1],"Costelas"],["femur",[.32,-.5,0],"Fêmur"],["pelve",[-.3,-.02,0],"Pelve"],["umero",[-.55,.75,0],"Úmero"]],
+};
+// ---- muscular
+SYS.muscular={t:"Sistema muscular",f:"Mais de 600 músculos esqueléticos, presos aos ossos por tendões, produzem os movimentos ao se contrair. A contração acontece quando os filamentos de actina deslizam sobre os de miosina, usando ATP e íons cálcio. Os músculos trabalham em pares: quando um contrai, o oposto relaxa.",
+ dl:[["Estriado esquelético","voluntário, preso aos ossos"],["Estriado cardíaco","involuntário, só no coração"],["Liso","involuntário, nas paredes de órgãos e vasos"],["Energia","ATP; em esforço intenso, fermentação lática"]],
+ pas:"Tipos de tecido muscular, mecanismo de contração (actina, miosina, Ca²⁺, ATP), músculos antagônicos e a fadiga muscular.",
+ cam:[[0,-.05,0],6.4,.1],
+ partes:[["cabeca","Esternocleidomastóideo e trapézio",[.80,.32,.30],"O esternocleidomastóideo gira e inclina a cabeça; o trapézio, nas costas, eleva os ombros e segura a escápula.","Músculos do pescoço e da postura."],
+  ["deltoide","Deltoide",[.78,.30,.28],"Cobre o ombro e levanta o braço para o lado, para a frente e para trás.","Local comum de injeção intramuscular."],
+  ["peitoral","Peitoral maior",[.76,.28,.26],"Músculo do peito que puxa o braço para a frente e para o meio do corpo.","Trabalha em flexões e supino."],
+  ["biceps","Bíceps e tríceps",[.80,.32,.28],"O bíceps (na frente do braço) dobra o cotovelo; o tríceps (atrás) estica. São o exemplo clássico de músculos antagônicos.","Músculos antagônicos: um contrai enquanto o outro relaxa."],
+  ["antebraco","Músculos do antebraço",[.76,.30,.28],"Movem o punho e os dedos através de tendões longos que passam pelo punho.","Tendinite por esforço repetitivo (LER)."],
+  ["abdome","Reto abdominal e oblíquos",[.78,.32,.30],"Seguram os órgãos do abdome, flexionam e giram o tronco e ajudam na expiração forçada, na tosse e no parto.","O 'tanquinho' é o reto abdominal dividido por faixas de tendão."],
+  ["gluteo","Glúteo máximo",[.74,.28,.26],"Maior músculo do corpo. Estende o quadril: levantar da cadeira, subir escadas, correr.","Maior músculo do corpo humano."],
+  ["quadriceps","Quadríceps e posteriores da coxa",[.80,.32,.28],"O quadríceps (frente) estende o joelho; os posteriores (isquiotibiais) dobram o joelho.","Mais um par antagônico."],
+  ["panturrilha","Panturrilha e tibial anterior",[.78,.30,.28],"O gastrocnêmio (panturrilha) levanta o calcanhar e se prende pelo tendão de Aquiles; o tibial anterior levanta a ponta do pé.","Tendão calcâneo (de Aquiles): o mais forte do corpo."],
+  ["diafragma","Diafragma",[.84,.40,.36],"Músculo em forma de cúpula que separa tórax e abdome. É o principal músculo da respiração: ao contrair, desce e o ar entra.","Soluço é uma contração involuntária do diafragma."]],
+ monta(A){
+  pele(A,.08);esqueleto(A,{a:.25,c:[.92,.88,.78]},"osso",true);
+  const o={},R=A.rnd(4);
+  for(const s of [-1,1]){
+   lim(A,[s*.07,1.32,-.02],[s*.03,1.06,.12],.022,"cabeca");
+   A.add(A.param(20,10,(u,v)=>[s*(.02+.36*u),1.12-.06*u-.35*v*(1-u*.5),-.17-.03*Math.sin(u*PI)]),A.T(0,0,0),"cabeca",{a:.95});
+   elip(A,[s*.43,.96,0],[.08,.12,.09],"deltoide",o,A.Rz(s*.25));
+   elip(A,[s*.16,.84,.16],[.15,.09,.05],"peitoral",o,A.Rz(-s*.15));
+   const sh=Sh(s),el=El(s);lim(A,lerp(sh,el,.25).map((v,i)=>v+[0,0,.045][i]),lerp(sh,el,.92).map((v,i)=>v+[0,0,.035][i]),.04,"biceps");
+   lim(A,lerp(sh,el,.2).map((v,i)=>v+[0,0,-.05][i]),lerp(sh,el,.95).map((v,i)=>v+[0,0,-.05][i]),.04,"biceps",{c:[.70,.26,.24]});
+   lim(A,lerp(el,Wr(s),.05),lerp(el,Wr(s),.75),.038,"antebraco");
+   for(let k=0;k<4;k++)A.add(A.caixa(.075,.085,.03),A.T(s*.05,.48-k*.1,.17-k*.004),"abdome");
+   elip(A,[s*.21,.3,.08],[.06,.17,.1],"abdome",{c:[.72,.28,.26]});
+   elip(A,[s*.13,-.17,-.13],[.12,.13,.08],"gluteo");
+   const hp=Hp(s),kn=Kn(s);lim(A,lerp(hp,kn,.1).map((v,i)=>v+[0,0,.05][i]),lerp(hp,kn,.88).map((v,i)=>v+[0,0,.055][i]),.075,"quadriceps");
+   lim(A,lerp(hp,kn,.15).map((v,i)=>v+[0,0,-.05][i]),lerp(hp,kn,.92).map((v,i)=>v+[0,0,-.05][i]),.06,"quadriceps",{c:[.70,.26,.24]});
+   elip(A,[s*.19,-1.12,-.05],[.06,.18,.06],"panturrilha");lim(A,[s*.19,-1.3,-.07],[s*.2,-1.6,-.08],.012,"panturrilha",{c:[.94,.90,.82]});
+   lim(A,lerp(kn,An(s),.1).map((v,i)=>v+[s*.02,0,.04][i]),lerp(kn,An(s),.8).map((v,i)=>v+[s*.01,0,.04][i]),.025,"panturrilha");
+  }
+  A.add(A.param(40,14,(u,v)=>{const a=u*2*PI,r=.27*v;return [r*Math.cos(a),.44+.09*(1-v*v),r*Math.sin(a)*.6-.02];}),A.T(0,0,0),"diafragma",{a:.85});
+ },
+ extra:{relevo:{deltoide:.2,peitoral:.2,biceps:.2,quadriceps:.2,gluteo:.2,abdome:.15,panturrilha:.2,antebraco:.2},semPick:["osso"]},
+ etq:[["deltoide",[-.52,1.08,0],"Deltoide"],["peitoral",[.2,.95,.2],"Peitoral"],["abdome",[0,.6,.2],"Abdome"],["quadriceps",[-.35,-.5,.1],"Quadríceps"],["biceps",[.58,.75,.05],"Bíceps"],["panturrilha",[.3,-1.12,0],"Panturrilha"]],
+};
+// ---- nervoso
+function cerebro(A,id,o){o=o||{};
+ for(const s of [-1,1])A.add(A.elipsoide(.072,.09,.13,40),A.T(s*.045,1.52,-.01),id,Object.assign({c:[.94,.72,.72]},o));
+ A.add(A.elipsoide(.075,.04,.05,30),A.T(0,1.42,-.1),id!=="cerebro"?id:"cerebelo",Object.assign({c:[.90,.62,.62]},o));
+ A.add(A.cilindro(.02,.14,14),A.M(A.T(0,1.36,-.06),A.Rx(.25)),id!=="cerebro"?id:"tronco",Object.assign({c:[.92,.70,.60]},o));
+}
+SYS.nervoso={t:"Sistema nervoso",f:"Recebe informações do ambiente e do próprio corpo, processa e envia respostas aos músculos e glândulas. O sistema nervoso central (encéfalo e medula espinal) processa; o periférico (nervos e gânglios) leva e traz os sinais.",
+ dl:[["SNC","encéfalo + medula espinal"],["SNP","nervos cranianos (12 pares) e espinais (31 pares)"],["Autônomo","simpático (luta ou fuga) e parassimpático (repouso)"],["Célula","neurônio"]],
+ pas:"Divisões do sistema nervoso, arco reflexo (medula responde sem passar pelo encéfalo), efeitos do simpático e do parassimpático e ação de drogas nas sinapses.",
+ cam:[[0,-.05,0],6.4,.1],
+ partes:[["cerebro","Cérebro",[.94,.72,.72],"Maior parte do encéfalo, com dois hemisférios cobertos pelo córtex cheio de dobras (giros). Responsável por pensamento, memória, linguagem, movimentos voluntários e interpretação dos sentidos.",["Lobos","frontal, parietal, temporal, occipital"]],
+  ["cerebelo","Cerebelo",[.90,.62,.62],"Fica atrás e embaixo do cérebro. Coordena os movimentos, o equilíbrio e a postura.","O álcool afeta o cerebelo: andar cambaleante."],
+  ["tronco","Tronco encefálico",[.92,.70,.60],"Liga o encéfalo à medula. O bulbo controla funções vitais automáticas: respiração, batimentos cardíacos e pressão.","O bulbo ajusta a respiração pela quantidade de CO₂ no sangue."],
+  ["medula","Medula espinal",[.96,.82,.46],"Cordão nervoso dentro da coluna, do pescoço até a região lombar. Conduz sinais entre o encéfalo e o corpo e comanda os atos reflexos.","Arco reflexo: receptor → neurônio sensitivo → medula → neurônio motor → músculo."],
+  ["espinais","Nervos espinais",[.98,.86,.50],"31 pares que saem da medula entre as vértebras. Cada um tem fibras sensitivas (trazem informação) e motoras (levam ordens): são nervos mistos.","Lesão na medula pode causar paralisia abaixo do ponto lesado."],
+  ["membros","Nervos dos membros",[1,.88,.52],"Ramificações que levam o comando aos músculos e trazem tato, dor e temperatura. O nervo isquiático, atrás da coxa, é o mais longo e grosso do corpo.","Ciático (isquiático) inflamado causa dor que desce pela perna."],
+  ["cranianos","Nervos cranianos e órgãos dos sentidos",[1,.80,.44],"12 pares que saem do encéfalo. Ligam olhos (nervo óptico), ouvidos, nariz, língua e músculos da face. O nervo vago desce até o tórax e o abdome.","Nervo vago: principal nervo do parassimpático."]],
+ monta(A){
+  pele(A,.07);esqueleto(A,{a:.18,c:[.92,.88,.78]},"osso",true);
+  cerebro(A,"cerebro");
+  A.poli(colunaPts(1.29,.3,.035),.016,"medula");
+  for(let k=0;k<8;k++)A.poli([[(k-3.5)*.008,.3,sz(.3)+.035],[(k-3.5)*.02,-.1,sz(-.1)+.03],[(k-3.5)*.028,-.22,sz(-.2)+.02]],.004,"medula");
+  for(let y=1.2;y>.32;y-=.055)for(const s of [-1,1])A.poli([[0,y,sz(y)+.035],[s*.05,y-.02,sz(y)+.03],[s*.11,y-.06,sz(y)+.07]],.006,"espinais");
+  for(const s of [-1,1]){
+   const w=Wr(s);A.poli([[s*.05,1.1,-.05],[s*.25,1.02,0],Sh(s).map((v,i)=>v+[0,-.06,.03][i]),El(s).map((v,i)=>v+[0,0,.04][i]),w.map((v,i)=>v+[0,0,.03][i])],.008,"membros");
+   for(let f=0;f<5;f++)A.poli([w,[w[0]+s*(f-2)*.018,w[1]-.2,w[2]+.02]],.004,"membros");
+   A.poli([[s*.05,-.12,-.1],[s*.14,-.24,-.1],lerp(Hp(s),Kn(s),.5).map((v,i)=>v+[0,0,-.06][i]),Kn(s).map((v,i)=>v+[0,0,-.05][i]),An(s).map((v,i)=>v+[0,0,-.03][i]),[s*.21,-1.66,.15]],.011,"membros");
+   A.add(A.esfera(.03,0,0,16),A.T(s*.06,1.48,.15),"cranianos",{c:[.95,.95,.98]});A.poli([[s*.06,1.48,.12],[s*.02,1.47,.04],[0,1.45,.0]],.006,"cranianos");
+   A.poli([[s*.02,1.36,-.04],[s*.03,1.15,.0],[s*.04,.8,.02],[s*.02,.45,.04]],.005,"cranianos");}
+ },
+ extra:{relevo:{cerebro:.4,cerebelo:.3},detalhe:{cerebro:30,cerebelo:40},semPick:["osso"]},
+ etq:[["cerebro",[0,1.72,0],"Cérebro"],["cerebelo",[.15,1.38,-.12],"Cerebelo"],["medula",[.12,.7,-.1],"Medula"],["membros",[.35,-.6,-.1],"Nervo isquiático"]],
+};
+// ---- circulatório
+const AORTA=[[.03,.72,.06],[.02,.86,.04],[.04,.9,-.03],[.04,.82,-.07],[.03,.5,-.08],[.02,.1,-.06],[.0,.03,-.05]];
+function coracao(A,id){elip(A,[.03,.68,.07],[.08,.1,.07],id,{c:[.78,.18,.16]},A.Rz(.5));}
+const ART=s=>[[.0,.03,-.05],[s*.08,-.08,-.02],Hp(s).map((v,i)=>v+[-s*.03,0,.06][i]),lerp(Hp(s),Kn(s),.6).map((v,i)=>v+[-s*.02,0,.02][i]),Kn(s).map((v,i)=>v+[0,0,-.04][i]),An(s).map((v,i)=>v+[0,.02,.0][i]),[s*.2,-1.64,.16]];
+const VEI=s=>ART(s).map((p,i)=>[p[0]+s*.022,p[1],p[2]+.012]);
+const BRA=s=>[[.03,.9,-.02],[s*.12,1.02,.02],Sh(s).map((v,i)=>v+[0,-.08,.03][i]),El(s).map((v,i)=>v+[0,0,.03][i]),Wr(s).map((v,i)=>v+[0,0,.03][i]),Hd(s)];
+SYS.circulatorio={t:"Sistema circulatório",f:"O coração bombeia o sangue por uma rede fechada de vasos. As artérias (vermelho) levam o sangue do coração para os órgãos; as veias (azul) trazem de volta; os capilares, finíssimos, fazem as trocas de gases, nutrientes e resíduos com as células. As bolinhas mostram o sangue circulando.",
+ dl:[["Circulação","dupla, fechada e completa"],["Grande circulação","coração → corpo → coração"],["Pequena circulação","coração → pulmões → coração"],["Pressão normal","cerca de 12 por 8 (120/80 mmHg)"],["Sangue","plasma, hemácias, leucócitos e plaquetas"]],
+ pas:"Diferenças entre artérias, veias e capilares, funções dos componentes do sangue (hemácia transporta O₂, leucócito defende, plaqueta coagula) e problemas como hipertensão e aterosclerose.",
+ cam:[[0,-.05,0],6.4,.1],
+ partes:[["coracao","Coração",[.78,.18,.16],"Bomba muscular com quatro cavidades, um pouco à esquerda no tórax. Bate cerca de 70 vezes por minuto em repouso. Há um modelo só do coração com mais detalhes.","Os lados direito e esquerdo não se misturam."],
+  ["aorta","Aorta",[.86,.24,.22],"Maior artéria do corpo. Sai do ventrículo esquerdo, faz um arco e desce na frente da coluna, dividindo-se em ramos para todos os órgãos.","Artérias têm paredes grossas e elásticas: aguentam a pressão."],
+  ["arterias","Artérias",[.88,.30,.26],"Levam sangue do coração aos órgãos: carótidas (cabeça), subclávias e braquiais (braços), ilíacas e femorais (pernas). Vão se ramificando em arteríolas e capilares.","Pulso: a onda de pressão sentida no punho (artéria radial) ou no pescoço (carótida)."],
+  ["veias","Veias",[.32,.40,.78],"Trazem o sangue de volta ao coração. Têm paredes mais finas e válvulas que impedem o sangue de voltar, ajudadas pela contração dos músculos das pernas.","Varizes: veias dilatadas por falha das válvulas."],
+  ["cavas","Veias cavas",[.30,.38,.76],"A cava superior traz o sangue da cabeça e dos braços; a inferior, do resto do corpo. Desembocam no átrio direito.","Maiores veias do corpo."],
+  ["pulmonar","Circulação pulmonar",[.50,.50,.80],"Artérias pulmonares levam sangue venoso aos pulmões; veias pulmonares trazem sangue oxigenado ao coração. Nos capilares dos alvéolos acontece a hematose.","Hematose: troca de CO₂ por O₂ nos alvéolos."]],
+ monta(A){
+  pele(A,.07);coracao(A,"coracao");A.poli(AORTA,.024,"aorta");
+  for(const s of [-1,1]){A.poli(ART(s),.012,"arterias");A.poli(VEI(s),.014,"veias");A.poli(BRA(s),.01,"arterias");A.poli(BRA(s).map(p=>[p[0]+s*.015,p[1],p[2]-.012]),.012,"veias");
+   A.poli([[s*.02,.9,.0],[s*.04,1.15,.05],[s*.05,1.32,.05],[s*.06,1.45,.0]],.01,"arterias");A.poli([[s*.035,.95,.0],[s*.06,1.15,.02],[s*.07,1.32,.02]],.012,"veias");
+   elip(A,[s*.14,.72,0],[.1,.2,.11],"pulmonar",{a:.15,c:[.92,.62,.66]});
+   A.poli([[.0,.74,.06],[s*.05,.76,.05],[s*.12,.75,.02]],.012,"pulmonar",{c:[.36,.44,.82]});A.poli([[.06,.66,.02],[s*.06,.68,-.01],[s*.13,.67,-.02]],.012,"pulmonar",{c:[.86,.30,.28]});}
+  A.poli([[-.03,.72,.04],[-.03,.88,.0],[-.03,.98,.0]],.022,"cavas");A.poli([[-.02,.62,.03],[-.04,.45,-.04],[-.04,.1,-.05],[-.022,.03,-.04]],.024,"cavas");
+  sangue(A,0);
+ },
+ anima(t,A){A.refaz("sg",()=>sangue(A,t));},
+ extra:{semApagar:["sangue"]},
+ etq:[["coracao",[.2,.7,.15],"Coração"],["aorta",[.12,.35,-.05],"Aorta"],["arterias",[-.32,-.55,.1],"Artérias"],["veias",[.38,-.55,.1],"Veias"],["cavas",[-.15,.92,0],"Cava superior"]],
+};
+const camP=(P,u)=>{const L=[0];for(let i=1;i<P.length;i++)L.push(L[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1],P[i][2]-P[i-1][2]));const s=u*L[L.length-1];let i=1;while(i<P.length-1&&L[i]<s)i++;const f=(s-L[i-1])/((L[i]-L[i-1])||1);return lerp(P[i-1],P[i],f);};
+function sangue(A,t){const g={grupo:"sg"},b=A.esfera(.016,0,0,8);
+ for(const s of [-1,1]){const pa=AORTA.concat(ART(s).slice(1)),pv=VEI(s).slice().reverse();
+  for(let i=0;i<8;i++){const u=(t*.15+i/8)%1;A.add(b,A.T(...camP(pa,u)),"sangue",Object.assign({c:[1,.34,.3],emi:.8},g));A.add(b,A.T(...camP(pv,u)),"sangue",Object.assign({c:[.45,.58,1],emi:.8},g));}}}
+// ---- respiratório
+function pulmoes(A,id,a){for(const s of [-1,1])A.add(A.param(40,28,(u,v)=>{const th=u*2*PI,ph=v*PI,top=Math.cos(ph)>0?.8:1;let x=.11*Math.sin(ph)*Math.cos(th),z=.13*Math.sin(ph)*Math.sin(th),y=.22*Math.cos(ph)*top;if(s>0&&x<0&&y<.05)x*=.55;return [s*.15+x*(s>0?.95:1.05),.71+y,z];}),A.T(0,0,0),id,{a:a===undefined?.4:a,c:[.92,.62,.66]});}
+function arvore(A,p,d,r,n,id,R){if(n<=0)return;const L=.07*n*.38+.03,q=p.map((v,i)=>v+d[i]*L);A.poli([p,q],r,id);
+ for(const k of [-1,1]){const nd=A.norm([d[0]+k*.55+(R()-.5)*.3,d[1]-.15+(R()-.5)*.3,d[2]+(R()-.5)*.6]);arvore(A,q,nd,r*.7,n-1,id,R);}}
+SYS.respiratorio={t:"Sistema respiratório",f:"Leva o ar até os alvéolos dos pulmões, onde o oxigênio passa para o sangue e o gás carbônico sai do sangue (hematose). O ar passa por fossas nasais, faringe, laringe, traqueia, brônquios e bronquíolos.",
+ dl:[["Inspiração","diafragma e intercostais contraem, o tórax aumenta e o ar entra"],["Expiração","músculos relaxam e o ar sai"],["Controle","bulbo, sensível ao CO₂ do sangue"],["Alvéolos","cerca de 300 a 500 milhões"]],
+ pas:"Trajeto do ar, mecânica da ventilação (diferença de pressão), hematose por difusão e efeitos do cigarro e da altitude.",
+ cam:[[0,.85,0],2.6,.15],
+ partes:[["nariz","Fossas nasais",[.94,.70,.70],"Filtram (pelos e muco), aquecem e umedecem o ar. Aqui também ficam os receptores do olfato.","Respirar pelo nariz protege mais as vias aéreas que pela boca."],
+  ["faringe","Faringe",[.92,.66,.66],"Canal comum aos sistemas respiratório e digestório, atrás da boca e do nariz.","Cruzamento do ar e do alimento."],
+  ["laringe","Laringe e epiglote",[.90,.86,.76],"Tubo de cartilagem com as pregas vocais, que vibram e produzem a voz. A epiglote fecha a laringe ao engolir, para o alimento não ir para as vias aéreas.","Engasgo: a epiglote não fechou a tempo."],
+  ["traqueia","Traqueia",[.92,.88,.80],"Tubo reforçado por anéis de cartilagem em forma de C, que impedem que ele feche. Por dentro tem cílios e muco que empurram as impurezas para cima.","O cigarro paralisa os cílios e o muco se acumula (tosse do fumante)."],
+  ["bronquios","Brônquios e bronquíolos",[.96,.90,.82],"A traqueia se divide em dois brônquios, um para cada pulmão, que se ramificam em tubos cada vez menores, os bronquíolos.","Asma: os bronquíolos se contraem e o ar passa com dificuldade."],
+  ["pulmoes","Pulmões",[.92,.62,.66],"Órgãos esponjosos dentro da caixa torácica, envolvidos pela pleura. O direito tem 3 lobos; o esquerdo, 2, para dar espaço ao coração.","Pulmão direito maior, esquerdo com espaço para o coração."],
+  ["alveolos","Alvéolos",[.96,.60,.58],"Sacos de parede finíssima, rodeados por capilares. O O₂ passa do ar para o sangue e o CO₂ faz o caminho contrário, por difusão.","Enfisema: destruição das paredes dos alvéolos."],
+  ["diafragma","Diafragma",[.84,.40,.36],"Músculo em cúpula abaixo dos pulmões. Ao contrair, abaixa e aumenta o volume do tórax: a pressão interna cai e o ar entra.","Principal músculo da inspiração."]],
+ monta(A){
+  pele(A,.06);const R=A.rnd(8);
+  elip(A,[0,1.42,.13],[.03,.03,.05],"nariz");
+  A.poli([[0,1.42,.08],[0,1.36,.04],[0,1.26,.03]],.022,"faringe");
+  A.add(A.cilindro(.03,.08,20),A.T(0,1.19,.06),"laringe");A.add(A.elipsoide(.02,.008,.025,12),A.M(A.T(0,1.25,.06),A.Rx(.6)),"laringe",{c:[.96,.80,.74]});
+  A.add(A.cilindro(.02,.3,20,false),A.T(0,1.0,.05),"traqueia");for(let y=.87;y<1.14;y+=.025)A.add(A.toro(.021,.005,0,PI*1.6,16),A.M(A.T(0,y,.05),A.Ry(PI*.7)),"traqueia");
+  for(const s of [-1,1]){A.poli([[0,.85,.05],[s*.06,.8,.04],[s*.1,.76,.03]],.014,"bronquios");arvore(A,[s*.1,.76,.03],A.norm([s*.4,-.6,0]),.01,4,"bronquios",R);arvore(A,[s*.1,.76,.03],A.norm([s*.2,.5,-.2]),.009,3,"bronquios",R);}
+  pulmoes(A,"pulmoes",.3);
+  // alvéolos ampliados ao lado
+  const C=[.62,.75,.1];A.poli([[.36,.75,.05],C],.012,"bronquios");
+  for(let i=0;i<22;i++){const a=R()*2*PI,b=Math.acos(2*R()-1),r=.05+R()*.05;A.add(A.esfera(.035,0,0,16),A.T(C[0]+.05+r*Math.sin(b)*Math.cos(a),C[1]+r*Math.cos(b),C[2]+r*Math.sin(b)*Math.sin(a)),"alveolos",{a:.85});}
+  for(let i=0;i<10;i++){const a=i/10*2*PI;A.poli([[C[0]+.05+.11*Math.cos(a),C[1]+.11*Math.sin(a),C[2]+.04],[C[0]+.05+.12*Math.cos(a+.6),C[1]+.12*Math.sin(a+.6),C[2]-.04]],.004,"alveolos",{c:i%2?[.86,.24,.22]:[.34,.42,.82]});}
+  A.add(A.param(40,14,(u,v)=>{const a=u*2*PI,r=.27*v;return [r*Math.cos(a),.44+.09*(1-v*v),r*Math.sin(a)*.6-.02];}),A.T(0,0,0),"diafragma",{a:.85});
+ },
+ extra:{relevo:{pulmoes:.15}},
+ etq:[["traqueia",[-.08,1.02,.08],"Traqueia"],["pulmoes",[-.3,.85,.05],"Pulmão direito"],["pulmoes",[.3,.85,.05],"Pulmão esquerdo"],["alveolos",[.72,.9,.1],"Alvéolos (ampliados)"],["diafragma",[0,.4,.2],"Diafragma"],["laringe",[.08,1.22,.08],"Laringe"]],
+};
+// ---- digestório
+function figado(A,id){elip(A,[-.1,.42,.04],[.2,.08,.13],id,{c:[.52,.20,.18]},A.Rz(-.18));}
+function estomago(A,id){A.add(A.tubo(u=>camP([[.06,.42,.0],[.14,.43,.03],[.17,.34,.06],[.12,.24,.08],[.02,.22,.08],[-.04,.25,.06]],u),u=>.03+.045*Math.sin(Math.min(1,u*1.2)*PI),60,20),A.T(0,0,0),id,{c:[.94,.62,.58]});}
+function intestinos(A,id,id2){const P=[];for(let r=0;r<6;r++){const y=.12-r*.042;for(let i=0;i<=12;i++){const x=(r%2?1:-1)*(-.11+i*.0183);P.push([x,y+.012*Math.sin(i*1.3),.08+.02*Math.sin(i*.8+r)]);}}
+ A.poli(P,.017,id,{c:[.96,.72,.62]});
+ A.add(A.tubo(u=>camP([[-.17,-.13,.05],[-.18,.18,.05],[-.12,.22,.1],[.1,.2,.11],[.18,.2,.06],[.18,-.1,.05],[.12,-.15,.03],[0,-.15,-.02],[0,-.27,-.08]],u),u=>.032*(1+.18*Math.sin(u*90)),200,14),A.T(0,0,0),id2||id,{c:[.84,.64,.48]});}
+SYS.digestorio={t:"Sistema digestório",f:"Transforma os alimentos em moléculas pequenas (digestão), que passam para o sangue (absorção). O tubo digestório vai da boca ao ânus; glândulas anexas (salivares, fígado e pâncreas) lançam secreções nele. A digestão é mecânica (mastigação, movimentos peristálticos) e química (enzimas).",
+ dl:[["Comprimento do tubo","cerca de 9 metros"],["Carboidratos","amilase salivar e pancreática"],["Proteínas","pepsina (estômago), tripsina (intestino)"],["Gorduras","bile emulsifica, lipase digere"]],
+ pas:"Onde atua cada enzima e em que pH (pepsina em meio ácido, as do intestino em meio básico), papel da bile e das vilosidades, e a relação com a microbiota intestinal.",
+ cam:[[0,.55,0],2.9,.1],
+ partes:[["boca","Boca e glândulas salivares",[.94,.56,.56],"Os dentes trituram o alimento e a saliva umedece e começa a digerir o amido (amilase salivar). A língua forma o bolo alimentar.",["Saliva","~1 litro por dia"]],
+  ["esofago","Faringe e esôfago",[.94,.66,.58],"Tubo muscular que leva o bolo alimentar até o estômago por ondas de contração (peristaltismo), mesmo de cabeça para baixo.","Peristaltismo: músculo liso, involuntário."],
+  ["estomago","Estômago",[.94,.62,.58],"Bolsa muscular que mistura o alimento com o suco gástrico (ácido clorídrico + pepsina), formando o quimo. O ácido mata microrganismos e ativa a pepsina.",["pH","~2 (muito ácido)"]],
+  ["figado","Fígado",[.52,.20,.18],"Maior glândula do corpo, no lado direito do abdome. Produz a bile, guarda glicogênio e vitaminas, desintoxica o sangue (álcool, remédios) e produz proteínas do sangue.","A bile não tem enzimas: emulsifica as gorduras."],
+  ["vesicula","Vesícula biliar",[.42,.66,.36],"Armazena e concentra a bile, liberando-a no duodeno quando chega comida gordurosa.","Pedras na vesícula (cálculos biliares)."],
+  ["pancreas","Pâncreas",[.96,.82,.52],"Glândula mista atrás do estômago. Lança no duodeno o suco pancreático (bicarbonato, amilase, lipase, tripsina) e no sangue os hormônios insulina e glucagon.","Glândula exócrina e endócrina ao mesmo tempo."],
+  ["delgado","Intestino delgado",[.96,.72,.62],"Tubo de 6 a 7 metros: duodeno, jejuno e íleo. Termina a digestão e absorve os nutrientes pelas vilosidades, dobrinhas que aumentam muito a superfície.","Principal local de absorção de nutrientes."],
+  ["grosso","Intestino grosso",[.84,.64,.48],"Ceco, cólon (ascendente, transverso, descendente, sigmoide) e reto. Absorve água e sais e forma as fezes. Abriga bactérias que produzem vitaminas K e do complexo B.","Pouca fibra e pouca água: intestino preso."],
+  ["apendice","Apêndice",[.90,.70,.56],"Pequeno tubo preso ao ceco, no lado direito do abdome. Tem tecido linfático.","Apendicite: inflamação, com dor no lado direito, pede cirurgia."]],
+ monta(A){
+  pele(A,.06);
+  elip(A,[0,1.33,.13],[.05,.025,.05],"boca");for(const s of [-1,1]){elip(A,[s*.1,1.37,.03],[.025,.035,.02],"boca",{c:[.96,.84,.66]});elip(A,[s*.05,1.28,.08],[.018,.014,.02],"boca",{c:[.96,.84,.66]});}
+  A.poli([[0,1.3,.06],[0,1.2,.0],[0,1.0,-.02],[.02,.6,-.02],[.06,.42,.0]],.016,"esofago");
+  estomago(A,"estomago");figado(A,"figado");elip(A,[-.08,.33,.13],[.025,.04,.02],"vesicula");
+  A.add(A.tubo(u=>camP([[-.04,.26,.0],[.06,.28,-.04],[.17,.29,-.05]],u),u=>.022*(1.3-u*.6),30,12),A.T(0,0,0),"pancreas");
+  A.poli([[-.04,.25,.06],[-.08,.18,.04],[-.05,.13,.03],[.02,.15,.02]],.02,"delgado",{c:[.96,.72,.62]});
+  intestinos(A,"delgado","grosso");
+  A.poli([[-.17,-.15,.05],[-.15,-.21,.06],[-.13,-.22,.07]],.008,"apendice");
+ },
+ extra:{relevo:{figado:.08,estomago:.12,delgado:.1,grosso:.1}},
+ etq:[["figado",[-.3,.5,.1],"Fígado"],["estomago",[.3,.42,.08],"Estômago"],["delgado",[0,.0,.17],"Intestino delgado"],["grosso",[-.34,.05,.05],"Intestino grosso"],["esofago",[.08,.75,0],"Esôfago"],["pancreas",[.3,.26,-.05],"Pâncreas"]],
+};
+// ---- urinário
+function rins(A,id){for(const s of [-1,1]){const y=s<0?.28:.31;A.add(A.param(32,24,(u,v)=>{const th=u*2*PI,ph=v*PI;let x=.05*Math.sin(ph)*Math.cos(th),yy=.075*Math.cos(ph),z=.035*Math.sin(ph)*Math.sin(th);if(x*(-s)>0)x*=.45+.55*Math.abs(Math.cos(ph))**.6;return [s*.11+x,y+yy,-.09+z];}),A.T(0,0,0),id,{c:[.60,.24,.22]});}}
+SYS.urinario={t:"Sistema urinário",f:"Filtra o sangue, retira os resíduos (como a ureia, vinda das proteínas) e o excesso de água e sais, formando a urina. Também controla a pressão arterial e o equilíbrio de água e sais do corpo. À direita está um néfron, a unidade de filtração do rim, bem ampliado.",
+ dl:[["Néfrons","cerca de 1 milhão em cada rim"],["Filtrado por dia","~180 litros (quase tudo é reabsorvido)"],["Urina por dia","~1 a 1,5 litro"],["Hormônio","ADH: aumenta a reabsorção de água"]],
+ pas:"Etapas da formação da urina (filtração no glomérulo, reabsorção e secreção nos túbulos), ação do ADH e do álcool (que inibe o ADH) e a relação com a hemodiálise.",
+ cam:[[.45,.12,0],3.4,.1],
+ partes:[["rins","Rins",[.60,.24,.22],"Dois órgãos em forma de feijão no fundo do abdome, um de cada lado da coluna. O direito fica um pouco mais baixo por causa do fígado.","Hemodiálise: máquina que faz a filtração quando os rins falham."],
+  ["vasos","Artérias e veias renais",[.70,.30,.40],"A artéria renal (da aorta) traz sangue para filtrar; a veia renal (para a cava) leva o sangue já limpo.","Cerca de 20% do sangue bombeado passa pelos rins."],
+  ["ureteres","Ureteres",[.96,.86,.54],"Tubos que levam a urina dos rins até a bexiga, por peristaltismo.","Cálculo renal preso no ureter causa cólica forte."],
+  ["bexiga","Bexiga",[.94,.80,.40],"Bolsa muscular que armazena a urina. Quando enche, receptores avisam o encéfalo e sentimos vontade de urinar.","Capacidade: cerca de 400 a 600 mL."],
+  ["uretra","Uretra",[.96,.84,.56],"Canal que leva a urina da bexiga para fora. No homem é mais longa e também passa sêmen; na mulher é curta, o que facilita infecções urinárias.","Mulheres têm mais infecção urinária por ter uretra curta."],
+  ["glomerulo","Glomérulo e cápsula de Bowman",[.86,.30,.28],"Novelo de capilares dentro de uma cápsula em forma de taça. A pressão do sangue empurra água, sais, glicose, aminoácidos e ureia para dentro da cápsula: é a filtração. Células e proteínas grandes ficam no sangue.","Proteína ou sangue na urina indicam problema no glomérulo."],
+  ["tubulos","Túbulos contorcidos",[.96,.78,.40],"No túbulo proximal são reabsorvidos toda a glicose, os aminoácidos e boa parte da água e dos sais. No distal acontecem ajustes finos e a secreção de íons e substâncias.","Glicose na urina (diabetes): a glicose passa do limite que os túbulos conseguem reabsorver."],
+  ["henle","Alça de Henle",[.52,.78,.92],"Alça em U que mergulha na parte interna do rim e cria um ambiente muito salgado, que ajuda a reabsorver água e concentrar a urina.","Animais de deserto têm alças longas: urina muito concentrada."],
+  ["coletor","Ducto coletor",[.60,.86,.66],"Recebe a urina de vários néfrons. Sob ação do ADH, fica mais permeável e devolve mais água ao sangue.","Desidratação → mais ADH → urina escura e concentrada."]],
+ monta(A){
+  pele(A,.06);rins(A,"rins");
+  A.poli(AORTA.slice(3),.02,"vasos",{a:.6,c:[.86,.24,.22]});A.poli([[-.04,.62,-.04],[-.04,.0,-.05]],.022,"vasos",{a:.6,c:[.32,.40,.78]});
+  for(const s of [-1,1]){const y=s<0?.28:.31;A.poli([[.03,y+.01,-.08],[s*.09,y+.01,-.09]],.008,"vasos",{c:[.86,.24,.22]});A.poli([[-.04,y-.02,-.06],[s*.09,y-.02,-.09]],.009,"vasos",{c:[.32,.40,.78]});
+   A.poli([[s*.09,y-.03,-.08],[s*.07,.1,-.06],[s*.05,-.08,.0],[s*.035,-.15,.05]],.006,"ureteres");
+   A.add(A.cone(.03,.03,14),A.T(s*.11,y+.09,-.09),"rins",{c:[.92,.74,.40]});}
+  A.add(A.esfera(.065,0,0,28),A.T(0,-.17,.08),"bexiga",{a:.75});A.poli([[0,-.23,.08],[0,-.3,.09]],.007,"uretra");
+  // néfron ampliado
+  const N=[.95,.35,0];
+  A.add(A.tubo(u=>{const a=u*40;return [N[0]+.06*Math.sin(a*.7)*Math.cos(a),N[1]+.06*Math.sin(a*1.3),.06*Math.cos(a*.9)];},.01,300,6),A.T(0,0,0),"glomerulo",{c:[.86,.24,.22]});
+  A.add(A.param(32,16,(u,v)=>{const th=u*2*PI,ph=v*PI*.82;return [N[0]+.11*Math.sin(ph)*Math.cos(th),N[1]-.11*Math.cos(ph)+.0,.11*Math.sin(ph)*Math.sin(th)];}),A.T(0,0,0),"glomerulo",{a:.45,c:[.96,.80,.72]});
+  A.poli([[N[0]-.25,N[1]+.2,0],[N[0]-.02,N[1]+.05,0]],.012,"glomerulo",{c:[.86,.24,.22]});A.poli([[N[0]+.02,N[1]+.05,0],[N[0]-.2,N[1]+.28,0]],.01,"glomerulo",{c:[.70,.24,.30]});
+  const prox=[];for(let i=0;i<=40;i++){const t=i/40;prox.push([N[0]+.08+t*.3+.04*Math.sin(t*18),N[1]+.1+.04*Math.cos(t*14),.04*Math.sin(t*9)]);}A.poli(prox,.016,"tubulos");
+  const e=prox[prox.length-1];A.poli([e,[e[0]+.02,e[1]-.2,0],[e[0]+.02,e[1]-.75,0],[e[0]+.12,e[1]-.75,0],[e[0]+.12,e[1]-.15,0]],.015,"henle");
+  const di=[];for(let i=0;i<=30;i++){const t=i/30;di.push([e[0]+.12-t*.2+.03*Math.sin(t*16),e[1]-.15+t*.1+.03*Math.cos(t*12),.03*Math.sin(t*8)]);}A.poli(di,.015,"tubulos",{c:[.98,.86,.50]});
+  const f=di[di.length-1];A.poli([f,[f[0]+.45,f[1]+.02,0],[f[0]+.45,f[1]-.9,0]],.022,"coletor");
+ },
+ extra:{},
+ etq:[["rins",[-.25,.36,-.05],"Rim direito"],["bexiga",[.15,-.17,.1],"Bexiga"],["ureteres",[-.15,.05,0],"Ureter"],["glomerulo",[.95,.55,0],"Glomérulo"],["henle",[1.3,-.2,0],"Alça de Henle"],["coletor",[1.45,.1,0],"Ducto coletor"],["tubulos",[1.25,.55,0],"Túbulo proximal"],[null,[.95,.72,0],"Néfron (ampliado)"]],
+};
+// ---- endócrino
+SYS.endocrino={t:"Sistema endócrino",f:"Glândulas que lançam hormônios no sangue. Os hormônios agem em células-alvo, às vezes longe da glândula, e regulam crescimento, metabolismo, reprodução, nível de glicose, resposta ao estresse e muito mais. Junto com o sistema nervoso, coordena o corpo.",
+ dl:[["Glândula endócrina","lança no sangue"],["Glândula exócrina","lança em ductos ou cavidades"],["Controle","retroalimentação (feedback) negativa"]],
+ pas:"Hormônio de cada glândula e sua função, controle por feedback negativo (ex.: tireoide e hipófise) e distúrbios como diabetes e hipotireoidismo.",
+ cam:[[0,.65,0],3.6,.12],
+ partes:[["hipotalamo","Hipotálamo",[.98,.70,.54],"Região do encéfalo que liga o sistema nervoso ao endócrino. Controla a hipófise e produz o ADH e a ocitocina.",["Hormônios","ADH, ocitocina, liberadores"]],
+  ["hipofise","Hipófise",[.80,.62,.96],"Pequena glândula embaixo do encéfalo, chamada de 'glândula mestra' porque controla outras glândulas.",["Hormônios","GH (crescimento), TSH, ACTH, FSH, LH, prolactina"]],
+  ["pineal","Pineal",[.70,.70,.96],"Produz melatonina, principalmente no escuro. Regula o ciclo sono-vigília.","Luz de telas à noite reduz a melatonina."],
+  ["tireoide","Tireoide",[.66,.56,.92],"Glândula em forma de borboleta no pescoço. Seus hormônios (T3 e T4, feitos com iodo) controlam o ritmo do metabolismo. Também produz calcitonina, que baixa o cálcio no sangue.","Falta de iodo causa bócio: por isso o sal de cozinha é iodado."],
+  ["paratireoides","Paratireoides",[.86,.56,.86],"Quatro glândulas pequenas atrás da tireoide. O paratormônio aumenta o cálcio no sangue (tira dos ossos).","Calcitonina e paratormônio: efeitos opostos (antagônicos)."],
+  ["timo","Timo",[.62,.82,.70],"Atrás do esterno; grande na infância, diminui na vida adulta. Amadurece os linfócitos T, importantes na defesa.","Também faz parte do sistema imune."],
+  ["suprarrenais","Suprarrenais (adrenais)",[.96,.74,.42],"Ficam em cima dos rins. Produzem adrenalina (resposta de luta ou fuga), cortisol (estresse) e aldosterona (reabsorção de sódio).",["Adrenalina","acelera o coração e aumenta a glicose"]],
+  ["pancreas","Pâncreas (ilhotas)",[.96,.82,.52],"As ilhotas pancreáticas produzem insulina (baixa a glicose do sangue, fazendo as células absorverem) e glucagon (aumenta a glicose, quebrando glicogênio).","Diabetes tipo 1: falta de insulina; tipo 2: as células respondem mal a ela."],
+  ["gonadas","Gônadas",[.94,.56,.72],"Ovários produzem estrogênio e progesterona; testículos produzem testosterona. Comandam as características sexuais e a reprodução.","Puberdade: aumento de FSH e LH estimula as gônadas."]],
+ monta(A){
+  pele(A,.06);cerebro(A,"cerebro_ctx",{a:.2});
+  elip(A,[0,1.44,.0],[.02,.015,.02],"hipotalamo");elip(A,[0,1.405,.03],[.014,.014,.014],"hipofise");elip(A,[0,1.47,-.06],[.01,.012,.01],"pineal");
+  for(const s of [-1,1]){elip(A,[s*.025,1.12,.075],[.017,.032,.014],"tireoide",{},A.Rz(s*.25));for(const y of [1.135,1.1])A.add(A.esfera(.006,0,0,10),A.T(s*.028,y,.06),"paratireoides");}
+  A.add(A.caixa(.03,.012,.012),A.T(0,1.105,.083),"tireoide");
+  for(const s of [-1,1])elip(A,[s*.025,.93,.12],[.03,.06,.02],"timo");
+  rins(A,"rins_ctx");for(const s of [-1,1]){const y=s<0?.28:.31;A.add(A.cone(.035,.035,14),A.T(s*.11,y+.09,-.09),"suprarrenais");}
+  A.add(A.tubo(u=>camP([[-.04,.26,.0],[.06,.28,-.04],[.17,.29,-.05]],u),u=>.022*(1.3-u*.6),30,12),A.T(0,0,0),"pancreas");
+  for(const s of [-1,1])elip(A,[s*.12,-.12,.03],[.02,.014,.012],"gonadas");
+ },
+ extra:{semPick:["cerebro_ctx","rins_ctx"],semApagar:["cerebro_ctx","rins_ctx"]},
+ etq:[["hipofise",[-.2,1.42,.05],"Hipófise"],["tireoide",[.18,1.12,.08],"Tireoide"],["timo",[-.18,.94,.12],"Timo"],["suprarrenais",[.28,.42,-.08],"Suprarrenal"],["pancreas",[.3,.27,-.04],"Pâncreas"],["gonadas",[.28,-.12,.03],"Ovário"]],
+};
+// ---- linfático
+SYS.linfatico={t:"Sistema linfático e imune",f:"Rede de vasos que recolhe o líquido que sobra entre as células (linfa) e o devolve ao sangue. No caminho, a linfa passa pelos linfonodos, onde células de defesa reconhecem e atacam microrganismos. Órgãos como baço, timo, tonsilas e medula óssea formam e abrigam essas células.",
+ dl:[["Leucócitos","neutrófilos, linfócitos B e T, macrófagos…"],["Linfócito B","produz anticorpos"],["Linfócito T","coordena a defesa e destrói células infectadas"]],
+ pas:"Imunidade inata × adquirida, vacina (imunização ativa, cria memória) × soro (passiva, anticorpos prontos) e por que o HIV, que ataca linfócitos T, enfraquece a defesa.",
+ cam:[[0,.4,0],4.4,.1],
+ partes:[["vasos","Vasos linfáticos",[.56,.84,.64],"Vasos finos com válvulas, espalhados pelo corpo, que recolhem a linfa dos tecidos.","Inchaço (edema) quando a linfa não é drenada."],
+  ["linfonodos","Linfonodos",[.40,.74,.52],"Pequenos órgãos em forma de feijão no pescoço, axilas, virilhas e abdome. Filtram a linfa e concentram linfócitos.","'Íngua': linfonodo inchado durante uma infecção."],
+  ["baco","Baço",[.52,.34,.56],"Fica no lado esquerdo do abdome. Filtra o sangue, destrói hemácias velhas e abriga células de defesa.","Pode ser retirado; outros órgãos assumem parte da função."],
+  ["timo","Timo",[.62,.82,.70],"Onde os linfócitos T amadurecem e aprendem a não atacar o próprio corpo.","Maior na infância."],
+  ["tonsilas","Tonsilas (amígdalas)",[.90,.56,.56],"Tecido linfático na garganta que é uma das primeiras barreiras contra microrganismos que entram pela boca e nariz.","Amigdalite: inflamação das tonsilas."],
+  ["ducto","Ducto torácico",[.70,.90,.70],"Principal vaso linfático. Sobe na frente da coluna e despeja a linfa numa veia perto do coração. Também leva as gorduras absorvidas no intestino.","A linfa volta ao sangue."],
+  ["medula","Medula óssea vermelha",[.88,.28,.30],"Tecido no interior dos ossos que produz todas as células do sangue: hemácias, leucócitos e plaquetas.","Transplante de medula trata leucemias."]],
+ monta(A){
+  pele(A,.07);esqueleto(A,{a:.15,c:[.92,.88,.78]},"osso",true);
+  const R=A.rnd(5),no=(p,n,sp)=>{for(let i=0;i<n;i++)A.add(A.elipsoide(.014,.01,.01,10),A.T(p[0]+(R()-.5)*sp,p[1]+(R()-.5)*sp,p[2]+(R()-.5)*sp*.6),"linfonodos");};
+  for(const s of [-1,1]){no([s*.07,1.18,.04],6,.07);no([s*.3,.93,0],7,.07);no([s*.13,-.17,.06],7,.07);
+   A.poli([[s*.07,1.4,.02],[s*.07,1.18,.04],[s*.05,1.05,.02]],.006,"vasos");A.poli([Wr(s),El(s).map((v,i)=>v+[0,0,.03][i]),[s*.3,.93,0],[s*.08,1.04,.0]],.006,"vasos");
+   A.poli([An(s).map((v,i)=>v+[0,0,.03][i]),Kn(s).map((v,i)=>v+[s*-.02,0,.05][i]),[s*.13,-.17,.06],[s*.05,0,-.02]],.006,"vasos");
+   elip(A,[s*.025,1.3,.08],[.012,.018,.01],"tonsilas");}
+  A.poli([[0,.0,-.04],[.0,.6,-.05],[.02,.95,-.03],[.08,1.04,.0]],.009,"ducto");
+  for(let i=0;i<8;i++)A.add(A.elipsoide(.014,.01,.01,10),A.T((R()-.5)*.14,.05+(R()-.5)*.1,.05),"linfonodos");
+  elip(A,[.15,.36,-.06],[.035,.065,.03],"baco");
+  for(const s of [-1,1])elip(A,[s*.025,.93,.12],[.03,.06,.02],"timo");
+  for(const s of [-1,1]){lim(A,lerp(Hp(s),Kn(s),.08),lerp(Hp(s),Kn(s),.92),.016,"medula");}
+ },
+ extra:{semPick:["osso"]},
+ etq:[["linfonodos",[-.3,1.08,0],"Linfonodos do pescoço"],["baco",[.32,.4,-.06],"Baço"],["timo",[.2,.95,.12],"Timo"],["linfonodos",[-.45,.92,0],"Axilares"],["medula",[-.35,-.5,0],"Medula óssea"],["ducto",[-.15,.6,-.05],"Ducto torácico"]],
+};
+// ---- genital masculino
+SYS.masculino={t:"Sistema genital masculino",f:"Produz os espermatozoides e o hormônio testosterona e leva os espermatozoides até o exterior. O caminho do espermatozoide: testículo → epidídimo → ducto deferente → (recebe secreções das glândulas) → uretra.",
+ dl:[["Espermatogênese","nos túbulos seminíferos, contínua a partir da puberdade"],["Hormônio","testosterona"],["Sêmen","espermatozoides + líquidos das glândulas"]],
+ pas:"Trajeto dos espermatozoides, função de cada glândula, por que os testículos ficam fora do abdome (temperatura) e métodos contraceptivos como a vasectomia.",
+ cam:[[0,-.27,0],1.5,.1],
+ partes:[["testiculos","Testículos",[.86,.66,.70],"Produzem os espermatozoides (nos túbulos seminíferos) e a testosterona (nas células intersticiais).","Ficam na bolsa escrotal, cerca de 2 °C abaixo da temperatura do corpo, necessária para produzir espermatozoides."],
+  ["escroto","Bolsa escrotal",[.90,.74,.66],"Pele que envolve os testículos e regula a temperatura, aproximando-os ou afastando-os do corpo.","Termorregulação dos testículos."],
+  ["epididimo","Epidídimo",[.92,.80,.56],"Tubo enovelado sobre cada testículo, onde os espermatozoides amadurecem e ganham capacidade de se mover.","Maturação dos espermatozoides."],
+  ["deferente","Ductos deferentes",[.96,.88,.60],"Tubos que levam os espermatozoides do epidídimo até a uretra, passando por cima da bexiga.","Vasectomia: corte dos ductos deferentes; o sêmen continua sendo produzido, mas sem espermatozoides."],
+  ["vesiculas","Glândulas seminais",[.80,.86,.56],"Produzem líquido rico em frutose, a fonte de energia dos espermatozoides. É a maior parte do volume do sêmen.","Frutose: energia para o movimento do flagelo."],
+  ["prostata","Próstata",[.78,.62,.86],"Glândula abaixo da bexiga, em volta da uretra. Produz um líquido alcalino que protege os espermatozoides da acidez da vagina.","Exame de próstata é recomendado a partir dos 45-50 anos."],
+  ["uretra","Uretra",[.96,.84,.56],"Canal que passa pela próstata e pelo pênis. Conduz urina e sêmen, mas não ao mesmo tempo.","No homem, a uretra é comum aos sistemas urinário e genital."],
+  ["penis","Pênis",[.88,.68,.62],"Órgão com corpos cavernosos e esponjoso, que se enchem de sangue na ereção. A glande, na ponta, é coberta pelo prepúcio.","Fimose: prepúcio estreito que não deixa a glande ser exposta."]],
+ monta(A){
+  pele(A,.08);
+  A.add(A.esfera(.06,0,0,28),A.T(0,-.15,.06),"bexiga_ctx",{a:.3,c:[.94,.80,.40]});
+  for(const s of [-1,1]){const T0=[s*.035,-.42,.08];elip(A,T0,[.022,.03,.02],"testiculos");
+   A.add(A.tubo(u=>[T0[0]+s*.012+.006*Math.sin(u*30),T0[1]+.035-u*.06,T0[2]-.02+.006*Math.cos(u*30)],.007,80,6),A.T(0,0,0),"epididimo");
+   A.poli([[T0[0]+s*.012,T0[1]-.025,T0[2]-.02],[s*.05,-.34,.06],[s*.07,-.22,.09],[s*.08,-.14,.08],[s*.06,-.1,.02],[s*.03,-.17,-.02],[s*.01,-.24,.02]],.005,"deferente");
+   elip(A,[s*.04,-.2,-.01],[.012,.025,.01],"vesiculas",{},A.Rz(s*.5));}
+  elip(A,[0,-.24,.04],[.022,.018,.02],"prostata");
+  A.poli([[0,-.21,.06],[0,-.24,.05],[0,-.27,.08],[0,-.3,.12],[0,-.38,.17]],.006,"uretra");
+  lim(A,[0,-.28,.09],[0,-.37,.16],.022,"penis",{a:.6});elip(A,[0,-.385,.17],[.022,.02,.022],"penis",{a:.6,c:[.90,.60,.60]});
+  elip(A,[0,-.42,.08],[.065,.045,.04],"escroto",{a:.25});
+ },
+ extra:{semPick:["bexiga_ctx"],semApagar:["bexiga_ctx"]},
+ etq:[["testiculos",[-.12,-.44,.1],"Testículo"],["epididimo",[.12,-.4,.06],"Epidídimo"],["deferente",[.14,-.18,.08],"Ducto deferente"],["prostata",[-.12,-.24,.03],"Próstata"],["vesiculas",[.12,-.22,-.02],"Glândula seminal"],["penis",[.08,-.33,.16],"Pênis"],[null,[0,-.07,.08],"Bexiga"]],
+};
+// ---- genital feminino
+SYS.feminino={t:"Sistema genital feminino",f:"Produz os óvulos e os hormônios estrogênio e progesterona, recebe os espermatozoides e abriga o desenvolvimento do embrião. O ciclo menstrual dura em média 28 dias: o endométrio engrossa para receber um embrião e, se não há gravidez, descama (menstruação).",
+ dl:[["Ovulação","por volta do 14º dia de um ciclo de 28 dias"],["Hormônios","FSH e LH (hipófise), estrogênio e progesterona (ovário)"],["Fecundação","na tuba uterina"],["Nidação","implantação do embrião no endométrio"]],
+ pas:"Ciclo menstrual e seus hormônios, período fértil, local da fecundação, funcionamento da pílula anticoncepcional e da camisinha e a função da placenta.",
+ cam:[[0,-.05,0],1.7,.1],
+ partes:[["ovarios","Ovários",[.94,.72,.62],"Guardam os folículos com os ovócitos. A cada ciclo, geralmente um amadurece e é liberado (ovulação). Produzem estrogênio e progesterona.","Após a ovulação, o folículo vira corpo lúteo, que produz progesterona."],
+  ["tubas","Tubas uterinas",[.96,.80,.62],"Canais que captam o ovócito liberado (pelas fímbrias, na ponta) e o levam até o útero. É onde normalmente acontece a fecundação.","Gravidez ectópica: embrião se implanta na tuba."],
+  ["utero","Útero",[.90,.50,.52],"Órgão muscular (miométrio) onde o embrião se desenvolve. Na gravidez se expande muito e, no parto, contrai sob ação da ocitocina.","Ocitocina: contrações do parto e saída do leite."],
+  ["endometrio","Endométrio",[.96,.36,.40],"Camada interna do útero, cheia de vasos, que engrossa a cada ciclo para receber o embrião. Se não há fecundação, descama: é a menstruação.","Progesterona mantém o endométrio; quando cai, ocorre a menstruação."],
+  ["colo","Colo do útero",[.92,.62,.62],"Parte inferior e estreita do útero, que se abre para a vagina. Dilata durante o parto.","Exame preventivo (Papanicolau) detecta lesões causadas pelo HPV."],
+  ["vagina","Vagina",[.94,.66,.66],"Canal muscular e elástico que liga o útero ao exterior. Recebe o pênis na relação sexual e é o canal do parto normal.","Ambiente ácido protege contra microrganismos."],
+  ["mamas","Glândulas mamárias",[.96,.78,.72],"Glândulas que produzem leite após o parto, estimuladas pela prolactina. O leite sai pelos ductos até o mamilo, com a ajuda da ocitocina.","Leite materno passa anticorpos ao bebê (imunidade passiva natural)."]],
+ monta(A){
+  pele(A,.08);A.add(A.esfera(.055,0,0,28),A.T(0,-.17,.09),"bexiga_ctx",{a:.3,c:[.94,.80,.40]});
+  A.add(A.param(40,28,(u,v)=>{const th=u*2*PI,ph=v*PI,y=Math.cos(ph),k=.55+.45*(y+1)/2;return [.055*k*Math.sin(ph)*Math.cos(th),-.12+.07*y,.035*Math.sin(ph)*Math.sin(th)+.03];}),A.T(0,0,0),"utero",{solido:1});
+  A.add(A.param(30,20,(u,v)=>{const th=u*2*PI,ph=v*PI,y=Math.cos(ph),k=.55+.45*(y+1)/2;return [.03*k*Math.sin(ph)*Math.cos(th),-.12+.045*y,.012*Math.sin(ph)*Math.sin(th)+.03];}),A.T(0,0,0),"endometrio");
+  A.add(A.cilindro(.022,.04,20),A.T(0,-.205,.03),"colo");
+  A.poli([[0,-.22,.03],[0,-.27,.05],[0,-.31,.07]],.017,"vagina");
+  for(const s of [-1,1]){elip(A,[s*.13,-.13,.02],[.022,.014,.014],"ovarios");
+   A.poli([[s*.045,-.07,.03],[s*.09,-.06,.03],[s*.13,-.08,.03],[s*.15,-.115,.03]],.007,"tubas");for(let k=0;k<6;k++){const a=k/6*2*PI;A.poli([[s*.15,-.115,.03],[s*.16+.012*Math.cos(a),-.135,.03+.012*Math.sin(a)]],.003,"tubas");}
+   const M0=[s*.13,.72,.16];elip(A,M0,[.08,.07,.05],"mamas",{a:.3});for(let k=0;k<7;k++){const a=k/7*2*PI,p=[M0[0]+.05*Math.cos(a),M0[1]+.045*Math.sin(a),M0[2]-.01];A.add(A.esfera(.016,0,0,10),A.T(...p),"mamas",{c:[.96,.84,.62]});A.poli([p,[M0[0],M0[1],M0[2]+.045]],.003,"mamas",{c:[.96,.84,.62]});}}
+ },
+ extra:{cortaveis:["utero"],corteInicial:true,semPick:["bexiga_ctx"],semApagar:["bexiga_ctx"],botoes:{corte:true,gira:true}},
+ etq:[["ovarios",[-.25,-.14,.03],"Ovário"],["tubas",[.2,-.04,.03],"Tuba uterina"],["utero",[0,-.02,.05],"Útero"],["vagina",[.1,-.3,.07],"Vagina"],["mamas",[.32,.75,.16],"Glândula mamária"]],
+};
+// ---- pele
+SYS.tegumentar={t:"Pele (sistema tegumentar)",f:"A pele é o maior órgão do corpo. Protege contra microrganismos, raios UV e perda de água, ajuda a controlar a temperatura, percebe tato, dor, calor e frio e produz vitamina D com a luz do sol. Este bloco mostra um pedaço da pele em corte, bem ampliado.",
+ dl:[["Camadas","epiderme, derme e hipoderme"],["Área no adulto","cerca de 2 m²"],["Anexos","pelos, unhas, glândulas sebáceas e sudoríparas"]],
+ pas:"Termorregulação (suor e vasos que dilatam ou contraem), proteção da melanina contra o UV, câncer de pele e a vitamina D.",
+ cam:[[0,.15,0],4.2,.32],
+ partes:[["epiderme","Epiderme",[.96,.84,.74],"Camada de fora, sem vasos. As células nascem embaixo, sobem, enchem-se de queratina e morrem, formando a camada córnea que descama.","Queratina: proteína que impermeabiliza a pele, os pelos e as unhas."],
+  ["melanocitos","Melanócitos",[.36,.24,.18],"Células na base da epiderme que produzem melanina, o pigmento que dá cor à pele e absorve parte dos raios UV.","Bronzeado: mais melanina em resposta ao sol."],
+  ["derme","Derme",[.94,.66,.62],"Camada de tecido conjuntivo com colágeno e fibras elásticas, cheia de vasos, nervos e glândulas.","Tatuagem fica na derme, por isso é permanente."],
+  ["hipoderme","Hipoderme",[.98,.90,.56],"Camada de gordura (tecido adiposo) que funciona como isolante térmico, reserva de energia e amortecedor.","Isolamento térmico e reserva."],
+  ["pelo","Pelo e folículo",[.36,.28,.22],"O pelo cresce a partir do folículo, uma bolsa na derme. É feito de queratina.","Mamíferos são os únicos animais com pelos."],
+  ["eretor","Músculo eretor do pelo",[.82,.32,.30],"Pequeno músculo liso que arrepia o pelo com frio ou susto.","O arrepio é herança de mamíferos que se protegiam assim do frio."],
+  ["sebacea","Glândula sebácea",[.98,.86,.48],"Lança sebo (óleo) no folículo, lubrificando pele e pelos.","Excesso de sebo + bactérias: espinhas (acne)."],
+  ["sudoripara","Glândula sudorípara",[.62,.82,.96],"Tubo enovelado que produz o suor. A evaporação do suor retira calor do corpo.","Termorregulação: suor esfria pela evaporação."],
+  ["vasos","Vasos sanguíneos",[.86,.24,.22],"Com calor, os vasos da derme dilatam e a pele fica vermelha, perdendo calor; com frio, contraem e guardam calor.","Vasodilatação × vasoconstrição."],
+  ["receptores","Receptores sensoriais",[1,.86,.40],"Terminações nervosas e corpúsculos que percebem tato leve, pressão, vibração, calor, frio e dor.","Pontas dos dedos têm muitos receptores de tato."]],
+ monta(A){
+  const R=A.rnd(9),X=1.1,Z=.6;
+  A.add(A.caixa(2*X,.16,2*Z),A.T(0,.62,0),"epiderme",{a:.92});A.add(A.caixa(2*X,.02,2*Z),A.T(0,.71,0),"epiderme",{c:[.98,.92,.84]});
+  for(let i=0;i<40;i++)A.add(A.esfera(.018,0,0,8),A.T((R()*2-1)*X*.95,.55,(R()*2-1)*Z*.95),"melanocitos");
+  A.add(A.caixa(2*X,.7,2*Z),A.T(0,.19,0),"derme",{a:.3});
+  for(let i=0;i<110;i++)A.add(A.esfera(.07,.1,i,14),A.T((R()*2-1)*(X-.07),-.5+R()*.5,(R()*2-1)*(Z-.07)),"hipoderme",{a:.85});
+  // pelos inclinados com folículo, glândula sebácea e músculo eretor
+  [[-.6,.1],[.15,-.2],[.75,.25]].forEach(([x,z])=>{const b=[x-.1,-.15,z],t=[x+.35,1.25,z];A.poli([b,lerp(b,t,.55),t],.018,"pelo");A.add(A.esfera(.05,0,0,16),A.T(...b),"pelo");
+   A.add(A.tubo(u=>[b[0]+.1*u-.0,b[1]+u*.65,z],.045,10,14,false),A.T(0,0,0),"pelo",{a:.4,c:[.70,.52,.44]});
+   for(let k=0;k<6;k++)A.add(A.esfera(.035,0,0,10),A.T(x+.07+(R()-.2)*.05,.25+(R()-.5)*.08,z+(R()-.5)*.06),"sebacea");
+   A.poli([[x+.02,.08,z],[x+.25,.42,z],[x+.4,.52,z]],.012,"eretor");});
+  // glândula sudorípara: novelo profundo + ducto até o poro
+  const G=[-.15,-.18,.3];A.add(A.tubo(u=>{const a=u*30;return [G[0]+.07*Math.cos(a),G[1]+.05*Math.sin(a*.5),G[2]+.07*Math.sin(a)];},.014,200,6),A.T(0,0,0),"sudoripara");
+  A.poli([G,[G[0]+.02,.2,G[2]],[G[0]-.02,.5,G[2]],[G[0],.72,G[2]]],.012,"sudoripara");
+  // vasos: alças na derme
+  for(let i=0;i<5;i++){const x=-.9+i*.45;A.poli([[x,-.05,-.4],[x+.05,.4,-.3],[x+.12,.45,-.3],[x+.17,.0,-.4]],.015,"vasos",{c:i%2?[.34,.42,.82]:[.86,.24,.22]});}
+  A.poli([[-1.1,-.06,-.42],[1.1,-.06,-.42]],.025,"vasos");A.poli([[-1.1,-.1,-.35],[1.1,-.1,-.35]],.025,"vasos",{c:[.34,.42,.82]});
+  // receptores: nervo, corpúsculos de tato (raso) e de pressão (fundo)
+  A.poli([[-1.1,-.2,.45],[-.4,-.2,.45],[.3,-.25,.45],[.9,-.3,.45]],.013,"receptores");
+  A.poli([[-.4,-.2,.45],[-.4,.45,.45]],.008,"receptores");A.add(A.elipsoide(.03,.06,.03,14),A.T(-.4,.48,.45),"receptores");
+  A.add(A.elipsoide(.08,.12,.08,20),A.T(.9,-.35,.45),"receptores",{a:.8});A.poli([[.3,-.25,.45],[.4,.55,.45]],.006,"receptores");
+ },
+ extra:{relevo:{hipoderme:.2,epiderme:.06},aoRaio:.4,fundo:["#2A1E22","#120C0E"]},
+ etq:[["epiderme",[-1.2,.65,.6],"Epiderme"],["derme",[-1.2,.2,.6],"Derme"],["hipoderme",[-1.2,-.3,.6],"Hipoderme"],["pelo",[.3,1.3,.25],"Pelo"],["sudoripara",[-.15,-.32,.35],"Glândula sudorípara"],["sebacea",[-.4,.3,.1],"Glândula sebácea"],["receptores",[.95,-.15,.5],"Corpúsculo de pressão"]],
+};
+// ---------- configuração da página ----------
+const SY=SYS[S],nomes=SIS.map(s=>s[1]);
+const partes=S==="geral"?SIS.slice(1).map(([id,n,c])=>({id,n,c,f:"Toque de novo para abrir este sistema com todas as estruturas."})):SY.partes.map(([id,n,c,f,x])=>Array.isArray(x)?{id,n,c,f,dl:[x]}:{id,n,c,f,pas:x});
+partes.push({id:"pele",n:"Contorno do corpo",c:[.94,.80,.70],f:"",oculto:true},{id:"osso",n:"Esqueleto",c:[.92,.88,.78],f:"",oculto:true});
+["cerebro_ctx","rins_ctx","bexiga_ctx","sangue"].forEach(id=>partes.push({id,n:"Referência",c:[.9,.9,.9],f:"",oculto:true}));
+const fx=SY.foco||{};
+if(!SY.foco){/* foco automático: centro de cada parte */}
+// materiais: osso poroso, músculo com fibras, órgão úmido com vasinhos
+const OSSOS=["esqueletico","cranio","coluna","costelas","cintura","umero","antebraco","maos","pelve","femur","patela","perna","pes","osso"];
+const TXM={};(S==="esqueletico"?OSSOS:["osso","esqueletico"]).forEach(id=>TXM[id]=7);
+if(S==="muscular")(SY.partes||[]).forEach(p=>TXM[p[0]]=9);else TXM.muscular=9;
+if(!["esqueletico","muscular","tegumentar"].includes(S))(SY.partes||[]).forEach(p=>{if(TXM[p[0]]===undefined)TXM[p[0]]=6;});
+["digestorio","respiratorio","circulatorio","urinario","coracao"].forEach(id=>{if(TXM[id]===undefined)TXM[id]=6;});
+if(S==="tegumentar"){TXM.epiderme=5;TXM.derme=6;TXM.hipoderme=2;}
+["cerebro","cerebelo","nervoso","espinais","membros","cranianos","medula","sangue","alveolos","glomerulo","tubulos","henle","coletor"].forEach(id=>{if(S!=="esqueletico")delete TXM[id];});
+const BRM={};Object.keys(TXM).forEach(id=>BRM[id]=TXM[id]===6?.3:TXM[id]===9?.18:TXM[id]===7?.08:.12);
+let tNav;
+const cfg=Object.assign({
+ titulo:S==="geral"?"Corpo humano":SY.t, area:"Biologia", voltar:"index.html#biologia", rotLista:S==="geral"?"Sistemas":"Estruturas", rotParte:S==="geral"?"Sistema":"Estrutura",
+ geral:{t:SY.t,f:SY.f,dl:SY.dl,pas:SY.pas}, partes,
+ semPick:["pele"].concat((SY.extra||{}).semPick||[]), semApagar:["pele","osso","sangue"].concat((SY.extra||{}).semApagar||[]),
+ aoRaio:0, fundo:["#1A1C30","#0A0B18"], dist:SY.cam[1], alvo:SY.cam[0], pitch:SY.cam[2], yaw:0, giro:.0015, botoes:{corte:false},
+ extraBotoes:S==="geral"?"":'<button class="mv-bt" data-b="todos" type="button">Corpo inteiro</button>',
+ aoBotao(k){if(k==="todos")vai("geral");},
+ slider:{rot:"Sistema",min:0,max:SIS.length-1,passo:1,valor:IDX,fmt:v=>nomes[v],muda(v,A){if(!A.foca)return;clearTimeout(tNav);if(v!==IDX)tNav=setTimeout(()=>vai(SIS[v][0]),700);}},
+ aoFocar(o){if(S==="geral"&&o&&SIS.some(s=>s[0]===o.id)){clearTimeout(tNav);tNav=setTimeout(()=>vai(o.id),900);}},
+ constroi(A){SY.monta(A);}, textura:TXM, brilho:BRM, texturaAltura:S==="tegumentar"?[5,7]:[22,26],
+ dica:S==="geral"?"Toque num sistema para abrir · arraste para girar":"Arraste para girar · toque numa estrutura para ver de perto",
+ etiquetas:(SY.etq||[]).map(([id,p,t])=>id?{id,p,t}:{p,t}),
+},SY.extra||{});
+if(SY.anima)cfg.anima=SY.anima;
+Modelo3D(cfg);
+
+</script></body></html>

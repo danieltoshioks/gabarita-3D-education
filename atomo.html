@@ -1,0 +1,52 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Modelo de Bohr · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// modelo de Bohr (1913): núcleo (prótons + nêutrons) e elétrons em camadas K, L, M, N
+const EL=[null,["H","Hidrogênio",1],["He","Hélio",4],["Li","Lítio",7],["Be","Berílio",9],["B","Boro",11],["C","Carbono",12],["N","Nitrogênio",14],["O","Oxigênio",16],["F","Flúor",19],["Ne","Neônio",20],["Na","Sódio",23],["Mg","Magnésio",24],["Al","Alumínio",27],["Si","Silício",28],["P","Fósforo",31],["S","Enxofre",32],["Cl","Cloro",35],["Ar","Argônio",40],["K","Potássio",39],["Ca","Cálcio",40]];
+const camadas=Z=>{const cap=[2,8,8,2],r=[];let z=Z;for(const c of cap){if(z<=0)break;r.push(Math.min(c,z));z-=c;}return r;};
+const RC=[.55,.9,1.25,1.6];
+let Z=6,TT=0,SALTO=-99;
+Modelo3D({
+ titulo:"Modelo de Bohr", area:"Química", voltar:"index.html#quimica", rotLista:"Partes", rotParte:"Parte",
+ geral:{t:"Modelo de Rutherford-Bohr (1913)",f:"Niels Bohr manteve o núcleo de Rutherford e acrescentou uma ideia nova: o elétron só pode girar em certas órbitas, as camadas ou níveis de energia. Enquanto permanece numa camada, ele não perde energia. Para mudar de camada, absorve ou emite uma quantidade exata de energia. Toque em \"Salto do elétron\" para ver, e mude o número atômico no controle.",
+  dl:[["Quem","Niels Bohr, 1913"],["Novidade","níveis de energia quantizados"],["Explicou","os espectros de linhas e o teste da chama"],["Limite","só funciona bem para o hidrogênio"]],
+  pas:"Número atômico (Z), número de massa (A = Z + N), íons, isótopos e a ligação entre a camada de valência e a família na tabela."},
+ partes:[
+  {id:"proton",n:"Prótons",c:[.86,.36,.30],f:"Partículas de carga positiva no núcleo. O número de prótons é o número atômico (Z) e define qual é o elemento.",pas:"Mudou o número de prótons, mudou o elemento."},
+  {id:"neutron",n:"Nêutrons",c:[.72,.74,.78],f:"Partículas sem carga no núcleo. Átomos do mesmo elemento com números de nêutrons diferentes são isótopos.",pas:"Isótopos: mesmo Z, massa diferente (ex.: carbono-12 e carbono-14)."},
+  {id:"eletron",n:"Elétrons",c:[.45,.75,1],f:"Partículas de carga negativa, cerca de 1.836 vezes mais leves que o próton. Num átomo neutro, o número de elétrons é igual ao de prótons.",pas:"Ao absorver energia o elétron salta para uma camada mais externa; ao voltar, emite luz (teste da chama)."},
+  {id:"foton",n:"Fóton (luz emitida)",c:[1,.86,.35],f:"Quando o elétron volta para uma camada mais interna, devolve a energia que absorveu na forma de luz. Cada salto tem uma energia certa, por isso cada elemento emite cores próprias.",pas:"Teste da chama, fogos de artifício e letreiros de neon são explicados pelo modelo de Bohr."},
+  {id:"orbita",n:"Camadas eletrônicas",c:[.55,.65,.85],f:"Níveis de energia K, L, M, N... Cada um comporta um número máximo de elétrons. A camada mais externa é a de valência e define como o átomo faz ligações.",pas:"Regra do octeto e a relação entre elétrons de valência e a família do elemento."},
+ ],
+ detalhe:{proton:30,neutron:30}, relevo:{proton:.04,neutron:.04}, brilho:{proton:.4,neutron:.4,eletron:.2},
+ aoRaio:0, fundo:["#101A38","#060A1A"], dist:4.4, pitch:.55, giro:.002, botoes:{corte:false}, extraBotoes:'<button class="mv-bt" data-b="salto" type="button">Salto do elétron</button>', aoBotao(k){if(k==="salto")SALTO=TT;},
+
+ slider:{rot:"Z",min:1,max:20,passo:1,valor:6,fmt:v=>v+" · "+EL[v][1],muda(v,A){Z=v;monta(A);A.refaz("eletrons",()=>eletrons(A,TT));}},
+ constroi(A){monta(A,1);eletrons(A,0);},
+ anima(t,A){TT=t;A.refaz("eletrons",()=>eletrons(A,t));},
+ foco:{proton:[[0,0,0],1.1,[0,.4,1]],neutron:[[0,0,0],1.1,[0,.4,1]],eletron:[[0,0,0],3.2,[0,.9,.6]],orbita:[[0,0,0],4.2,[0,1.4,.5]],foton:[[0,0,0],4.2,[0,1.4,.5]]},
+});
+function monta(A,primeira){
+ const go=()=>{const {add,esfera,toro,T,Rx,PI}=A,R=A.rnd(3),n=EL[Z][2]-Z,tot=Z+n;
+  const nuc=esfera(.085,0,0,18),rN=.085*Math.cbrt(tot)*1.05;
+  // empacotamento em espiral de Fibonacci dentro de uma esfera
+  const tipos=[];for(let i=0;i<tot;i++)tipos.push(i<Z?"proton":"neutron");for(let i=tot-1;i>0;i--){const j=Math.floor(R()*(i+1));[tipos[i],tipos[j]]=[tipos[j],tipos[i]];}
+  for(let i=0;i<tot;i++){const k=(i+.5)/tot,rr=tot===1?0:rN*Math.cbrt(k)*.85,th=i*2.39996,ph=Math.acos(1-2*k);
+   add(nuc,T(rr*Math.sin(ph)*Math.cos(th),rr*Math.cos(ph),rr*Math.sin(ph)*Math.sin(th)),tipos[i],{grupo:"nucleo"});}
+  camadas(Z).forEach((_,k)=>add(toro(RC[k],.006,0,2*PI,120),T(0,0,0),"orbita",{grupo:"nucleo",emi:.6,a:.55}));};
+ if(primeira)go();else A.refaz("nucleo",go);
+}
+function eletrons(A,t){
+ const {add,esfera,T}=A,e=esfera(.045,0,0,14),cs=camadas(Z),kv=cs.length-1,d=t-SALTO;
+ cs.forEach((q,k)=>{const w=.9/(k+1);for(let i=0;i<q;i++){const a=t*w+i*2*Math.PI/q+k*.7;let r=RC[k];
+  if(k===kv&&i===0&&d>=0&&d<3.2){const up=RC[k]+.38;r=d<.6?RC[k]+(up-RC[k])*(d/.6):d<2?up:d<2.4?up-(up-RC[k])*((d-2)/.4):RC[k];
+   if(d>.6&&d<2)add(A.toro(up,.004,0,2*Math.PI,120),T(0,0,0),"orbita",{grupo:"eletrons",emi:.8,a:.35});
+   if(d>=2.2){const f=(d-2.2)*2.2,ax=Math.cos(a),az=Math.sin(a);add(esfera(.06,0,0,14),T((RC[k]+f)*ax,0,(RC[k]+f)*az),"foton",{grupo:"eletrons",emi:1});}}
+  add(e,T(r*Math.cos(a),0,r*Math.sin(a)),"eletron",{grupo:"eletrons",emi:.7});}});
+}
+
+</script></body></html>

@@ -1,0 +1,50 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ondas · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// ondas transversais e longitudinais: as partículas oscilam, a energia é que viaja
+const OT=["transversal","longitudinal"],NO=["Transversal","Longitudinal"];
+const E=MV_ETAPAS(OT,NO,A=>onda(A,0),"on","Onda");
+const LAM=1.6,AMP=.38,X0=-2.4,X1=2.4,K=2*Math.PI/LAM,W=2.2;
+let TT=0;
+const crista=t=>{let x=(Math.PI/2+W*t)/K;while(x>X1-.4)x-=LAM;while(x<X0+.3)x+=LAM;return x;};
+Modelo3D({
+ titulo:"Ondas", area:"Física", voltar:"index.html#fisica", rotLista:"Tipos e grandezas", rotParte:"Ondas",
+ geral:{t:"A onda leva energia, não matéria",f:"Numa onda, cada partícula só oscila em volta da sua posição; o que avança é a perturbação, carregando energia. Na transversal, as partículas oscilam perpendicularmente ao sentido de propagação; na longitudinal, na mesma direção. Mude o tipo no controle.",
+  dl:[["Equação fundamental","v = λ · f"],["Período","T = 1/f"],["Mecânicas","precisam de meio (som, ondas no mar, corda)"],["Eletromagnéticas","propagam no vácuo (luz, rádio, raio X)"]],
+  pas:"Usar v = λ·f, classificar ondas (natureza e direção de vibração), reflexão, refração, difração e interferência, e por que o som não se propaga no vácuo."},
+ partes:[
+  {id:"transversal",n:"Onda transversal",c:[.45,.80,1],f:"As partículas sobem e descem enquanto a onda anda para a frente. Exemplos: onda numa corda e todas as ondas eletromagnéticas, como a luz.",dl:[["Exemplos","corda, luz, ondas de rádio"]],pas:"Só ondas transversais podem ser polarizadas."},
+  {id:"longitudinal",n:"Onda longitudinal",c:[1,.66,.44],f:"As partículas vão e voltam na mesma direção em que a onda se propaga, formando regiões apertadas (compressões) e espaçadas (rarefações). O som no ar é assim.",dl:[["Exemplos","som, mola empurrada"]],pas:"O som é onda mecânica e longitudinal no ar."},
+  {id:"crista",n:"Crista e vale",c:[1,.86,.40],f:"Crista é o ponto mais alto da onda transversal; vale é o mais baixo.",pas:"Distância entre duas cristas seguidas = λ."},
+  {id:"lambda",n:"Comprimento de onda (λ)",c:[.70,1,.62],f:"Distância entre dois pontos equivalentes seguidos, como duas cristas ou duas compressões. Medido em metros.",pas:"Com a mesma velocidade, mais frequência → menor λ."},
+  {id:"amplitude",n:"Amplitude",c:[1,.56,.56],f:"Maior afastamento da partícula em relação à posição de equilíbrio. Está ligada à energia: no som, ao volume; na luz, ao brilho.",pas:"Amplitude não muda a velocidade da onda."},
+  {id:"particulas",n:"Partículas do meio",c:[.80,.86,.96],f:"Cada uma oscila no lugar. Siga a partícula destacada em amarelo: ela não sai do lugar, só vai e volta.",pas:"A onda transporta energia sem transportar matéria."},
+ ],
+ slider:E.slider, aoFocar:E.aoFocar, semApagar:["crista","lambda","amplitude","particulas"],
+ aoRaio:0, fundo:["#13203F","#070C1E"], dist:6.6, pitch:.25, yaw:.25, giro:0, botoes:{corte:false,gira:false},
+ constroi(A){onda(A,0);},
+ anima(t,A){TT=t;A.refaz("on",()=>onda(A,t));},
+ foco:{transversal:[[0,0,0],5.6,[.25,.25,1]],longitudinal:[[0,0,0],5.6,[.25,.35,1]],crista:[[0,.3,0],4,[.2,.2,1]],lambda:[[0,0,0],4.4,[0,.15,1]],amplitude:[[0,.2,0],3.6,[.2,.2,1]],particulas:[[0,0,0],4,[.3,.3,1]]},
+ etiquetas:[{id:"crista",p:()=>[crista(TT),AMP+.18,0],t:"Crista",quando:()=>E.st.k===0},{id:"crista",p:()=>[crista(TT)+LAM/2>X1-.2?crista(TT)-LAM/2:crista(TT)+LAM/2,-AMP-.18,0],t:"Vale",quando:()=>E.st.k===0},
+  {id:"lambda",p:()=>[crista(TT)+LAM/2,AMP+.42,0],t:"λ",quando:()=>E.st.k===0},{id:"amplitude",p:()=>[crista(TT)-.28,AMP/2,0],t:"Amplitude",quando:()=>E.st.k===0},
+  {id:"lambda",p:()=>[comp(TT)+LAM/2,.62,0],t:"λ",quando:()=>E.st.k===1},{id:"longitudinal",p:()=>[comp(TT),-.62,0],t:"Compressão",quando:()=>E.st.k===1},{id:"longitudinal",p:()=>[comp(TT)+LAM/2>X1-.2?comp(TT)-LAM/2:comp(TT)+LAM/2,-.62,0],t:"Rarefação",quando:()=>E.st.k===1}],
+});
+function comp(t){let x=(Math.PI+W*t)/K;while(x>X1-.4)x-=LAM;while(x<X0+.3)x+=LAM;return x;}
+function onda(A,t){
+ const k=E.st.k,g={grupo:"on"},o=x=>Object.assign({},g,x),s=A.esfera(.05,0,0,12);
+ A.linha([X0-.1,0,0],[X1+.1,0,0],.004,"particulas",o({a:.4}));
+ A.seta([X0,-.85,0],[X0+.9,-.85,0],.02,"particulas",o({c:[.9,.9,.96],emi:.4}));
+ if(k===0){const P=[];for(let i=0;i<=60;i++){const x=X0+(X1-X0)*i/60,y=AMP*Math.sin(K*x-W*t);P.push([x,y,0]);A.add(s,A.T(x,y,0),i===24?"particulas":"transversal",o(i===24?{c:[1,.86,.4],emi:.8}:{}));}
+  A.poli(P,.012,"transversal",o({a:.6}));
+  const c=crista(t),c2=c+LAM;
+  A.linha([c,AMP+.3,0],[Math.min(c2,X1),AMP+.3,0],.008,"lambda",o({c:[.70,1,.62],emi:.6}));A.linha([c,AMP+.25,0],[c,AMP+.35,0],.008,"lambda",o({c:[.70,1,.62]}));
+  A.linha([c-.12,0,0],[c-.12,AMP,0],.008,"amplitude",o({c:[1,.56,.56],emi:.6}));}
+ else{for(let r=0;r<3;r++)for(let i=0;i<=48;i++){const x0=X0+(X1-X0)*i/48,dx=.16*Math.sin(K*x0-W*t);A.add(s,A.T(x0+dx,(r-1)*.22,0),i===20&&r===1?"particulas":"longitudinal",o(i===20&&r===1?{c:[1,.86,.4],emi:.8}:{}));}
+  const c=comp(t);A.linha([c,.5,0],[Math.min(c+LAM,X1),.5,0],.008,"lambda",o({c:[.70,1,.62],emi:.6}));}
+}
+
+</script></body></html>

@@ -1,0 +1,57 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Isomeria · Modelos visuais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Jost:wght@500..800&display=swap">
+<style>html,body{height:100%;margin:0;background:#060A1B;overflow:hidden}</style></head><body>
+<script src="motor.js?v=20261116c"></script>
+<script>
+// isomeria geométrica (cis e trans do but-2-eno) e óptica (enantiômeros do ácido lático)
+const IS=["cis","trans","optica"],NI=["Cis-but-2-eno","Trans-but-2-eno","Isomeria óptica"];
+const E=MV_ETAPAS(IS,NI,A=>monta(A),"is","Isômero");
+const AT={C:[.16,[.24,.25,.28]],H:[.1,[.92,.93,.96]],O:[.15,[.86,.26,.22]]};
+Modelo3D({
+ titulo:"Isomeria", area:"Química", voltar:"index.html#quimica", rotLista:"Isômeros e partes", rotParte:"Isomeria",
+ geral:{t:"Mesma fórmula, estruturas diferentes",f:"Isômeros são compostos com a mesma fórmula molecular, mas com os átomos arranjados de forma diferente, o que muda as propriedades. Aqui estão a isomeria geométrica (cis e trans) e a óptica (imagens no espelho que não se sobrepõem).",
+  dl:[["Fórmula do but-2-eno","C₄H₈"],["Geométrica","precisa de ligação dupla (ou anel) e ligantes diferentes em cada carbono"],["Óptica","precisa de carbono quiral (4 ligantes diferentes)"]],
+  pas:"Identificar carbono quiral, reconhecer cis e trans, diferenças de propriedades e a importância da isomeria óptica em remédios (um enantiômero pode curar e o outro não)."},
+ partes:[
+  {id:"cis",n:"Cis-but-2-eno",c:[.42,.70,.96],f:"Os dois grupos CH₃ ficam do mesmo lado da ligação dupla. A ligação dupla não gira, por isso cis e trans não se transformam um no outro sozinhos.",dl:[["Polaridade","levemente polar"],["Ponto de ebulição","~4 °C"]],pas:"Cis = mesmo lado."},
+  {id:"trans",n:"Trans-but-2-eno",c:[.96,.62,.40],f:"Os grupos CH₃ ficam em lados opostos da ligação dupla. A molécula é mais simétrica e apolar.",dl:[["Polaridade","apolar"],["Ponto de ebulição","~1 °C"]],pas:"Trans = lados opostos. Gordura trans: forma usada em alimentos industrializados, ligada a doenças do coração."},
+  {id:"optica",n:"Isomeria óptica (ácido lático)",c:[.62,.86,.56],f:"O carbono central do ácido lático está ligado a quatro grupos diferentes: H, OH, CH₃ e COOH. Isso cria duas moléculas que são imagens uma da outra num espelho, mas não se sobrepõem, como as mãos direita e esquerda.",dl:[["Carbono quiral","4 ligantes diferentes"],["Enantiômeros","desviam a luz polarizada em sentidos opostos (dextrogiro e levogiro)"],["Mistura racêmica","50% de cada: não desvia a luz"]],pas:"Talidomida: um enantiômero era calmante e o outro causava malformações."},
+  {id:"dupla",n:"Ligação dupla C=C",c:[.96,.86,.44],f:"Ligação dupla entre carbonos. Ela não permite rotação, o que fixa os grupos de cada lado.",pas:"Sem rotação, sem conversão entre cis e trans."},
+  {id:"quiral",n:"Carbono quiral",c:[.96,.86,.44],f:"Carbono com quatro grupos diferentes ligados. Marcado com asterisco (C*) nas fórmulas.",pas:"Cada carbono quiral pode gerar 2 isômeros ópticos (2ⁿ no total)."},
+  {id:"espelho",n:"Plano do espelho",c:[.70,.82,.96],f:"Os dois enantiômeros são imagens especulares: um é o reflexo do outro.",pas:"Imagem especular não sobreponível."},
+  {id:"atomos",n:"Átomos",c:[.80,.82,.88],f:"Preto: carbono. Branco: hidrogênio. Vermelho: oxigênio.",oculto:true},
+ ],
+ slider:E.slider, aoFocar:E.aoFocar, semApagar:["atomos","dupla","quiral","espelho"],
+ brilho:{atomos:.6,dupla:.5,quiral:.5}, aoRaio:0, fundo:["#13203F","#070C1E"], dist:3.8, pitch:.2, yaw:.3, giro:.002, botoes:{corte:false},
+ constroi(A){monta(A);},
+ foco:{cis:[[0,0,0],3.4,[.3,.2,1]],trans:[[0,0,0],3.4,[.3,.2,1]],optica:[[0,0,0],5,[.2,.25,1]],dupla:[[0,0,0],1.4,[.3,.4,1]],quiral:[[-1,0,0],1.6,[.3,.3,1]],espelho:[[0,0,0],5,[.8,.25,1]]},
+ etiquetas:[{p:[0,.85,0],t:"CH₃ do mesmo lado",quando:()=>E.st.k===0},{p:[0,.85,0],t:"CH₃ em lados opostos",quando:()=>E.st.k===1},{id:"quiral",p:[-1.1,.2,.0],t:"C*",quando:()=>E.st.k===2},{id:"quiral",p:[1.1,.2,.0],t:"C*",quando:()=>E.st.k===2},{id:"espelho",p:[0,1.05,0],t:"Espelho",quando:()=>E.st.k===2}],
+});
+function monta(A){
+ const k=E.st.k,g={grupo:"is"},o=x=>Object.assign({},g,x);
+ const at=(el,p,id)=>A.add(A.esfera(AT[el][0],0,0,28),A.T(...p),id||"atomos",o({c:AT[el][1]}));
+ const lig=(a,b,ord,id)=>{if(ord===2){for(const s of [-1,1])A.linha(a.map((v,i)=>v+[0,0,s*.05][i]),b.map((v,i)=>v+[0,0,s*.05][i]),.025,id||"atomos",o({c:[.86,.84,.80]}));}else A.linha(a,b,.03,id||"atomos",o({c:[.86,.84,.80]}));};
+ const metil=(c,dir)=>{at("C",c);const base=A.norm(dir);for(let i=0;i<3;i++){const a=i/3*2*Math.PI;const up=Math.abs(base[1])<.9?[0,1,0]:[1,0,0],e1=A.norm(A.cross(up,base)),e2=A.cross(base,e1);
+  const d=A.norm([0,1,2].map(j=>base[j]*.34+(e1[j]*Math.cos(a)+e2[j]*Math.sin(a))*.94));const h=c.map((v,j)=>v+d[j]*.42);lig(c,h);at("H",h);}};
+ if(k<2){const C2=[-.33,0,0],C3=[.33,0,0],up=[0,1,0];at("C",C2,k===0?"cis":"trans");at("C",C3,k===0?"cis":"trans");lig(C2,C3,2,"dupla");
+  const v=a=>[Math.cos(a),Math.sin(a),0],L=.62;
+  const c1=C2.map((x,i)=>x+v(Math.PI*2/3)[i]*L),h2=C2.map((x,i)=>x+v(Math.PI*4/3)[i]*.45);lig(C2,c1);metil(c1,v(Math.PI*2/3));lig(C2,h2);at("H",h2);
+  const aC=k===0?Math.PI/3:-Math.PI/3,aH=k===0?-Math.PI/3:Math.PI/3,c4=C3.map((x,i)=>x+v(aC)[i]*L),h3=C3.map((x,i)=>x+v(aH)[i]*.45);lig(C3,c4);metil(c4,v(aC));lig(C3,h3);at("H",h3);}
+ else{A.add(A.caixa(.01,1.8,1.6),A.T(0,0,0),"espelho",o({a:.18,c:[.70,.82,.96]}));
+  const tet=[[0,1,0],[Math.sqrt(8/9),-1/3,0],[-Math.sqrt(2/9),-1/3,Math.sqrt(2/3)],[-Math.sqrt(2/9),-1/3,-Math.sqrt(2/3)]];
+  for(const s of [-1,1]){const C=[s*1.05,0,0],m=d=>[-s*d[0]*(s>0?1:1)*(s>0?1:-1)*-1,d[1],d[2]];
+   const D=tet.map(d=>s<0?d:[-d[0],d[1],d[2]]);A.add(A.esfera(.17,0,0,28),A.T(...C),"quiral",o({c:[.24,.25,.28]}));
+   const P=D.map(d=>C.map((v,i)=>v+d[i]*.55));
+   // H
+   lig(C,P[0]);at("H",P[0]);
+   // OH
+   lig(C,P[1]);at("O",P[1]);const ho=P[1].map((v,i)=>v+D[1][i]*.28+[0,.18,0][i]);lig(P[1],ho);at("H",ho);
+   // CH3
+   lig(C,P[2]);metil(P[2],D[2]);
+   // COOH
+   lig(C,P[3]);at("C",P[3]);const o1=P[3].map((v,i)=>v+[s*.0,.35,0][i]+D[3][i]*.2),o2=P[3].map((v,i)=>v+D[3][i]*.42);lig(P[3],o1,2);at("O",o1);lig(P[3],o2);at("O",o2);const h=o2.map((v,i)=>v+D[3][i]*.25+[0,-.12,0][i]);lig(o2,h);at("H",h);}}
+}
+
+</script></body></html>
